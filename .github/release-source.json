@@ -1,8 +1,8 @@
 {
   "repository": "klwb360/NetAudit",
-  "tag": "v0.1.0",
-  "source_commit": "f2002b79bd6da91e2a29f741c8483951e20bba86",
-  "run_id": "37116561468",
-  "artifact_id": 11272270396,
-  "artifact_sha256": "f84bfff005504715e83edadd9f78560a57e0d8efe8436f0ac9140d0ea305ee26"
+  "tag": "v0.2.0",
+  "source_commit": "8a9840601d6c51dbdaff1fbbf62aeaf84cc0b490",
+  "run_id": "37120272682",
+  "artifact_id": 11272449538,
+  "artifact_sha256": "45dc43a26b1073a3214e86f32eb6e7d59571e7bb4cf8b296ae366af067fdacb1"
 }
