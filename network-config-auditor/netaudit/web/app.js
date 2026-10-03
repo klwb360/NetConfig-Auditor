@@ -1,6 +1,60 @@
 "use strict";
 const $ = id => document.getElementById(id);
 let exports_ = null, report_ = null;
+let inputRevision = 0, auditRunning = false, configSource = "输入文本";
+const resultTitles = {findings:"安全发现",architecture:"网络架构检查",intelligence:"CVE / KEV 情报",ai:"AI 解释与整改建议",inventory:"报告与配置清单",help:"使用帮助"};
+const resultTabs = [...document.querySelectorAll("[data-result-tab]")];
+function selectResultTab(name, focus=false) {
+  if(!Object.hasOwn(resultTitles,name)) return;
+  for(const tab of resultTabs) {
+    const selected=tab.dataset.resultTab===name;
+    tab.setAttribute("aria-selected",String(selected));tab.tabIndex=selected?0:-1;
+    $(tab.getAttribute("aria-controls")).hidden=!selected;
+    if(selected&&focus)tab.focus();
+  }
+  $("result-title").textContent=resultTitles[name];
+}
+for(const tab of resultTabs) {
+  tab.addEventListener("click",()=>selectResultTab(tab.dataset.resultTab));
+  tab.addEventListener("keydown",event=>{
+    const index=resultTabs.indexOf(tab);
+    let next;
+    if(event.key==="ArrowRight"||event.key==="ArrowDown")next=(index+1)%resultTabs.length;
+    else if(event.key==="ArrowLeft"||event.key==="ArrowUp")next=(index+resultTabs.length-1)%resultTabs.length;
+    else if(event.key==="Home")next=0;
+    else if(event.key==="End")next=resultTabs.length-1;
+    else return;
+    event.preventDefault();selectResultTab(resultTabs[next].dataset.resultTab,true);
+  });
+}
+function allowExports(available) {
+  $("exports").hidden=!available;
+  document.querySelectorAll("[data-format]").forEach(button=>button.disabled=!available);
+}
+function updateConfigMeta() {
+  const text=$("config").value,bytes=new TextEncoder().encode(text).length;
+  $("config-meta").textContent=text?`${configSource} · ${text.split(/\r?\n/).length} 行 · ${(bytes/1024).toFixed(1)} KiB`:"尚未导入配置";
+}
+function clearResults(message="导入配置或载入示例，开始一次本地审计。") {
+  exports_=null;report_=null;allowExports(false);
+  $("summary").querySelectorAll("strong").forEach(item=>item.textContent="—");
+  for(const id of ["architecture","intelligence","ai-result","inventory"])$(id).hidden=true;
+  $("inventory").querySelector("pre").textContent="";
+  document.querySelectorAll(".panel-empty-placeholder").forEach(item=>item.hidden=false);
+  $("findings").className="empty";
+  $("findings").replaceChildren(node("div","⌁","empty-icon"),node("h3","等待审计"),node("p",message));
+  $("result-context").textContent=message;
+  renderPipeline();
+}
+function invalidateResults() {
+  inputRevision++;
+  const hadResult=Boolean(report_);
+  if(hadResult||auditRunning) {
+    const message=auditRunning?"输入已更改，当前请求的结果将不保留；请完成后重新审计。":"输入已更改，请重新审计以获取对应结果。";
+    clearResults(message);$("status").textContent=message;
+  }
+  return inputRevision;
+}
 const labels = {critical:"严重", high:"高", medium:"中", low:"低", info:"提示"};
 function node(tag, text, cls) { const n = document.createElement(tag); if(text !== undefined) n.textContent = text; if(cls) n.className = cls; return n; }
 const domainLabels={vlan:"VLAN",stp:"STP",ospf:"OSPF",acl:"ACL",nat:"NAT",management_plane:"Management Plane / 管理平面"};
@@ -69,38 +123,51 @@ function renderFindings() {
   }
 }
 $("run").addEventListener("click", async () => {
-  $("run").disabled=true;$("example").disabled=true;$("status").textContent="正在审计…启用 AI 时请等待本机模型完成。";exports_=null;report_=null;renderPipeline(null,true);
-  $("exports").hidden=true;$("inventory").hidden=true;
-  ["architecture","intelligence","ai-result"].forEach(id=>$(id).hidden=true);
-  $("summary").querySelectorAll("strong").forEach(n=>n.textContent="—");
+  const revision=inputRevision;auditRunning=true;
+  $("run").disabled=true;$("example").disabled=true;clearResults("正在审计，请等待本地处理完成。");
+  $("status").textContent="正在审计…启用 AI 时请等待本机模型完成。";renderPipeline(null,true);
+  document.querySelector(".results").setAttribute("aria-busy","true");
   $("findings").replaceChildren(node("p","正在审计…"));
   try {
     const payload=await auditPayload();
+    if(revision!==inputRevision)return;
     const sessionResponse=await fetch("/api/session",{cache:"no-store"});
     if(!sessionResponse.ok) throw new Error("无法建立本地会话");
     const session=await sessionResponse.json();
+    if(revision!==inputRevision)return;
     const response=await fetch("/api/audit",{method:"POST",headers:{"Content-Type":"application/json","X-NetAudit-Token":session.token},body:JSON.stringify(payload)});
+    if(revision!==inputRevision)return;
     const value=await response.json();if(!response.ok)throw new Error(value.error||"审计失败");
+    if(revision!==inputRevision)return;
     report_=value.report;exports_=value.exports;const s=report_.summary;
     const nums=$("summary").querySelectorAll("strong");nums[0].textContent=s.severity.critical+s.severity.high;nums[1].textContent=s.severity.medium+s.severity.low;nums[2].textContent=s.unsupported_lines;
     $("status").textContent=`审计完成 · ${report_.device.vendor} · ${report_.device.hostname} · 识别 ${s.recognized_lines}/${s.relevant_lines} 行`;
-    $("exports").hidden=false;$("inventory").hidden=false;$("inventory").querySelector("pre").textContent=JSON.stringify(report_.inventory,null,2);renderPipeline(report_.pipeline);renderArchitecture();renderIntelligence();renderAI();renderFindings();
-  } catch(e) {$("status").textContent="审计失败："+e.message;$("findings").replaceChildren(node("p","请检查配置、厂商与可选情报设置后重试。"));renderPipeline();}
-  finally {$("run").disabled=false;$("example").disabled=false;}
+    $("result-context").textContent=`当前结果 · ${report_.device.vendor} · ${report_.device.hostname} · ${s.total} 项发现`;
+    document.querySelectorAll(".panel-empty-placeholder").forEach(item=>item.hidden=true);
+    allowExports(true);$("inventory").hidden=false;$("inventory").querySelector("pre").textContent=JSON.stringify(report_.inventory,null,2);renderPipeline(report_.pipeline);renderArchitecture();renderIntelligence();renderAI();renderFindings();
+  } catch(e) {
+    if(revision!==inputRevision)return;
+    clearResults("审计未完成，请检查配置、厂商与可选设置后重试。");
+    $("status").textContent="审计失败："+e.message;
+  }
+  finally {auditRunning=false;$("run").disabled=false;$("example").disabled=false;document.querySelector(".results").setAttribute("aria-busy","false");}
 });
-$("ai-enabled").addEventListener("change",()=>{$("ai-model").disabled=!$("ai-enabled").checked;});
-for(const kind of ["kev","nvd"]){$("clear-"+kind).addEventListener("click",()=>{$(kind+"-file").value="";});$(kind+"-file").addEventListener("change",()=>{const file=$(kind+"-file").files[0];if(file&&file.size>16*1024*1024){$(kind+"-file").value="";$("status").textContent=kind.toUpperCase()+" 文件超过 16 MiB 限制，请选择较小的官方 JSON 文件。";}});}
+for(const id of ["config","cpe","cve-ids","ai-model"])$(id).addEventListener("input",()=>{if(id==="config"){configSource="手动编辑";updateConfigMeta();}invalidateResults();});
+$("vendor").addEventListener("change",invalidateResults);
+$("ai-enabled").addEventListener("change",()=>{$("ai-model").disabled=!$("ai-enabled").checked;invalidateResults();});
+for(const kind of ["kev","nvd"]){$("clear-"+kind).addEventListener("click",()=>{$(kind+"-file").value="";invalidateResults();});$(kind+"-file").addEventListener("change",()=>{invalidateResults();const file=$(kind+"-file").files[0];if(file&&file.size>16*1024*1024){$(kind+"-file").value="";$("status").textContent=kind.toUpperCase()+" 文件超过 16 MiB 限制，请选择较小的官方 JSON 文件。";}});}
 $("severity").addEventListener("change",()=>{if(report_)renderFindings();});
 $("file").addEventListener("change", async () => {
   const file=$("file").files[0];if(!file)return;
+  const revision=invalidateResults();
   if(file.size>2*1024*1024){$("status").textContent="文件超过 2 MiB 限制";return;}
-  try {$("config").value=new TextDecoder("utf-8",{fatal:true}).decode(await file.arrayBuffer());$("status").textContent="文件已载入，点击开始审计。";}
-  catch(e){$("status").textContent="文件必须为 UTF-8 文本。";}
+  try {const text=new TextDecoder("utf-8",{fatal:true}).decode(await file.arrayBuffer());if(revision!==inputRevision)return;invalidateResults();$("config").value=text;configSource=file.name;updateConfigMeta();$("status").textContent=auditRunning?"文件已载入，当前请求结束后请重新审计。":"文件已载入，点击开始审计。";}
+  catch(e){if(revision===inputRevision)$("status").textContent="文件必须为 UTF-8 文本。";}
 });
 document.querySelectorAll("[data-format]").forEach(button=>button.addEventListener("click",()=>{
   if(!exports_)return;const f=button.dataset.format;const blob=new Blob([exports_[f]],{type:{json:"application/json",md:"text/markdown",html:"text/html"}[f]+";charset=utf-8"});const url=URL.createObjectURL(blob);const a=node("a");a.href=url;a.download="network-audit."+f;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }));
-$("example").addEventListener("click",()=>{$("vendor").value="cisco";$("config").value=`hostname LAB-SW
+$("example").addEventListener("click",()=>{invalidateResults();$("vendor").value="cisco";$("config").value=`hostname LAB-SW
 spanning-tree mode rapid-pvst
 vlan 10
  name OFFICE
@@ -132,4 +199,5 @@ line vty 0 4
  login local
  exec-timeout 0 0
 !
-`;$("status").textContent="已载入 Cisco 合成问题示例（含 STP / OSPF），仅供演示。";});
+`;configSource="Cisco 合成示例";updateConfigMeta();$("status").textContent="已载入 Cisco 合成问题示例（含 STP / OSPF），仅供演示。";});
+selectResultTab("findings");allowExports(false);updateConfigMeta();

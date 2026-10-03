@@ -6,6 +6,10 @@
 
 **[下载 Windows 便携版](https://github.com/klwb360/NetAudit/releases/latest)** · [v0.2.0 发布页](https://github.com/klwb360/NetAudit/releases/tag/v0.2.0) · [使用说明与常见问题](docs/FAQ.md) · [故障排查](docs/TROUBLESHOOTING.md)
 
+**0.2.1 界面优化正在验收**：新版将配置输入与结果分区，增加六个结果页签和集中显示的操作状态。当前下载仍为已发布的 v0.2.0；新版 EXE 与验收记录完成后再更新下载入口。
+
+[下载与双击](#windows下载后双击使用) · [新版网页怎么用](#新版网页怎么用) · [审计流程](#审计流程) · [命令行](#源码与命令行) · [文档索引](#文档导航)
+
 ## Windows：下载后双击使用
 
 1. 登录有权访问本私人仓库的 GitHub 账号，下载 [推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.0/NetAudit-0.2.0-windows-x64-8a9840601d6c-portable.zip)，或在 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest) 的 **Assets** 选择名称以 `-portable.zip` 结尾的文件。
@@ -26,6 +30,25 @@
 Release 同时提供 `SHA256SUMS.txt`、构建清单与验收报告，发布时复用已验收的原始文件。源码提交、SHA-256 和实测范围见 [交付记录](DELIVERY.md)。仓库保持私人，Release 下载也需要访问权限。
 
 开发或备份获取途径：[Windows 构建列表](https://github.com/klwb360/NetAudit/actions/workflows/netaudit-windows.yml) 的 Actions 产物仍可下载，但有保留期限；它包含外层产物 ZIP，需先解压外层，再解压其中的 `portable.zip`。Release 直接提供内部便携 ZIP，只需解压一次。不同构建使用各自的校验值。
+
+## 新版网页怎么用
+
+![NetAudit 0.2.1 本地审计工作台，使用 Cisco 合成示例](docs/images/workspace.png)
+
+以下为 0.2.1 的界面组织；新版本正在验收。宽屏顶部显示审计概览与入门提示，左侧准备配置，右侧查看统计和结果；窄屏会按顺序堆叠。先选择厂商、导入或粘贴配置，再点击“开始审计”。设备版本与本地情报、本机 AI 设置按需展开，普通审计无需填写。
+
+| 结果页签 | 查看内容 |
+|---|---|
+| 安全发现 | 按严重度筛选配置问题，核对原始行号、证据、风险和建议。 |
+| 网络架构 | 查看 VLAN、STP、OSPF、ACL、NAT、Management Plane 的覆盖与待复核项。 |
+| 漏洞情报 | 查看本地 CVE / KEV 来源、版本匹配及未确认候选。 |
+| AI 建议 | 查看显式启用的本机模型解释，以及未启用或失败状态。 |
+| 报告与清单 | 下载 JSON、Markdown、HTML，查看结构化清单和未建模行。 |
+| 使用帮助 | 查看输入要求、关闭、迁移和检查边界。 |
+
+页签切换和严重度筛选只调整显示。修改配置、厂商、设备版本、情报文件或 AI 设置后，需要重新点击“开始审计”，结果才对应新输入。操作与状态栏会提示导入、审计、完成或需要重审；配置不会持久保存，刷新后请重新导入。默认审计不依赖云端服务，可选 AI 只连接本机 Ollama。
+
+详细操作见 [Windows 使用说明](network-config-auditor/docs/WINDOWS.md#新版网页工作区)，当前下载和真实验证结果见 [交付记录](DELIVERY.md)。
 
 ## 能做什么
 

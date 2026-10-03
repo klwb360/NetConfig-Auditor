@@ -1,17 +1,131 @@
 <!doctype html>
 <html lang="zh-CN">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NetAudit · 网络配置审计</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>NetAudit · 网络配置审计</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
 <body>
-<header><div class="brand"><b>N</b><span>NetAudit<small>网络配置审计</small></span></div><span class="local"><i></i> 本地运行 · 配置不出本机</span></header>
+<header class="app-header">
+  <a class="brand" href="#workspace" aria-label="NetAudit 配置审计工作台"><b aria-hidden="true">N</b><span>NetAudit<small>网络配置审计</small></span></a>
+  <span class="local"><i aria-hidden="true"></i> 本地运行<span class="local-detail"> · 配置不出本机</span></span>
+</header>
 <main>
-<section class="intro"><div class="eyebrow">CONFIGURATION REVIEW</div><h1>把网络配置，变成可核对的发现。</h1><p>解析 Cisco、华为与 H3C 配置，检查六类网络架构，关联本地漏洞情报，并生成整改报告。</p></section>
-<ol id="pipeline" class="pipeline" aria-label="审计流程"><li>配置解析器</li><li>网络架构检查</li><li>安全规则引擎</li><li>CVE / KEV 情报</li><li>AI 解释与建议</li><li>Markdown / HTML 报告</li></ol>
-<div class="layout">
-<section class="panel input"><div class="panel-head"><h2>输入配置</h2><span>01</span></div><label for="vendor">设备厂商</label><select id="vendor"><option value="auto">自动识别</option><option value="cisco">Cisco IOS / IOS XE</option><option value="huawei">Huawei VRP</option><option value="h3c">H3C Comware</option></select><div class="row"><label for="config">完整配置文本</label><label class="file-label">导入文件<input type="file" id="file" accept=".cfg,.conf,.txt"></label></div><textarea id="config" spellcheck="false" placeholder="粘贴 show running-config 或 display current-configuration 输出…"></textarea><div class="hint">每次输入一台设备的 UTF-8 配置，最大 2 MiB。凭据在结果中自动隐藏。</div>
-<details class="settings"><summary>设备版本与本地情报（可选）</summary><p class="hint">不提供设备版本时继续审计配置，但无法确认设备 CVE。厂商或主机名不足以确认漏洞；未匹配不表示安全。</p><label for="cpe">精确版本 CPE 2.3</label><input id="cpe" type="text" autocomplete="off" spellcheck="false" placeholder="cpe:2.3:o:厂商:产品:精确版本:…"><p class="hint">从设备版本及厂商公告核对完整 CPE，禁止以通配版本代替实际版本。</p><label for="cve-ids">待核对的 CVE 编号</label><input id="cve-ids" type="text" autocomplete="off" spellcheck="false" placeholder="CVE-2025-12345, CVE-2024-12345"><p class="hint">逗号或空格分隔。手工填写编号仅生成候选项，不代表设备受影响。</p><label for="kev-file">CISA KEV 官方 JSON</label><div class="file-row"><input id="kev-file" type="file" accept=".json,application/json"><button id="clear-kev" class="secondary" type="button">清除</button></div><label for="nvd-file">NVD 2.0 漏洞 JSON</label><div class="file-row"><input id="nvd-file" type="file" accept=".json,application/json"><button id="clear-nvd" class="secondary" type="button">清除</button></div><p class="hint">每个情报文件最大 16 MiB，UTF-8 JSON。KEV 留空使用随包 CISA 快照；NVD 留空无法完成精确设备漏洞匹配。工具不自动下载情报。</p></details>
-<details class="settings"><summary>本机 AI 辅助解释（可选）</summary><label class="checkbox-label"><input id="ai-enabled" type="checkbox">启用本机 Ollama 辅助解释</label><label for="ai-model">已安装的模型名称</label><input id="ai-model" type="text" autocomplete="off" spellcheck="false" placeholder="例如 qwen2.5:7b" disabled><p class="hint">默认关闭。需自行安装模型并运行本机 Ollama（127.0.0.1:11434）。仅将结构化规则与情报事实发送给本机模型，不发送原始配置；模型输出不能替代证据核对。单次模型请求最多等待 30 秒。</p></details>
-<div class="input-actions"><button id="run">开始审计 <span>→</span></button><button id="example" class="secondary">载入示例</button></div><p id="status" role="status" aria-live="polite">准备就绪。</p></section>
-<section class="results"><div class="results-head"><h2>审计结果</h2><div id="exports" hidden><button data-format="json" class="secondary">JSON</button><button data-format="md" class="secondary">Markdown</button><button data-format="html" class="secondary">HTML</button></div></div><div id="summary" class="stats"><div><strong>—</strong><span>严重 / 高风险</span></div><div><strong>—</strong><span>中 / 低风险</span></div><div><strong>—</strong><span>未建模行</span></div></div><section id="architecture" class="result-section" hidden><h2>网络架构检查</h2><p class="hint">检查状态来自输入配置证据，无法证明动态拓扑或运行状态安全。</p><div id="domains" class="domain-grid"></div></section><div class="result-tools"><label>严重度 <select id="severity"><option value="all">全部</option><option value="critical">严重</option><option value="high">高</option><option value="medium">中</option><option value="low">低</option><option value="info">提示</option></select></label></div><div id="findings" class="empty"><div class="empty-icon">⌁</div><h3>等待配置</h3><p>审计后，每项发现会附带行号与配置证据。</p></div><section id="intelligence" class="result-section" hidden></section><section id="ai-result" class="result-section" hidden></section><details id="inventory" hidden><summary>配置清单与未建模行</summary><pre></pre></details></section>
-</div><footer>关闭程序：回到启动窗口按 Ctrl+C；关闭浏览器标签页不会停止服务。迁移到另一台 Windows 电脑：复制整个便携文件夹。<br>配置与情报处理在本机运行，普通使用无需管理员权限。实际影响需结合设备版本、拓扑和运行状态核对；修改建议需经过业务验证。</footer>
+  <section class="overview" aria-label="工作台概览">
+    <div class="intro">
+      <span class="eyebrow">CONFIGURATION REVIEW</span>
+      <h1>配置审计工作台</h1>
+      <p>从一份设备配置出发，核对架构、安全风险与整改依据。</p>
+      <div class="supported-vendors" aria-label="支持的厂商"><span>Cisco</span><span>Huawei</span><span>H3C</span><span class="scope-note">六类架构 · 本地情报 · 可选 AI</span></div>
+    </div>
+    <aside class="quick-start" aria-label="新手使用提示">
+      <div class="quick-start-head"><h2>三步完成一次审计</h2><span>无需管理员权限</span></div>
+      <ol><li><b>1</b><div><strong>导入配置</strong><span>选择文件或粘贴文本</span></div></li><li><b>2</b><div><strong>开始审计</strong><span>核对发现与配置证据</span></div></li><li><b>3</b><div><strong>导出报告</strong><span>Markdown / HTML / JSON</span></div></li></ol>
+    </aside>
+  </section>
+
+  <ol id="pipeline" class="pipeline" aria-label="审计流程">
+    <li><strong>配置解析器</strong><span>等待配置</span></li>
+    <li><strong>网络架构检查</strong><span>VLAN / STP / OSPF 等</span></li>
+    <li><strong>安全规则引擎</strong><span>核对配置证据</span></li>
+    <li><strong>CVE / KEV 情报</strong><span>关联设备版本</span></li>
+    <li><strong>AI 解释与建议</strong><span>可选本机模型</span></li>
+    <li><strong>Markdown / HTML 报告</strong><span>本地查看与导出</span></li>
+  </ol>
+
+  <div id="workspace" class="layout">
+    <section class="panel input" aria-labelledby="input-title">
+      <div class="panel-head"><div><span class="section-kicker">CONFIGURATION</span><h2 id="input-title">输入配置</h2></div><span class="panel-note">每次一台设备</span></div>
+      <div class="vendor-field"><label for="vendor">设备厂商</label><select id="vendor"><option value="auto">自动识别</option><option value="cisco">Cisco IOS / IOS XE</option><option value="huawei">Huawei VRP</option><option value="h3c">H3C Comware</option></select></div>
+      <div class="row config-label-row"><label for="config">完整配置文本</label><label class="file-label" for="file"><span>导入配置文件</span><input type="file" id="file" accept=".cfg,.conf,.txt"></label></div>
+      <textarea id="config" spellcheck="false" aria-describedby="config-meta config-hint" placeholder="粘贴 show running-config 或 display current-configuration 输出…"></textarea>
+      <div id="config-meta" class="config-meta">尚未导入配置</div>
+      <p id="config-hint" class="hint config-hint">每次输入一台设备的 UTF-8 配置，最大 2 MiB。凭据在结果中自动隐藏。</p>
+
+      <div class="advanced-heading"><span>高级设置</span><span>按需填写</span></div>
+      <details class="settings">
+        <summary>设备版本与本地情报（可选）</summary>
+        <p class="hint">不提供设备版本时继续审计配置，但无法确认设备 CVE。厂商或主机名不足以确认漏洞；未匹配不表示安全。</p>
+        <label for="cpe">精确版本 CPE 2.3</label>
+        <input id="cpe" type="text" autocomplete="off" spellcheck="false" placeholder="cpe:2.3:o:厂商:产品:精确版本:…">
+        <p class="hint">从设备版本及厂商公告核对完整 CPE，禁止以通配版本代替实际版本。</p>
+        <label for="cve-ids">待核对的 CVE 编号</label>
+        <input id="cve-ids" type="text" autocomplete="off" spellcheck="false" placeholder="CVE-2025-12345, CVE-2024-12345">
+        <p class="hint">逗号或空格分隔。手工填写编号仅生成候选项，不代表设备受影响。</p>
+        <label for="kev-file">CISA KEV 官方 JSON</label>
+        <div class="file-row"><input id="kev-file" type="file" accept=".json,application/json"><button id="clear-kev" class="secondary" type="button">清除</button></div>
+        <label for="nvd-file">NVD 2.0 漏洞 JSON</label>
+        <div class="file-row"><input id="nvd-file" type="file" accept=".json,application/json"><button id="clear-nvd" class="secondary" type="button">清除</button></div>
+        <p class="hint">每个情报文件最大 16 MiB，UTF-8 JSON。KEV 留空使用随包 CISA 快照；NVD 留空无法完成精确设备漏洞匹配。工具不自动下载情报。</p>
+      </details>
+      <details class="settings ai-settings">
+        <summary>本机 AI 辅助解释（可选）</summary>
+        <label class="checkbox-label"><input id="ai-enabled" type="checkbox">启用本机 Ollama 辅助解释</label>
+        <label for="ai-model">已安装的模型名称</label>
+        <input id="ai-model" type="text" autocomplete="off" spellcheck="false" placeholder="例如 qwen2.5:7b" disabled>
+        <p class="hint">默认关闭。需自行安装模型并运行本机 Ollama（127.0.0.1:11434）。仅将结构化规则与情报事实发送给本机模型，不发送原始配置；模型输出不能替代证据核对。单次模型请求最多等待 30 秒。</p>
+      </details>
+      <div class="input-controls">
+        <div class="input-actions"><button id="run" type="button">开始审计 <span aria-hidden="true">→</span></button><button id="example" class="secondary" type="button">载入示例</button></div>
+        <p id="status" role="status" aria-live="polite">准备就绪。</p>
+      </div>
+    </section>
+
+    <section class="results" aria-labelledby="result-title">
+      <div id="summary" class="stats" aria-label="审计摘要"><div><span>严重 / 高风险</span><strong>—</strong><small>优先核对</small></div><div><span>中 / 低风险</span><strong>—</strong><small>按场景评估</small></div><div><span>未建模行</span><strong>—</strong><small>补充人工检查</small></div></div>
+      <div class="result-workspace">
+        <div class="results-head"><div><span class="section-kicker">AUDIT RESULTS</span><h2 id="result-title">安全发现</h2><p id="result-context">审计后可切换分类，逐项核对配置证据。</p></div><div id="exports" class="exports" aria-label="导出完整报告" hidden><button data-format="json" class="secondary" type="button">JSON</button><button data-format="md" class="secondary" type="button">Markdown</button><button data-format="html" class="secondary" type="button">HTML</button></div></div>
+        <div class="result-tabs" role="tablist" aria-label="结果分类">
+          <button id="tab-findings" type="button" role="tab" data-result-tab="findings" aria-controls="result-panel-findings" aria-selected="true" tabindex="0">安全发现</button>
+          <button id="tab-architecture" type="button" role="tab" data-result-tab="architecture" aria-controls="result-panel-architecture" aria-selected="false" tabindex="-1">网络架构</button>
+          <button id="tab-intelligence" type="button" role="tab" data-result-tab="intelligence" aria-controls="result-panel-intelligence" aria-selected="false" tabindex="-1">漏洞情报</button>
+          <button id="tab-ai" type="button" role="tab" data-result-tab="ai" aria-controls="result-panel-ai" aria-selected="false" tabindex="-1">AI 建议</button>
+          <button id="tab-inventory" type="button" role="tab" data-result-tab="inventory" aria-controls="result-panel-inventory" aria-selected="false" tabindex="-1">报告与清单</button>
+          <button id="tab-help" type="button" role="tab" data-result-tab="help" aria-controls="result-panel-help" aria-selected="false" tabindex="-1">使用帮助</button>
+        </div>
+
+        <section id="result-panel-findings" class="result-panel" role="tabpanel" aria-labelledby="tab-findings" tabindex="0">
+          <div class="result-tools"><label for="severity">严重度 <select id="severity"><option value="all">全部</option><option value="critical">严重</option><option value="high">高</option><option value="medium">中</option><option value="low">低</option><option value="info">提示</option></select></label><span>发现附有行号与配置证据</span></div>
+          <div id="findings" class="empty"><div class="empty-icon" aria-hidden="true">⌁</div><h3>从一份配置开始</h3><p>导入或粘贴设备配置，点击「开始审计」。<br>也可以先载入示例，熟悉完整流程。</p><span class="empty-caption">配置在本机处理 · 已识别的凭据自动脱敏</span></div>
+        </section>
+
+        <section id="result-panel-architecture" class="result-panel" role="tabpanel" aria-labelledby="tab-architecture" tabindex="0" hidden>
+          <div class="panel-empty-placeholder empty"><div class="empty-icon" aria-hidden="true">⌘</div><h3>网络架构检查</h3><p>审计后查看 VLAN、STP、OSPF、ACL、NAT 与管理平面的配置覆盖和相关发现。</p></div>
+          <section id="architecture" class="result-section" hidden><h2>网络架构检查</h2><p class="hint">检查状态来自输入配置证据，无法证明动态拓扑或运行状态安全。</p><div id="domains" class="domain-grid"></div></section>
+        </section>
+
+        <section id="result-panel-intelligence" class="result-panel" role="tabpanel" aria-labelledby="tab-intelligence" tabindex="0" hidden>
+          <div class="panel-empty-placeholder empty"><div class="empty-icon" aria-hidden="true">◎</div><h3>核对设备漏洞情报</h3><p>默认使用随包 CISA KEV 快照。填写精确版本 CPE 并导入 NVD JSON，可进一步核对漏洞适用性。</p><span class="empty-caption">候选编号不代表设备受影响 · 未匹配不表示安全</span></div>
+          <section id="intelligence" class="result-section" hidden></section>
+        </section>
+
+        <section id="result-panel-ai" class="result-panel" role="tabpanel" aria-labelledby="tab-ai" tabindex="0" hidden>
+          <div class="panel-empty-placeholder empty"><div class="empty-icon" aria-hidden="true">✧</div><h3>本机 AI 辅助解释</h3><p>在左侧高级设置中启用已安装的 Ollama 模型，再开始审计。模型依据结构化规则与情报事实提供建议。</p><span class="empty-caption">默认关闭 · 不发送原始配置 · 建议需核对证据</span></div>
+          <section id="ai-result" class="result-section" hidden></section>
+        </section>
+
+        <section id="result-panel-inventory" class="result-panel" role="tabpanel" aria-labelledby="tab-inventory" tabindex="0" hidden>
+          <div class="panel-empty-placeholder empty"><div class="empty-icon" aria-hidden="true">≡</div><h3>配置清单与未建模行</h3><p>审计后检查已识别的设备配置，以及需要补充人工核对的未建模内容。</p></div>
+          <details id="inventory" hidden><summary>配置清单与未建模行</summary><pre></pre></details>
+          <div class="report-note"><h3>保存完整审计报告</h3><p>顶部导出按钮包含完整报告，切换页签或筛选严重度不会减少导出内容。Markdown 便于整理，HTML 可直接用浏览器查看，JSON 用于后续处理。</p></div>
+        </section>
+
+        <section id="result-panel-help" class="result-panel" role="tabpanel" aria-labelledby="tab-help" tabindex="0" hidden>
+          <div class="help-grid">
+            <article class="help-card"><span class="help-index">01</span><h3>开始使用</h3><p>导入 UTF-8 配置或粘贴完整配置文本，选择厂商后点击「开始审计」。不确定厂商时保留自动识别；「载入示例」可快速体验。</p></article>
+            <article class="help-card"><span class="help-index">02</span><h3>查看与导出</h3><p>从安全发现开始，逐项核对行号、证据和建议。网络架构与漏洞情报提供补充依据；用顶部按钮导出 Markdown、HTML 或 JSON 完整报告。</p></article>
+            <article class="help-card"><span class="help-index">03</span><h3>关闭程序与迁移</h3><p>回到启动窗口按 Ctrl+C。关闭浏览器标签页不会停止服务。迁移到另一台 Windows 电脑时，复制整个便携文件夹，再双击启动。</p></article>
+            <article class="help-card"><span class="help-index">04</span><h3>设备版本与情报</h3><p>KEV 使用随包快照，支持导入新的官方 JSON。精确漏洞匹配还需要实际设备版本 CPE 和 NVD JSON；手工 CVE 编号只作为候选项。工具不自动下载情报。</p></article>
+            <article class="help-card"><span class="help-index">05</span><h3>可选本机 AI</h3><p>先安装 Ollama 和模型，再在左侧启用。只发送结构化规则与情报事实，不发送原始配置；单次请求最多等待 30 秒。模型建议需经过证据与业务验证。</p></article>
+            <article class="help-card"><span class="help-index">06</span><h3>本地处理与审计范围</h3><p>配置与情报处理在本机运行，普通使用无需管理员权限。检查依据来自输入配置；实际影响仍需结合设备版本、拓扑和运行状态核对。</p></article>
+          </div>
+        </section>
+      </div>
+    </section>
+  </div>
+  <footer><span>NetAudit · 本地配置审计</span><p>关闭程序：回到启动窗口按 Ctrl+C；关闭浏览器标签页不会停止服务。迁移到另一台 Windows 电脑：复制整个便携文件夹。<br>配置与情报处理在本机运行，普通使用无需管理员权限。实际影响需结合设备版本、拓扑和运行状态核对；修改建议需经过业务验证。</p></footer>
 </main>
-</body></html>
+</body>
+</html>

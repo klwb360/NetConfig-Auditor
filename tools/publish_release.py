@@ -169,6 +169,14 @@ def notes(repository, tag, manifest, run_id):
 - 网页保留文件导入、厂商选择、示例、严重度筛选和三种导出，并增加流程、架构、情报和 AI 状态。
 
 """
+    ui_features = "" if tuple(map(int, version.split("."))) < (0, 2, 1) else """
+### 界面与使用体验
+
+- 顶部概览与简短使用提示，左侧配置输入，右侧按安全发现、网络架构、漏洞情报、AI 建议、报告与清单、使用帮助分区。
+- 保留可见的审计操作与状态，页签支持键盘切换，窄屏自动堆叠。
+- 修改配置或情报/模型设置后需重新审计；旧报告不可继续导出，进行中的旧输入结果也不会覆盖当前状态。
+
+"""
     return f"""下载后即可使用的 Windows x64 便携版，配置处理在本机完成。
 
 **推荐下载：[便携 ZIP]({base}/releases/download/{tag}/{portable})**（下方 Assets 中名称以 `-portable.zip` 结尾的文件）。
@@ -182,7 +190,7 @@ def notes(repository, tag, manifest, run_id):
 
 `-onefile.zip` 提供单 EXE 与配套说明、示例、许可证和源码；`-onefile.exe` 可独立启动。再次分发仍需保留 GPL-3.0-only 许可证、归属说明与对应源码。普通用户无需下载 GitHub 自动生成的 “Source code”。
 
-{features}
+{features}{ui_features}
 
 ### 验证与来源
 
