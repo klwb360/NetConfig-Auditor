@@ -2,34 +2,33 @@
 
 导入 Cisco、华为或 H3C 的设备配置，完成六个领域的网络架构检查、安全规则审计和本地 CVE / KEV 情报核对；可选使用本机 AI 解释发现，导出 JSON、Markdown 或 HTML 报告。配置处理在本机完成，工具不会连接设备或下发命令。
 
-**[v0.2.1 已发布](https://github.com/klwb360/NetAudit/releases/tag/v0.2.1)**，提供新版网页工作区、Windows 便携 ZIP、单 EXE 包、单 EXE 和对应源码；[v0.2.0](https://github.com/klwb360/NetAudit/releases/tag/v0.2.0) 与 [v0.1.0](https://github.com/klwb360/NetAudit/releases/tag/v0.1.0) 保留下载。正式文件、校验值和实测结果见 [交付记录](DELIVERY.md)。
+**[v0.2.1 已发布](https://github.com/klwb360/NetAudit/releases/tag/v0.2.1)**。推荐下载 Windows 便携版，解压后双击启动，即可在中文网页中完成审计和报告导出。
 
-**[下载 Windows 便携版](https://github.com/klwb360/NetAudit/releases/latest)** · [v0.2.1 发布页](https://github.com/klwb360/NetAudit/releases/tag/v0.2.1) · [使用说明与常见问题](docs/FAQ.md) · [故障排查](docs/TROUBLESHOOTING.md)
-
-新版将配置输入与结果分区，增加六个结果页签和集中显示的操作状态。源码、便携文件夹版与单 EXE 已完成对应版本验收，下载后即可使用。
+**[下载推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.1/NetAudit-0.2.1-windows-x64-befb38bbecbb-portable.zip)** · [v0.2.1 发布页](https://github.com/klwb360/NetAudit/releases/tag/v0.2.1) · [使用说明与常见问题](docs/FAQ.md) · [故障排查](docs/TROUBLESHOOTING.md)
 
 [下载与双击](#windows下载后双击使用) · [新版网页怎么用](#新版网页怎么用) · [审计流程](#审计流程) · [命令行](#源码与命令行) · [文档索引](#文档导航)
 
 ## Windows：下载后双击使用
 
-1. 登录有权访问本私人仓库的 GitHub 账号，下载 [推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.1/NetAudit-0.2.1-windows-x64-befb38bbecbb-portable.zip)，或在 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest) 的 **Assets** 选择名称以 `-portable.zip` 结尾的文件。
-2. 将便携 ZIP **解压一次**；不要在 ZIP 预览窗口中运行。普通使用无需下载页面自动生成的 “Source code”。
-3. 双击解压文件夹中的 `Start-NetAudit.bat` 或 `NetAudit.exe`，浏览器会自动打开。若未打开，复制启动窗口显示的实际地址到浏览器。
-4. 导入 UTF-8 配置、选择厂商，点击“开始审计”；也可先使用“载入示例”。
-5. 查看发现、严重度和证据，点击 JSON、Markdown 或 HTML 导出。
+1. **下载**：登录有权访问本私人仓库的 GitHub 账号，点击上方“下载推荐便携 ZIP”。也可在 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest) 的 **Assets** 中选择名称以 `-portable.zip` 结尾的文件。
+2. **解压**：在 Windows 中右键 ZIP →“全部提取”，解压到自己方便找到的文件夹。只需解压一次，然后打开解压后的文件夹；不要在 ZIP 预览窗口中运行程序。
+3. **启动**：双击 `Start-NetAudit.bat` 或 `NetAudit.exe`，默认浏览器会自动打开本地网页。若未打开，复制启动窗口显示的实际 `http://127.0.0.1:端口` 地址到浏览器，并保留启动窗口。
+4. **先试示例**：在网页左侧点击“载入示例”，再点击“开始审计”。右侧出现统计和检查结果，即可继续使用自己的配置。
+5. **导入配置**：点击“导入配置文件”，选择一台设备的 UTF-8 `.cfg`、`.conf` 或 `.txt` 文件（最大 2 MiB）；在“设备厂商”中选择 Cisco、Huawei 或 H3C，不确定时保留“自动识别”。也可将配置粘贴到文本框，然后点击“开始审计”。
+6. **查看结果**：切换“安全发现、网络架构、漏洞情报、AI 建议、报告与清单、使用帮助”六个页签。在“安全发现”中按严重度筛选，核对每项发现的行号、配置证据、风险与建议。
+7. **保存报告**：点击结果区顶部的 **JSON、Markdown 或 HTML** 按钮下载报告。HTML 可用浏览器打开，Markdown 便于整理，JSON 便于后续处理；页签和严重度筛选不影响完整报告的导出。
 
-**关闭程序**：回到启动窗口按 Ctrl+C。关闭浏览器标签页不会停止服务。**迁移电脑**：复制整个便携文件夹，包括 `_internal`，再双击使用。便携 EXE 自带 Python 运行库，普通使用设计为无需安装 Python 或使用管理员权限。
+首次使用保持高级设置默认值即可。“设备版本与本地情报”和“本机 AI”均为可选功能，普通配置审计可直接运行；默认随包提供 KEV 快照，AI 默认关闭。按需了解 [情报核对](network-config-auditor/docs/INTELLIGENCE.md) 与 [本机 AI](network-config-auditor/docs/AI.md)。
+
+**用完关闭**：回到启动窗口按 **Ctrl+C**，等待程序退出；仅关闭浏览器标签页不会停止服务。**迁移电脑**：先关闭程序，再复制整个便携文件夹，包括 `_internal`，到另一台 Windows 电脑后重新双击。便携 EXE 自带 Python 运行库，普通使用设计为无需安装 Python 或使用管理员权限。
 
 | 下载内容 | 用途 |
 |---|---|
 | `*-portable.zip` | 推荐。包含 EXE、运行库、BAT、说明、示例、许可证与对应源码。必须保留整个文件夹。 |
 | `*-onefile.zip` | 单 EXE 及配套资料；启动时使用用户临时目录，可能比便携文件夹版稍慢。 |
 | `*-onefile.exe` | 可独立运行的单 EXE；再次分发时仍需提供许可证、归属说明与对应源码。 |
-| `*-source-*.zip` | 对应完整源码，用于查阅、修改与重建。普通使用无需解压源码。 |
 
-Release 同时提供 `SHA256SUMS.txt`、构建清单与验收报告，发布时复用已验收的原始文件。源码提交、SHA-256 和实测范围见 [交付记录](DELIVERY.md)。仓库保持私人，Release 下载也需要访问权限。
-
-开发或备份获取途径：[Windows 构建列表](https://github.com/klwb360/NetAudit/actions/workflows/netaudit-windows.yml) 的 Actions 产物仍可下载，但有保留期限；它包含外层产物 ZIP，需先解压外层，再解压其中的 `portable.zip`。Release 直接提供内部便携 ZIP，只需解压一次。不同构建使用各自的校验值。
+普通使用选择以上运行包即可。仓库保持私人，Release 下载也需要访问权限；源码、校验与验收资料见下方 [源码与命令行](#源码与命令行) 和 [交付记录](DELIVERY.md)。
 
 ## 新版网页怎么用
 
@@ -120,6 +119,10 @@ python -m netaudit audit device.cfg --ai-model YOUR_INSTALLED_MODEL --format md 
 
 Windows 可使用 `py -3`，Linux 常用 `python3`。便携版可以用 `NetAudit.exe` 或 `Start-NetAudit.bat` 传递相同参数。退出码：0 调用成功；1 达到 `--fail-on` 指定严重度；2 参数、输入或文件错误，或 `--strict` 检出未建模行。详细用法见 [项目说明](network-config-auditor/README.md)。
 
+`*-source-*.zip` 提供对应完整源码，用于查阅、修改与重建；`SHA256SUMS.txt`、构建清单和验收报告用于文件校验与构建复核。这些资料目前也在 Release 中提供，普通使用无需解压源码。源码提交、SHA-256 和实测范围见 [交付记录](DELIVERY.md)。
+
+开发或备份获取途径：[Windows 构建列表](https://github.com/klwb360/NetAudit/actions/workflows/netaudit-windows.yml) 的 Actions 产物仍可下载，但有保留期限；它包含外层产物 ZIP，需先解压外层，再解压其中的 `portable.zip`。Release 直接提供内部便携 ZIP，只需解压一次。不同构建使用各自的校验值。
+
 ## 文档导航
 
 | 想了解 | 文档 |
@@ -156,7 +159,7 @@ NetAudit/
 
 v0.2.1 在 Windows Server 2022 x64 / Python 3.12.10 上通过 **192 项单元测试和 28 项真实进程验收**（源码 10、onedir 9、onefile 9）；Linux Python 3.10/3.12/3.13 检查及 Chromium 的 **65 项网页检查**通过。发布保护的 14 项测试与全部 9 个附件下载回验通过。
 
-历史 v0.2.0 的 192 项测试、28 项进程验收与 24 项网页检查，以及 v0.1.0 的 88 项测试与 25 项进程验收保持原记录；旧版本文件和 SHA-256 均保留在 [交付记录](DELIVERY.md)。
+历史 [v0.2.0](https://github.com/klwb360/NetAudit/releases/tag/v0.2.0) 的 192 项测试、28 项进程验收与 24 项网页检查，以及 [v0.1.0](https://github.com/klwb360/NetAudit/releases/tag/v0.1.0) 的 88 项测试与 25 项进程验收保持原记录；旧版本保留下载，文件和 SHA-256 均记录在 [交付记录](DELIVERY.md)。
 
 真实 Ollama 模型推理、真实 NVD 适用记录、普通非管理员账户、物理无 Python 电脑、Windows 真实桌面交互、Windows 10/11 和 ARM64 尚未实测；AI 使用本机协议替身、NVD 使用合成格式用例验证。范围以 [交付记录](DELIVERY.md) 为准。
 
