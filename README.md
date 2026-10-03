@@ -2,7 +2,9 @@
 
 本地网络配置审计工具，支持 Cisco、华为、H3C，提供中文网页、命令行和 JSON / Markdown / HTML 报告。配置处理在本机完成，普通使用不需要管理员权限。
 
-Windows 用户：
+Windows 用户：[直接下载已验收版本及校验值](DELIVERY.md)。
+
+使用步骤：
 
 1. 登录有权访问本私人仓库的 GitHub 账号，打开 [Windows 构建列表](https://github.com/klwb360/NetAudit/actions/workflows/netaudit-windows.yml)，选择成功的构建，在页面底部 Artifacts 下载产物。
 2. 解压下载的 ZIP，再解压其中名称带 `portable` 的 ZIP。
