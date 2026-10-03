@@ -1,0 +1,19 @@
+# NetAudit 独立仓库迁移记录
+
+迁移日期：2026-10-03（UTC）。目标仓库：私人仓库 [klwb360/NetAudit](https://github.com/klwb360/NetAudit)。
+
+来源为 [klwb360/Codex-code](https://github.com/klwb360/Codex-code) 的 `network-config-auditor` 项目，以及两个 GitHub Actions workflow。原 [PR #1](https://github.com/klwb360/Codex-code/pull/1) 已由仓库所有者合并。
+
+- 已验收的源码提交：`741bb5a70e675e28735da1182ab0cc9f1de33773`。
+- 原仓库 `main` 合并提交：`dbc4a8040693263cca918e0d14c3e9cc8ccca847`。
+- 迁移使用前一提交的文件快照；已核对其文件树与上述合并结果一致。
+- 保留原目录结构、配置解析、27 条审计规则、网页、报告、测试、构建脚本、依赖锁定、示例、完整 LICENSE、NOTICE 和上游来源说明。
+- 迁移修改仅涉及新仓库下载链接、Windows workflow 的 `main` 分支触发、根 README 与迁移说明。旧仓库内容保留。
+
+新仓库从独立初始提交导入源码快照，旧 Git 历史、PR 讨论、Actions 运行与构建产物仍在原仓库；本文件保留对应出处。新仓库将重新构建并生成与新提交对应的 EXE、便携 ZIP 和 SHA-256，旧产物校验值不能作为新构建的校验值。
+
+原已验收运行（供追溯）：[Windows 构建 37100067081](https://github.com/klwb360/Codex-code/actions/runs/37100067081)，[原构建产物](https://github.com/klwb360/Codex-code/actions/runs/37100067081/artifacts/11265925710)。原 Windows Server 2022 x64 / Python 3.12.10 环境通过 78 项单元测试和 25 项实际进程验收（源码 9、onedir 8、onefile 8）。
+
+验收范围：含中文及空格路径、CLI 返回码与无暂停、端口冲突回退、完整网页资源、三厂商及三种报告、无参数打开浏览器的自动化调用、只读位置、退出无遗留服务。冻结版进程通过去除 Python 相关环境变量并限制 PATH 验证其使用随包运行库。尚未在物理无 Python 的电脑、普通非管理员账户、Windows 10/11 或 ARM64 上实测；默认浏览器真实窗口与资源管理器双击未作人工实测。
+
+使用方式见 [Windows 使用说明](network-config-auditor/docs/WINDOWS.md)。许可证与归属说明继续见 [LICENSE](network-config-auditor/LICENSE) 和 [NOTICE](network-config-auditor/NOTICE)。

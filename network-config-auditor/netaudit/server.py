@@ -1,0 +1,152 @@
+from __future__ import annotations
+
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+import errno
+import json
+from pathlib import Path
+import secrets
+import signal
+import threading
+import webbrowser
+
+from .parser import MAX_BYTES, parse_config
+from .reports import render
+from .rules import audit
+
+_SLOTS = threading.BoundedSemaphore(4)
+WEB_DIR = Path(__file__).resolve().parent / "web"
+
+
+class LocalServer(ThreadingHTTPServer):
+    # A stalled browser request must not keep the executable alive on exit.
+    daemon_threads = True
+
+    def get_request(self):
+        sock, addr = super().get_request()
+        sock.settimeout(15)
+        return sock, addr
+
+
+def make_handler(token: str):
+    class Handler(BaseHTTPRequestHandler):
+        server_version = "NetAudit"
+        sys_version = ""
+
+        def log_message(self, *_):
+            # Do not log user input, errors containing input or URL tokens.
+            pass
+
+        def _host_ok(self):
+            return self.headers.get("Host") in (f"127.0.0.1:{self.server.server_port}", f"localhost:{self.server.server_port}")
+
+        def _send(self, status, body, mime="application/json; charset=utf-8"):
+            data = body.encode("utf-8")
+            self.send_response(status)
+            self.send_header("Content-Type", mime)
+            self.send_header("Content-Length", str(len(data)))
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("Referrer-Policy", "no-referrer")
+            self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'")
+            self.send_header("Connection", "close")
+            self.end_headers()
+            self.wfile.write(data)
+            self.close_connection = True
+
+        def _error(self, status, message):
+            self._send(status, json.dumps({"error": message}, ensure_ascii=False))
+
+        def do_GET(self):
+            if not self._host_ok():
+                return self._error(403, "Host 不允许")
+            if self.path == "/api/session":
+                origin = self.headers.get("Origin")
+                if origin and origin not in (f"http://127.0.0.1:{self.server.server_port}", f"http://localhost:{self.server.server_port}"):
+                    return self._error(403, "Origin 不允许")
+                return self._send(200, json.dumps({"token": token}))
+            paths = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("app.js", "text/javascript; charset=utf-8"), "/style.css": ("style.css", "text/css; charset=utf-8")}
+            if self.path not in paths:
+                return self._error(404, "路径不存在")
+            name, mime = paths[self.path]
+            return self._send(200, (WEB_DIR / name).read_text(encoding="utf-8"), mime)
+
+        def do_POST(self):
+            if not self._host_ok():
+                return self._error(403, "Host 不允许")
+            origin = self.headers.get("Origin")
+            expected_origins = (f"http://127.0.0.1:{self.server.server_port}", f"http://localhost:{self.server.server_port}")
+            if origin not in expected_origins or self.headers.get("X-NetAudit-Token") != token:
+                return self._error(403, "请求来源或会话令牌不允许")
+            if self.path != "/api/audit":
+                return self._error(404, "路径不存在")
+            if self.headers.get_content_type() != "application/json" or self.headers.get("Transfer-Encoding"):
+                return self._error(415, "仅接受带 Content-Length 的 JSON")
+            try:
+                length = int(self.headers.get("Content-Length", "-1"))
+            except ValueError:
+                return self._error(400, "Content-Length 不合法")
+            if not 0 < length <= MAX_BYTES + 65536:
+                return self._error(413, "输入超过限制")
+            if not _SLOTS.acquire(blocking=False):
+                return self._error(429, "并发审计过多，请稍后重试")
+            try:
+                self.connection.settimeout(15)
+                data = self.rfile.read(length)
+                if len(data) != length:
+                    return self._error(400, "请求内容不完整")
+                value = json.loads(data.decode("utf-8"))
+                if not isinstance(value, dict) or not isinstance(value.get("config"), str) or not isinstance(value.get("vendor", "auto"), str):
+                    return self._error(400, "config/vendor 类型不合法")
+                result = audit(parse_config(value["config"], value.get("vendor", "auto")))
+                self._send(200, json.dumps({"report": result, "exports": {f: render(result, f) for f in ("json", "md", "html")}}, ensure_ascii=False))
+            except (ValueError, UnicodeError) as exc:
+                # Parse errors intentionally never contain credential values.
+                self._error(400, str(exc) if not isinstance(exc, json.JSONDecodeError) else "JSON 格式不合法")
+            except (TimeoutError, OSError):
+                self.close_connection = True
+            finally:
+                _SLOTS.release()
+
+    return Handler
+
+
+def _bind_server(port: int, handler):
+    try:
+        return LocalServer(("127.0.0.1", port), handler)
+    except OSError as exc:
+        # Windows may reject an excluded/reserved port with WSAEACCES.
+        # Other errors must remain visible instead of being hidden by retries.
+        occupied = exc.errno in (errno.EADDRINUSE, errno.EACCES) or getattr(exc, "winerror", None) in (10048, 10013)
+        if not port or not occupied:
+            raise
+        return LocalServer(("127.0.0.1", 0), handler)
+
+
+def serve(port: int = 8765, *, open_browser: bool = True):
+    # Ctrl+Break also permits a Windows automation runner to stop the whole
+    # console process group cleanly, including a BAT launcher.
+    break_signal = getattr(signal, "SIGBREAK", None)
+    previous = None
+    if break_signal is not None and threading.current_thread() is threading.main_thread():
+        previous = signal.signal(break_signal, signal.default_int_handler)
+    try:
+        token = secrets.token_urlsafe(32)
+        with _bind_server(port, make_handler(token)) as server:
+            if port and server.server_port != port:
+                print(f"端口 {port} 已被占用或不可用，已自动选择空闲端口。", flush=True)
+            url = f"http://127.0.0.1:{server.server_port}"
+            print(f"网络配置审计工具已启动：{url}", flush=True)
+            print("关闭程序：在此窗口按 Ctrl+C，或关闭此窗口。仅关闭网页不会停止服务。", flush=True)
+            if open_browser:
+                try:
+                    opened = webbrowser.open(url, new=2)
+                except (OSError, webbrowser.Error):
+                    opened = False
+                if not opened:
+                    print("未能自动打开浏览器，请复制上方地址到浏览器。", flush=True)
+            server.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        if previous is not None:
+            signal.signal(break_signal, previous)

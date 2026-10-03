@@ -1,0 +1,27 @@
+# NetAudit Windows 使用说明
+
+1. **下载**：登录有权访问私人仓库的 GitHub 账号，打开 [Windows 构建列表](https://github.com/klwb360/NetAudit/actions/workflows/netaudit-windows.yml)，进入成功且源码提交对应当前版本的运行，在 Artifacts 下载便携产物。构建未成功时不会提供已验收的 EXE。
+2. **解压**：先解压 GitHub 下载的产物 ZIP，再解压其中名称含 `windows-x64` 和 `portable` 的 ZIP。建议选择自己的桌面或文档文件夹；中文和带空格的路径均支持。不要在 ZIP 预览窗口内直接运行。
+3. **双击**：打开解压后的文件夹，双击 `Start-NetAudit.bat` 或 `NetAudit.exe`。程序自动打开默认浏览器。若没有自动打开，复制启动窗口显示的 `http://127.0.0.1:端口` 地址到浏览器。
+4. **导入配置**：点击“导入文件”，选择 UTF-8 的 `.cfg`、`.conf` 或 `.txt` 文件，选择 Cisco、华为或 H3C。也可粘贴配置，或先使用“载入示例”。
+5. **查看与导出**：点击“开始审计”，查看问题、原始行号与建议，使用严重度筛选；点击 JSON、Markdown 或 HTML 下载报告。
+
+**关闭**：回到启动的命令行窗口按 Ctrl+C（或关闭该窗口）。关闭浏览器标签页不会停止程序。配置处理全部在本机完成，普通使用不需要管理员权限；首次访问可能需要几秒，尤其单 EXE 版本。
+
+**迁移**：复制整个便携文件夹到另一台 Windows 电脑，继续双击使用。`_internal` 等运行库目录必须随 `NetAudit.exe` 一起复制；目标电脑不需要安装 Python。默认临时目录使用 Windows 用户临时目录，网页上传的配置不会保存到程序文件夹。导出报告请选择自己有写入权限的目录。
+
+**单 EXE**：名称含 `windows-x64` 和 `onefile` 的 ZIP 内提供独立 `NetAudit.exe`，也有 BAT、示例、许可证及对应源码。该 EXE 可以单独运行；再次分发时请同时提供 ZIP 中的许可证、归属说明与对应源码。优先选择便携文件夹版本，启动更快，也便于排查问题。
+
+**校验下载**：产物中的 `SHA256SUMS.txt` 记录分发文件的 SHA-256；构建清单记录源提交与实际环境。可在 PowerShell 使用 `Get-FileHash .\文件名.zip -Algorithm SHA256` 对比。
+
+**源码包提示 Python 缺失**：源码版 BAT 需要 Python 3.10 或更新版本；若不希望安装 Python，请按第 1 步获取成功构建的便携 EXE 包。无需安装 Git、pip 或 PyInstaller。
+
+命令行使用示例（在便携文件夹中打开命令提示符）：
+
+```bat
+Start-NetAudit.bat serve --no-browser
+Start-NetAudit.bat audit "D:\网络配置\设备.cfg" --vendor cisco --format html --out "D:\审计报告\设备.html"
+NetAudit.exe audit "D:\网络配置\设备.cfg" --format json --out "D:\审计报告\设备.json" --fail-on high
+```
+
+传入参数时 BAT 不会暂停。退出码沿用 CLI：0 成功，1 达到指定严重度，2 输入/参数/文件错误或严格模式发现未建模行。审计结论仍需结合设备版本与业务核对，支持范围和 GPL-3.0-only 来源说明见 README、LICENSE 与 NOTICE。

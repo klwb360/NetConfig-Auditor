@@ -1,0 +1,56 @@
+name: NetAudit Windows portable
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - network-config-auditor/**
+      - .github/workflows/netaudit-windows.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: netaudit-windows-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  windows-portable:
+    runs-on: windows-2022
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: network-config-auditor
+        shell: pwsh
+    env:
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Check out the exact source commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Set up the fixed Windows x64 Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12.10"
+          architecture: x64
+      - name: Run source regression tests
+        run: python -m unittest discover -s tests -v
+      - name: Build and verify source, onedir, then onefile
+        run: python tools/build_windows.py
+      - name: Upload verified portable packages and checksums
+        id: upload
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: NetAudit-windows-x64-${{ github.sha }}
+          path: network-config-auditor/dist/windows/*
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 0
+      - name: Record the authenticated download entry
+        run: |
+          "Download: ${{ steps.upload.outputs.artifact-url }}" >> $env:GITHUB_STEP_SUMMARY
+          "Artifact ID: ${{ steps.upload.outputs.artifact-id }}" >> $env:GITHUB_STEP_SUMMARY
+          "GitHub artifact digest: ${{ steps.upload.outputs.artifact-digest }}" >> $env:GITHUB_STEP_SUMMARY

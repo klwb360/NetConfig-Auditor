@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NetAudit · 网络配置审计</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body>
+<header><div class="brand"><b>N</b><span>NetAudit<small>网络配置审计</small></span></div><span class="local"><i></i> 本地运行 · 配置不出本机</span></header>
+<main>
+<section class="intro"><div class="eyebrow">CONFIGURATION REVIEW</div><h1>把网络配置，变成可核对的发现。</h1><p>解析 Cisco、华为与 H3C 配置，定位配置问题、安全风险和修改建议。</p></section>
+<div class="layout">
+<section class="panel input"><div class="panel-head"><h2>输入配置</h2><span>01</span></div><label for="vendor">设备厂商</label><select id="vendor"><option value="auto">自动识别</option><option value="cisco">Cisco IOS / IOS XE</option><option value="huawei">Huawei VRP</option><option value="h3c">H3C Comware</option></select><div class="row"><label for="config">完整配置文本</label><label class="file-label">导入文件<input type="file" id="file" accept=".cfg,.conf,.txt"></label></div><textarea id="config" spellcheck="false" placeholder="粘贴 show running-config 或 display current-configuration 输出…"></textarea><div class="hint">每次输入一台设备的 UTF-8 配置，最大 2 MiB。凭据在结果中自动隐藏。</div><div class="input-actions"><button id="run">开始审计 <span>→</span></button><button id="example" class="secondary">载入示例</button></div><p id="status" role="status" aria-live="polite">准备就绪。</p></section>
+<section class="results"><div class="results-head"><h2>审计结果</h2><div id="exports" hidden><button data-format="json" class="secondary">JSON</button><button data-format="md" class="secondary">Markdown</button><button data-format="html" class="secondary">HTML</button></div></div><div id="summary" class="stats"><div><strong>—</strong><span>严重 / 高风险</span></div><div><strong>—</strong><span>中 / 低风险</span></div><div><strong>—</strong><span>未建模行</span></div></div><div class="result-tools"><label>严重度 <select id="severity"><option value="all">全部</option><option value="critical">严重</option><option value="high">高</option><option value="medium">中</option><option value="low">低</option><option value="info">提示</option></select></label></div><div id="findings" class="empty"><div class="empty-icon">⌁</div><h3>等待配置</h3><p>审计后，每项发现会附带行号与配置证据。</p></div><details id="inventory" hidden><summary>配置清单与未建模行</summary><pre></pre></details></section>
+</div><footer>关闭程序：回到启动窗口按 Ctrl+C；关闭浏览器标签页不会停止服务。迁移到另一台 Windows 电脑：复制整个便携文件夹。<br>离线静态审计。实际影响需结合设备版本、拓扑和运行状态核对；修改建议需经过业务验证。</footer>
+</main>
+</body></html>

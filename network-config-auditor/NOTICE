@@ -1,0 +1,29 @@
+NetAudit / network-config-auditor
+
+Derived portions:
+  pynipper-ng by Syn-4ck
+  https://github.com/syn-4ck/pynipper-ng
+  Audited source commit: 58957659205bcf656f1f209b26be51d1d508b9f9
+  License: GNU General Public License version 3
+
+GenericPlugin in netaudit/rules.py is adapted from
+src/analyze/cisco/ios/core/base_plugin.py. The original issue collection
+interface is retained and extended for typed IR, source evidence,
+explicit plugin registration and reset state for every audit.
+Upstream HTTP/SSH checking approaches were reviewed and rewritten.
+
+tools/upstream_methods.json contains attributed, AST-normalized method
+excerpts from the audited commit for isolated regression reproductions.
+These excerpts retain their GPL-3.0 license; normalization changes formatting.
+
+Modifications dated 2026-10-02:
+  Multi-vendor offline parser and normalized inventory; evidence-based
+  management/network/ACL/NAT checks; redaction; standalone reports;
+  local web application; CLI; documentation and tests.
+
+The GNU GPL v3 text is included in LICENSE. This derivative project is
+provided under GPL-3.0-only. No code from hier_config, CiscoConfParse or
+other comparison candidates is bundled, and there are no runtime package
+dependencies or external vulnerability lookup services.
+
+Upstream authors do not endorse this adaptation.
