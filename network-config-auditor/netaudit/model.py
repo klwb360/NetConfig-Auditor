@@ -23,6 +23,15 @@ class Interface:
     vrf: str = "default"
     acl_bindings: dict[str, str] = field(default_factory=dict)
     nat_role: str | None = None
+    # None means the supplied configuration does not establish the state.
+    stp_enabled: bool | None = None
+    stp_edge: bool | None = None
+    bpdu_guard: bool | None = None
+    bpdu_filter: bool | None = None
+    stp_evidence: list[Evidence] = field(default_factory=list)
+    ospf_binding: dict | None = None
+    ospf_authentication: str | None = None
+    ospf_evidence: list[Evidence] = field(default_factory=list)
     evidence: list[Evidence] = field(default_factory=list)
 
 
@@ -97,6 +106,11 @@ class Config:
     nat_pools: dict[str, dict] = field(default_factory=dict)
     management_lines: list[ManagementLine] = field(default_factory=list)
     global_commands: list[Evidence] = field(default_factory=list)
+    stp: dict = field(default_factory=lambda: {
+        "enabled": None, "mode": None, "edge_default": None,
+        "bpdu_guard_default": None, "bpdu_filter_default": None,
+        "vlan_enabled": {}, "evidence": [],
+    })
     warnings: list[dict] = field(default_factory=list)
     line_count: int = 0
     relevant_lines: int = 0

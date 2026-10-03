@@ -2,6 +2,17 @@
 
 应用版本以 `network-config-auditor/pyproject.toml` 为准。构建文件名同时包含源码提交前 12 位；同一应用版本的不同提交具有各自 SHA-256。
 
+## 0.2.0 — Unreleased
+
+- 将配置解析、六域架构检查、安全规则、CVE / KEV、本机可选 AI 和报告输出组织为同一审计流程，网页、CLI 与三种报告展示一致的阶段状态。
+- 新增显式 STP 与 IPv4 OSPF 配置解析和审计，保留未知状态及单设备离线检查边界；原有 27 条配置规则保留，共 35 个规则 ID。
+- 增加 VLAN、STP、OSPF、ACL、NAT、Management Plane 六域覆盖、证据与确认程度展示。
+- 随包提供 CISA 官方 2026-10-02 KEV 快照，增加本地设备 CPE / 候选 CVE 和 NVD CVE 2.0 JSON 导入；只有足够的产品版本证据才确认匹配。
+- 增加显式 `intel-update` 官方 KEV 下载，默认审计保持离线，更新输出使用用户目录。
+- 增加显式启用的本机 Ollama 解释；未启用、模型不可用或解释失败时保留规则和情报结果，模型输出作为待人工审阅建议。
+- JSON 报告升级为 schema 1.1，保留原有字段并增加架构、情报、AI 和流程信息；Markdown / HTML 保留相同结论与来源。
+- 同步升级源码版、Windows onedir 便携 ZIP 和 onefile EXE，v0.1.0 保留。新版构建、测试与下载校验正在执行，真实记录发布后补齐。
+
 ## Release 下载 — 2026-10-03
 
 - 发布 [v0.1.0](https://github.com/klwb360/NetAudit/releases/tag/v0.1.0)，提供便携 ZIP、单 EXE 包、单 EXE、对应源码、构建清单、三份验收报告与 SHA-256。

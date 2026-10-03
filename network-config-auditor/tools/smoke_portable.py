@@ -19,6 +19,7 @@ import csv
 from dataclasses import dataclass
 import hashlib
 import http.client
+from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import os
 from pathlib import Path
@@ -30,6 +31,7 @@ import socket
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from typing import Callable
 
@@ -425,17 +427,83 @@ def request(port: int, method: str, path: str, body: str | None = None,
         conn.close()
 
 
-def validate_report(text: str, format_: str, vendor: str | None = None) -> None:
+def validate_report(text: str, format_: str, vendor: str | None = None, *,
+                    expected_cve: str | None = None, ai_status: str = "disabled") -> None:
     if format_ == "json":
         report = json.loads(text)
         require({"device", "summary", "findings", "inventory"} <= report.keys(), "Incomplete JSON report")
         if vendor:
             require(report["device"]["vendor"] == vendor, f"Wrong vendor in report: {report['device']}")
+        validate_pipeline(report, expected_cve=expected_cve, ai_status=ai_status)
     elif format_ == "md":
         require(text.startswith("# 网络配置审计报告") and "配置清单" in text, "Incomplete Markdown export")
     else:
         require(text.lower().startswith("<!doctype html>") and "</html>" in text and "网络配置审计报告" in text,
                 "Incomplete HTML export")
+    if format_ != "json":
+        for section in ("审计流程", "网络架构检查", "CVE / KEV 情报", "AI 解释与整改建议"):
+            require(section in text, f"Missing pipeline export section: {section}")
+
+
+def validate_pipeline(report: dict, *, expected_cve: str | None = None, ai_status: str = "disabled") -> None:
+    require([item.get("stage") for item in report.get("pipeline", [])] ==
+            ["parser", "architecture", "security", "intelligence", "ai", "reports"],
+            "Incomplete or out-of-order audit pipeline")
+    domains = report.get("architecture", {}).get("domains", [])
+    require({item.get("domain") for item in domains} ==
+            {"vlan", "stp", "ospf", "acl", "nat", "management_plane"}, "Incomplete architecture domains")
+    intel = report.get("intelligence", {})
+    require(isinstance(intel.get("sources"), list) and bool(intel["sources"]),
+            "Bundled KEV source/provenance was not loaded")
+    sources = [item for item in intel["sources"] if item.get("kind") == "kev"]
+    require(len(sources) == 1 and sources[0].get("origin") == "bundled-official-snapshot",
+            "Runtime did not load the bundled official KEV snapshot")
+    reference_kev = Path(__file__).resolve().parents[1] / "netaudit" / "data" / "kev.json"
+    require(sources[0].get("sha256") == hashlib.sha256(reference_kev.read_bytes()).hexdigest(),
+            "Runtime KEV differs from the committed source snapshot")
+    require(report.get("ai", {}).get("status") == ai_status, "Unexpected AI state")
+    if expected_cve is None:
+        require(not intel.get("matches"), "Default audit invented a precise vulnerability match")
+        require(intel.get("status") == "not-configured", "Default report does not disclose missing asset/NVD evidence")
+    else:
+        matches = [item for item in intel.get("matches", []) if item.get("cve_id") == expected_cve]
+        require(len(matches) == 1, f"Exact local NVD CPE/version match missing for {expected_cve}")
+        require(matches[0].get("known_exploited") is True, "Real bundled KEV did not enrich the matched CVE")
+        require(matches[0].get("confidence") == "cpe-version-match", "NVD match lacks precise version confidence")
+
+
+def pipeline_fixture() -> tuple[dict, dict]:
+    """Synthetic NVD applicability, real KEV CVE; this is an engine fixture."""
+    cpe = "cpe:2.3:o:cisco:ios_xe:16.12.1:*:*:*:*:*:*:*"
+    asset = {"cpe": cpe}
+    nvd = {"format": "NVD_CVE", "version": "2.0", "timestamp": "2026-10-03T00:00:00.000",
+           "vulnerabilities": [{"cve": {
+               "id": "CVE-2023-20198", "sourceIdentifier": "smoke-fixture@netaudit.invalid",
+               "published": "2023-10-16T00:00:00.000", "lastModified": "2026-10-03T00:00:00.000",
+               "vulnStatus": "Analyzed",
+               "descriptions": [{"lang": "en", "value": "Synthetic applicability fixture; not a vendor vulnerability assertion."}],
+               "configurations": [{"nodes": [{"operator": "OR", "negate": False, "cpeMatch": [
+                   {"vulnerable": True, "criteria": cpe, "matchCriteriaId": "00000000-0000-0000-0000-000000000001"}]}]}],
+               "references": [{"url": "https://nvd.nist.gov/vuln/detail/CVE-2023-20198"}],
+           }}]}
+    return asset, nvd
+
+
+def exercise_pipeline_web(port: int, headers: dict) -> dict:
+    asset, nvd = pipeline_fixture()
+    body = json.dumps({"vendor": "cisco", "config": "hostname PortablePipeline\nip http server\n",
+                       "asset": asset, "nvd": nvd}, ensure_ascii=False)
+    value = json.loads(request(port, "POST", "/api/audit", body, headers)[0])
+    validate_pipeline(value["report"], expected_cve="CVE-2023-20198")
+    for format_, text in value["exports"].items():
+        if format_ == "json":
+            require(json.loads(text) == value["report"], "Pipeline JSON export differs from API report")
+        else:
+            validate_report(text, format_, "cisco")
+            require("CVE-2023-20198" in text, "Matched CVE was omitted from an exported report")
+    return {"pipeline": [item["stage"] for item in value["report"]["pipeline"]],
+            "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+            "matched_cve": "CVE-2023-20198", "ai": "disabled; no model requested"}
 
 
 def exercise_web(port: int, reference: Path, examples: Path) -> dict:
@@ -461,6 +529,7 @@ def exercise_web(port: int, reference: Path, examples: Path) -> dict:
         require(json.loads(value["exports"]["json"]) == value["report"], "JSON export differs from API report")
         totals[vendor] = value["report"]["summary"]["total"]
     return {"resources_sha256": resources, "vendors_findings": totals,
+            "pipeline_integration": exercise_pipeline_web(port, headers),
             "exports": ["json", "md", "html"], "session_token": "validated; omitted"}
 
 
@@ -583,6 +652,84 @@ class Harness:
         return {"runs": runs, "stdin": "DEVNULL", "timeout_seconds": COMMAND_TIMEOUT,
                 "external_cwd": True, "unicode_and_spaces_in_paths": True}
 
+    def pipeline(self, target: Target) -> dict:
+        extraction_before = {path.name for path in self.runtime.glob("_MEI*")}
+        output_dir = self.results / "流程 情报 验收" / target.name
+        output_dir.mkdir(parents=True)
+        config = output_dir / "设备 配置.cfg"
+        config.write_text("hostname PortablePipeline\nenable secret SmokeOnlySecret123\nip http server\n", encoding="utf-8")
+        asset, nvd = pipeline_fixture()
+        asset_path, nvd_path = output_dir / "设备 信息.json", output_dir / "离线 NVD.json"
+        asset_path.write_text(json.dumps(asset), encoding="utf-8")
+        nvd_path.write_text(json.dumps(nvd), encoding="utf-8")
+        base_args = ["audit", str(config), "--vendor", "cisco", "--asset-info", str(asset_path),
+                     "--nvd-file", str(nvd_path)]
+        reference = None
+        runs = []
+        for format_ in ("json", "md", "html"):
+            output = output_dir / ("完整 流程报告." + format_)
+            result = run_command(target, [*base_args, "--format", format_, "--out", str(output)], self.cwd)
+            require(result.returncode == 0, f"Pipeline CLI {format_} failed: {result.stderr.decode('utf-8', 'replace')[-1500:]}")
+            content = output.read_text(encoding="utf-8")
+            validate_report(content, format_, "cisco", expected_cve="CVE-2023-20198")
+            require("CVE-2023-20198" in content, "Matched CVE was omitted from pipeline CLI export")
+            if format_ == "json":
+                reference = json.loads(content)
+            runs.append({"format": format_, "exit_code": result.returncode})
+
+        requests = []
+
+        class ProtocolStub(BaseHTTPRequestHandler):
+            def log_message(self, *_):
+                pass
+
+            def do_POST(self):
+                raw = self.rfile.read(int(self.headers.get("Content-Length", "0")))
+                value = json.loads(raw)
+                requests.append({"path": self.path, "body": raw.decode("utf-8"), "model": value.get("model")})
+                facts = json.loads(value["messages"][1]["content"])["rules"]
+                items = [{"rule_id": fact["rule_id"], "explanation": "协议验收 fixture 解释；没有运行真实模型。",
+                          "remediation": "协议验收 fixture 建议；实际变更需要人工核对。"} for fact in facts]
+                content = json.dumps({"done": True, "message": {"role": "assistant", "content": json.dumps({"items": items})}}).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(content)))
+                self.end_headers()
+                self.wfile.write(content)
+
+        with HTTPServer(("127.0.0.1", 0), ProtocolStub) as stub:
+            stub_port = stub.server_port
+            thread = threading.Thread(target=stub.serve_forever)
+            thread.start()
+            try:
+                output = output_dir / "AI 协议报告.json"
+                result = run_command(target, [*base_args, "--format", "json", "--out", str(output),
+                                               "--ai-model", "netaudit-smoke-stub", "--ai-endpoint",
+                                               f"http://127.0.0.1:{stub_port}", "--ai-timeout", "10"], self.cwd)
+                require(result.returncode == 0, f"AI protocol CLI failed: {result.stderr.decode('utf-8', 'replace')[-1500:]}")
+                ai_report = json.loads(output.read_text(encoding="utf-8"))
+                validate_pipeline(ai_report, expected_cve="CVE-2023-20198", ai_status="completed")
+                require(ai_report["findings"] == reference["findings"], "AI changed the rule findings")
+                require(ai_report["intelligence"] == reference["intelligence"], "AI changed intelligence evidence")
+                require(len(requests) == 1 and requests[0]["path"] == "/api/chat", "Unexpected model protocol requests")
+                require(requests[0]["model"] == "netaudit-smoke-stub", "Model selection was not sent to protocol stub")
+                for private in ("PortablePipeline", "SmokeOnlySecret123", "cpe:2.3"):
+                    require(private not in requests[0]["body"], "AI protocol disclosed raw configuration or asset information")
+            finally:
+                stub.shutdown()
+                thread.join(timeout=10)
+                require(not thread.is_alive(), "AI protocol stub thread survived cleanup")
+        require(not port_open(stub_port), "AI protocol stub listener survived cleanup")
+        require(not ({path.name for path in self.runtime.glob("_MEI*")} - extraction_before),
+                "Pipeline CLI left a onefile temporary extraction directory")
+        return {"runs": runs, "stages": [item["stage"] for item in reference["pipeline"]],
+                "extraction_cleanup": "verified",
+                "matched_cve": "CVE-2023-20198", "nvd_applicability": "synthetic local exact CPE/version fixture",
+                "kev": "real bundled CISA snapshot loaded and enriched the matched CVE",
+                "ai": {"backend": "HTTP protocol stub, not an actual Ollama model", "status": "completed",
+                       "rule_findings_unchanged": True, "raw_config_and_asset_not_sent": True,
+                       "stub_thread_stopped": True, "stub_port_closed": True}}
+
     def browser_stub(self, target: Target) -> tuple[Target, Path, str]:
         marker = self.results / f"{target.name}-browser-url.txt"
         if WINDOWS:
@@ -700,6 +847,9 @@ class Harness:
                        lambda target=target: self.web(target, True))
             self.check("no arguments start web and dispatch browser at actual port", target.name,
                        lambda target=target: self.web(target, True, True))
+        self.check("pipeline, exact local NVD/KEV, three reports and explicit AI protocol stub",
+                   ", ".join(target.name for target in targets),
+                   lambda: {"targets": {target.name: self.pipeline(target) for target in targets}})
         restore = None
         try:
             restore = readonly_directory(self.install)
@@ -730,6 +880,8 @@ def main(argv: list[str] | None = None) -> int:
     report = {"schema": 1, "mode": mode, "platform": platform.platform(), "machine": platform.machine(),
               "python": sys.version, "checks": [], "not_tested": [
                   "Actual OS default-browser GUI launch and interactive file picker/filter/export clicks; real no-argument processes dispatch an observable configured browser stub",
+                  "Actual Ollama model inference; AI integration is tested with a local HTTP protocol stub only",
+                  "Live NVD applicability for the smoke asset; NVD applicability is a clearly labeled synthetic local exact-CPE fixture",
                   "A separate Windows computer with Python physically absent; subprocess no-Python PATH checks do not uninstall host build Python"],
               "path_case": "application/config/report/runtime locations contain Chinese characters and spaces; external working directory"}
     if WINDOWS:

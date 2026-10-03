@@ -9,7 +9,7 @@
 1. 修改代码时同步项目版本：[`pyproject.toml`](../network-config-auditor/pyproject.toml) 的 `[project].version`、[`netaudit/__init__.py`](../network-config-auditor/netaudit/__init__.py) 的 `__version__`，以及 [`rules.py`](../network-config-auditor/netaudit/rules.py) 中报告的 `tool_version`。版本使用 `X.Y.Z`，例如 `0.1.1`；不要复用已经发布的版本标签。
 2. 提交到 main，等待 [NetAudit Windows portable](https://github.com/klwb360/NetAudit/actions/workflows/netaudit-windows.yml) 构建成功。只修改根文档不会自动构建，需要时手动 **Run workflow** 并选择 main。
 3. 记录成功运行的 run ID 和该运行的完整 40 位源码 SHA。确认 `NetAudit-windows-x64-<完整SHA>` 产物尚未过期，`manifest.json` 的版本、源码提交和实际验收报告与本次构建一致。
-4. 打开 [NetAudit release](https://github.com/klwb360/NetAudit/actions/workflows/netaudit-release.yml)，点击 **Run workflow**，选择 **main**，填写下列三个输入。不要沿用输入框中旧版本的默认值。
+4. 打开 [NetAudit release](https://github.com/klwb360/NetAudit/actions/workflows/netaudit-release.yml)，点击 **Run workflow**，选择 **main**，填写下列三个输入。留空时使用 `.github/release-source.json` 已锁定的发行来源；新版本应填写全部三项。
 
 | 输入 | 填写内容 |
 |---|---|
@@ -19,7 +19,7 @@
 
 5. 等待发布运行成功，检查 Release 的 **Assets**、源码标签、校验文件和下载链接，再更新首页及交付记录。用户下载 `*-portable.zip` 后只需解压一次。
 
-发布工作流只能在 main 执行，也可由 main 修改发布工作流、发布脚本或 [`.github/release-source.json`](../.github/release-source.json) 自动触发。该 JSON 提供未填写输入时使用的默认发布来源，并锁定首次验收产物的 ID 与外层 SHA-256；未来版本优先填写手动输入，避免无意重用旧来源。源码构建与发布器提交可以不同，但标签始终指向 `source_commit`。
+发布工作流只能在 main 执行，也可由 main 修改发布工作流或 [`.github/release-source.json`](../.github/release-source.json) 自动触发。该 JSON 提供未填写输入时使用的默认发布来源，并锁定指定验收产物的 ID 与外层 SHA-256；未来版本优先填写手动输入，避免无意重用旧来源。源码构建与发布器提交可以不同，但标签始终指向 `source_commit`。
 
 ## 发布前实际检查什么
 
@@ -36,7 +36,7 @@
 | `SHA256SUMS.txt` | 其余八个文件的 SHA-256 |
 | `smoke-source.json`、`smoke-onedir.json`、`smoke-onefile.json` | 三种运行方式的验收报告 |
 
-清单必须记录干净源码、对应 run/attempt 和 Windows AMD64 环境，三份独立报告须与清单一致。当前检查要求源码 9 项、onedir 8 项、onefile 8 项全部通过；包含停服记录的检查必须没有剩余进程、没有强制清理且端口已关闭。
+清单必须记录干净源码、对应 run/attempt 和 Windows AMD64 环境，三份独立报告须与清单一致。v0.1.0 要求至少源码 9 项、onedir 8 项、onefile 8 项；v0.2.0 新增完整流程验收，要求至少源码 10 项、onedir 9 项、onefile 9 项，报告中的全部检查均须通过。包含停服记录的检查必须没有剩余进程、没有强制清理且端口已关闭。
 
 随后创建或确认版本标签，上传到草稿 Release，并逐个下载回验九个资产的大小与 SHA-256。只有全部通过，才将草稿转为正式 Release 并设置为 latest。这里“发布”仍是私人仓库内提供下载，不改变仓库可见性。
 

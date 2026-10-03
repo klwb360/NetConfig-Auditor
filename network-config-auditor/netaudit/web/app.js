@@ -3,6 +3,57 @@ const $ = id => document.getElementById(id);
 let exports_ = null, report_ = null;
 const labels = {critical:"严重", high:"高", medium:"中", low:"低", info:"提示"};
 function node(tag, text, cls) { const n = document.createElement(tag); if(text !== undefined) n.textContent = text; if(cls) n.className = cls; return n; }
+const domainLabels={vlan:"VLAN",stp:"STP",ospf:"OSPF",acl:"ACL",nat:"NAT",management_plane:"Management Plane / 管理平面"};
+const stageLabels={parse:"配置解析器",parser:"配置解析器",architecture:"网络架构检查",security:"安全规则引擎",rules:"安全规则引擎",intelligence:"CVE / KEV 情报",ai:"AI 解释与建议",reports:"Markdown / HTML 报告",report:"Markdown / HTML 报告"};
+const statusLabels={completed:"已完成",passed:"已完成",checked:"已检查",findings:"存在发现","needs-review":"需人工核对","not-observed":"未观察到配置","not-configured":"未配置","no-matches":"未匹配",matched:"已匹配",disabled:"未启用",error:"失败",failed:"失败",unavailable:"不可用",skipped:"已跳过","not-requested":"未启用","not-needed":"无需解释"};
+const confidenceLabels={"cpe-version-match":"精确 CPE 版本关联，仍需核对适用条件","needs-review":"需人工核对","user-provided-candidate":"用户提供候选编号"};
+const originLabels={"bundled-official-snapshot":"随包官方快照",bundled:"随包快照","user-import":"本地导入（未核实来源）","caller-provided-unverified":"用户提供（未核实来源）","official-download":"官方地址下载"};
+const statusText=value=>statusLabels[value]||value||"—";
+const valueText=value=>value==null?"—":typeof value==="object"?JSON.stringify(value):String(value);
+function field(parent,label,value){const p=node("p");p.append(node("strong",label+"："),document.createTextNode(valueText(value)));parent.append(p);}
+function sourceLink(value){
+  const text=String(value||"未提供来源");
+  try{const url=new URL(text);if(url.protocol==="https:"&&!url.username&&!url.password){const link=node("a",text);link.href=url.href;link.target="_blank";link.rel="noreferrer noopener";return link;}}
+  catch(e){/* Untrusted source strings remain literal text. */}
+  return node("span",text);
+}
+function renderPipeline(items,running=false){
+  const root=$("pipeline");root.replaceChildren();
+  const stages=items&&items.length?items:Object.entries(stageLabels).filter(([key])=>["parse","architecture","rules","intelligence","ai","reports"].includes(key)).map(([stage])=>({stage,status:running?"waiting":"",detail:""}));
+  for(const item of stages){const step=node("li");step.append(node("strong",stageLabels[item.stage]||item.stage));if(item.status)step.append(node("span",item.status==="waiting"?"等待结果":statusText(item.status)));if(item.detail)step.append(node("small",item.detail));root.append(step);}
+}
+function renderArchitecture(){
+  const domains=report_.architecture&&report_.architecture.domains||[];$("architecture").hidden=!domains.length;$("domains").replaceChildren();
+  for(const item of domains){const card=node("article",undefined,"domain-card");card.append(node("h3",domainLabels[item.domain]||item.domain),node("span",statusText(item.status),"badge"));field(card,"已观察配置",item.observed);field(card,"覆盖范围",item.coverage);if(item.finding_ids&&item.finding_ids.length)field(card,"相关规则",item.finding_ids.join("、"));$("domains").append(card);}
+}
+function renderIntelligence(){
+  const root=$("intelligence"),intel=report_.intelligence;root.replaceChildren();root.hidden=!intel;if(!intel)return;
+  root.append(node("h2","CVE / KEV 情报"));field(root,"状态",statusText(intel.status));root.append(node("p",intel.message));field(root,"资产标识",intel.asset||{});
+  for(const [title,key] of [["精确版本匹配","matches"],["候选项 · 不能作为已确认漏洞","candidates"]]){
+    root.append(node("h3",title));const items=intel[key]||[];
+    if(!items.length)root.append(node("p","无。未匹配不表示安全；仍需核对设备版本、适用条件和厂商公告。","hint"));
+    for(const item of items){const card=node("article");card.append(node("h3",[item.cve_id,item.title].filter(Boolean).join(" · ")));field(card,"严重度",item.severity);field(card,"KEV 已知利用",item.known_exploited?"是":"未收录");field(card,"判断",confidenceLabels[item.confidence]||item.confidence);field(card,"匹配依据",item.match_basis);if(item.description)card.append(node("p",item.description));const source=node("p");source.append(node("strong","来源："),sourceLink(item.source_url));card.append(source);if(item.kev&&item.kev.requiredAction)field(card,"CISA 要求",item.kev.requiredAction);root.append(card);}
+  }
+  if(intel.sources&&intel.sources.length){const details=node("details");details.append(node("summary","情报来源与时效"));for(const source of intel.sources){const card=node("article");card.append(node("h3",source.name||source.kind),sourceLink(source.source_url));field(card,"发布日期",source.date_released);field(card,"目录版本",source.catalog_version);field(card,"来源",originLabels[source.origin]||source.origin);field(card,"SHA-256",source.sha256);field(card,"快照过期",source.stale?"是":"否");field(card,"快照年龄（天）",source.age_days);field(card,"目录条目",source.count);field(card,"许可 / 归属",source.license);details.append(card);}root.append(details);}
+  if(intel.limitations&&intel.limitations.length){const list=node("ul",undefined,"limitations");for(const text of intel.limitations)list.append(node("li",text));root.append(list);}
+}
+function renderAI(){
+  const root=$("ai-result"),ai=report_.ai;root.replaceChildren();root.hidden=!ai;if(!ai)return;
+  root.append(node("h2","AI 解释与整改建议"));field(root,"状态",statusText(ai.status));if(ai.provider)field(root,"提供方",ai.provider);if(ai.model)field(root,"模型",ai.model);root.append(node("p",ai.message),node("p","模型内容仅供辅助理解，不能替代规则证据、厂商公告和变更审批。","hint"));
+  for(const item of ai.items||[]){const card=node("article");card.append(node("h3",item.rule_id));field(card,"解释",item.explanation);field(card,"整改建议",item.remediation);root.append(card);}
+}
+async function readIntelligenceFile(id,label){
+  const file=$(id).files[0];if(!file)return undefined;if(file.size>16*1024*1024)throw new Error(label+" 文件超过 16 MiB 限制");
+  let value;try{value=JSON.parse(new TextDecoder("utf-8",{fatal:true}).decode(await file.arrayBuffer()));}catch(e){throw new Error(label+" 文件必须为 UTF-8 JSON");}
+  if(!value||typeof value!=="object"||Array.isArray(value))throw new Error(label+" JSON 顶层必须是对象");return value;
+}
+async function auditPayload(){
+  const config=$("config").value;if(new TextEncoder().encode(config).length>2*1024*1024)throw new Error("配置超过 2 MiB 限制");
+  const asset={},cpe=$("cpe").value.trim(),ids=$("cve-ids").value.trim();if(cpe)asset.cpe=cpe;if(ids)asset.cve_ids=[...new Set(ids.split(/[\s,，]+/).filter(Boolean))];
+  const enabled=$("ai-enabled").checked,model=$("ai-model").value.trim();if(enabled&&!model)throw new Error("启用 AI 时需填写已安装的本机模型名称");
+  const payload={vendor:$("vendor").value,config,asset,ai:enabled?{enabled:true,provider:"ollama",endpoint:"http://127.0.0.1:11434",model,timeout:30}:{enabled:false}};
+  const [kev,nvd]=await Promise.all([readIntelligenceFile("kev-file","KEV"),readIntelligenceFile("nvd-file","NVD")]);if(kev!==undefined)payload.kev=kev;if(nvd!==undefined)payload.nvd=nvd;return payload;
+}
 function renderFindings() {
   const root = $("findings"); root.replaceChildren(); root.className = "";
   const items = report_.findings.filter(f => $("severity").value === "all" || f.severity === $("severity").value);
@@ -18,23 +69,27 @@ function renderFindings() {
   }
 }
 $("run").addEventListener("click", async () => {
-  $("run").disabled=true;$("status").textContent="正在审计…";exports_=null;report_=null;
+  $("run").disabled=true;$("example").disabled=true;$("status").textContent="正在审计…启用 AI 时请等待本机模型完成。";exports_=null;report_=null;renderPipeline(null,true);
   $("exports").hidden=true;$("inventory").hidden=true;
+  ["architecture","intelligence","ai-result"].forEach(id=>$(id).hidden=true);
   $("summary").querySelectorAll("strong").forEach(n=>n.textContent="—");
   $("findings").replaceChildren(node("p","正在审计…"));
   try {
+    const payload=await auditPayload();
     const sessionResponse=await fetch("/api/session",{cache:"no-store"});
     if(!sessionResponse.ok) throw new Error("无法建立本地会话");
     const session=await sessionResponse.json();
-    const response=await fetch("/api/audit",{method:"POST",headers:{"Content-Type":"application/json","X-NetAudit-Token":session.token},body:JSON.stringify({vendor:$("vendor").value,config:$("config").value})});
+    const response=await fetch("/api/audit",{method:"POST",headers:{"Content-Type":"application/json","X-NetAudit-Token":session.token},body:JSON.stringify(payload)});
     const value=await response.json();if(!response.ok)throw new Error(value.error||"审计失败");
     report_=value.report;exports_=value.exports;const s=report_.summary;
     const nums=$("summary").querySelectorAll("strong");nums[0].textContent=s.severity.critical+s.severity.high;nums[1].textContent=s.severity.medium+s.severity.low;nums[2].textContent=s.unsupported_lines;
     $("status").textContent=`审计完成 · ${report_.device.vendor} · ${report_.device.hostname} · 识别 ${s.recognized_lines}/${s.relevant_lines} 行`;
-    $("exports").hidden=false;$("inventory").hidden=false;$("inventory").querySelector("pre").textContent=JSON.stringify(report_.inventory,null,2);renderFindings();
-  } catch(e) {$("status").textContent="审计失败："+e.message;$("findings").replaceChildren(node("p","请检查配置与厂商选项后重试。"));}
-  finally {$("run").disabled=false;}
+    $("exports").hidden=false;$("inventory").hidden=false;$("inventory").querySelector("pre").textContent=JSON.stringify(report_.inventory,null,2);renderPipeline(report_.pipeline);renderArchitecture();renderIntelligence();renderAI();renderFindings();
+  } catch(e) {$("status").textContent="审计失败："+e.message;$("findings").replaceChildren(node("p","请检查配置、厂商与可选情报设置后重试。"));renderPipeline();}
+  finally {$("run").disabled=false;$("example").disabled=false;}
 });
+$("ai-enabled").addEventListener("change",()=>{$("ai-model").disabled=!$("ai-enabled").checked;});
+for(const kind of ["kev","nvd"]){$("clear-"+kind).addEventListener("click",()=>{$(kind+"-file").value="";});$(kind+"-file").addEventListener("change",()=>{const file=$(kind+"-file").files[0];if(file&&file.size>16*1024*1024){$(kind+"-file").value="";$("status").textContent=kind.toUpperCase()+" 文件超过 16 MiB 限制，请选择较小的官方 JSON 文件。";}});}
 $("severity").addEventListener("change",()=>{if(report_)renderFindings();});
 $("file").addEventListener("change", async () => {
   const file=$("file").files[0];if(!file)return;
@@ -46,6 +101,7 @@ document.querySelectorAll("[data-format]").forEach(button=>button.addEventListen
   if(!exports_)return;const f=button.dataset.format;const blob=new Blob([exports_[f]],{type:{json:"application/json",md:"text/markdown",html:"text/html"}[f]+";charset=utf-8"});const url=URL.createObjectURL(blob);const a=node("a");a.href=url;a.download="network-audit."+f;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }));
 $("example").addEventListener("click",()=>{$("vendor").value="cisco";$("config").value=`hostname LAB-SW
+spanning-tree mode rapid-pvst
 vlan 10
  name OFFICE
 !
@@ -53,6 +109,8 @@ interface GigabitEthernet0/1
  switchport mode trunk
  switchport trunk allowed vlan all
  switchport trunk native vlan 1
+ spanning-tree portfast trunk
+ spanning-tree bpdufilter enable
  no shutdown
 !
 ip access-list extended WAN-IN
@@ -63,6 +121,10 @@ interface GigabitEthernet0/2
  ip address 192.0.2.1 255.255.255.0
  ip access-group WAN-IN in
 !
+router ospf 1
+ router-id 10.255.0.1
+ network 10.0.0.0 0.0.0.255 area 0
+!
 ip http server
 ip ssh authentication-retries 10
 line vty 0 4
@@ -70,4 +132,4 @@ line vty 0 4
  login local
  exec-timeout 0 0
 !
-`;$("status").textContent="已载入 Cisco 演示配置。";});
+`;$("status").textContent="已载入 Cisco 合成问题示例（含 STP / OSPF），仅供演示。";});

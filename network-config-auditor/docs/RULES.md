@@ -1,5 +1,7 @@
 # 审计规则目录
 
+v0.2.0 保留原有 27 个规则 ID，新增 8 个 STP / OSPF 规则 ID，共 35 个配置规则 ID。CVE / KEV 与 AI 使用独立报告字段，不加入这 35 个 ID，也不改变原规则判断。
+
 严重度评估的是配置中可见的问题或待核对风险。离线输入不能证明实时转发、设备可达性或完整合规。命令建议需核对具体 NOS 版本。
 
 | 规则 ID | 默认严重度 | 触发条件 / 适用边界 |
@@ -31,7 +33,25 @@
 | NAT-POOL-UNDEFINED | medium | NAT 地址池引用未见定义 |
 | NAT-INBOUND-MAPPING | medium | 完整解析的静态/服务器映射存在；不直接认定公网暴露 |
 | PARSE-INCOMPLETE | info | 有未建模/格式错误行；缺少其他告警不代表安全 |
+| STP-DISABLED | high | 全局、接口或 VLAN 的受支持语法显式关闭 STP；`confirmed-config` 仅确认配置，不确认存在环路 |
+| STP-EDGE-TRUNK | medium | 非显式 shutdown / routed 接口同时配置 Trunk 与 edge / PortFast；服务器 Trunk 可能合法，`needs-review` |
+| STP-BPDU-FILTER | high | 非显式 shutdown / routed 接口显式启用 BPDU 过滤；需核对连接对象与平台语义 |
+| STP-BPDU-FILTER-DEFAULT | low | 全局启用默认 BPDU 过滤；与接口强制过滤分开，核对边缘识别与回退行为 |
+| OSPF-ROUTER-ID | high | 显式 Router ID 不是有效的非零 IPv4 标识；不检查运行时自动选取的 ID |
+| OSPF-DUPLICATE-ROUTER-ID | low | 同一 VRF 的不同本机进程显式共用 Router ID；独立 OSPF 域可能允许，需人工核对 |
+| OSPF-BROAD-NETWORK | medium | 已识别连续 wildcard 的 Network 选择范围为 `/8` 或更宽；它选择接口，不等同于发布整个范围 |
+| OSPF-AUTH-REVIEW | low | 对受支持的进程/区域/接口继承不能确认有效认证模式，或接口引用未见进程；仅 `needs-review`，不宣称邻居未认证 |
 
 ACL 覆盖判断只处理已解析 IPv4 条件。非连续 wildcard 保留为原始范围，不强行转换 CIDR；仅相同 wildcard 文本可认作相同范围。time-range、established、对象组、ICMP 类型等额外条件会关闭该规则的覆盖与宽泛放通推断。Huawei/H3C ACL 的默认动作取决于应用功能与设备版本，报告不采用 Cisco 的统一 implicit deny 假设。
 
 清单中的 `shutdown=null`、`mode=null`、`transport=null` 等表示输入未显式给出已识别设置，不表示启用/关闭。建议命令不含真实凭据。
+
+## STP / OSPF 的离线边界
+
+STP 支持三厂商的显式模式、边缘端口和 BPDU 设置，以及受支持的 `no` / `undo` 命令覆盖。Cisco 支持 VLAN 生成树启停；Huawei / H3C 支持全局与接口启停。没有启停命令保持未知，不能用版本默认值推断已关闭。缺少 BPDU Guard 不产生“一定未防护”的规则，实际根桥、拓扑与环路仍需运行状态验证。
+
+OSPF 以 IPv4 进程、VRF / VPN 实例、Router ID、区域、Network、接口绑定、passive / silent 接口与认证模式为范围。已识别的区域认证可被接口设置覆盖；完全被动的进程不会仅因无认证模式产生邻接风险推断。接口映射和缺失配置仍可能需要复核。认证模式存在不证明密钥有效、双方一致或邻居已建立。
+
+非连续 wildcard 不强行转换 CIDR；未支持的 OSPF 细节、其他路由协议和复杂 STP 语法保留警告。八个新 ID 针对单设备输入，不能检查跨设备 Router ID 冲突、两端 VLAN 一致性或整个网络合规。
+
+六域状态 `checked / needs-review / not-observed` 表示观察内容与检查覆盖。规则 `confirmed-config` 与情报 `cpe-version-match` 具有不同含义；后者需要产品版本和本地 NVD 条件，不证明当前设备已遭利用。详情见 [情报说明](INTELLIGENCE.md)和 [AI 说明](AI.md)。

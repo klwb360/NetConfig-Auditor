@@ -1,6 +1,8 @@
 # NetAudit · 网络配置审计工具
 
-输入一台 Cisco、华为或 H3C 交换机/路由器的完整配置，得到带原始行号的 **配置问题、安全风险、修改建议**，并查看接口、VLAN、路由、ACL、NAT 的结构化清单。提供中文本地网页与命令行，运行时仅使用 Python 标准库。
+输入一台 Cisco、华为或 H3C 交换机/路由器的完整配置，依次进行 **配置解析 → 六域架构检查 → 安全规则 → CVE / KEV 情报 → 可选本机 AI 解释 → 报告输出**。保留带原始行号的配置问题、风险、建议和结构化清单，提供中文本地网页与命令行；程序运行时仅使用 Python 标准库。
+
+本目录版本为 **0.2.0**，提供源码、Windows 便携 ZIP 与单 EXE。请从 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest) 获取正式文件；各次构建的真实测试范围与校验值见 [仓库交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md)。
 
 本项目审计了 [pynipper-ng](https://github.com/syn-4ck/pynipper-ng)，保留并改写其插件基类，重建了三厂商解析、审计规则和报告模块。来源、固定提交和改动见 [NOTICE](NOTICE)；审计详情见 [代码审计报告](docs/UPSTREAM_AUDIT.md)。项目采用 GPL-3.0-only。
 
@@ -19,7 +21,7 @@ python -m netaudit serve
 
 无参数运行 `python -m netaudit` 或双击 EXE，会启动网页并自动打开默认浏览器。`serve` 同样默认打开浏览器；使用 `python -m netaudit serve --no-browser` 可关闭此行为。默认访问 **http://127.0.0.1:8765**，端口占用时自动选择空闲端口，以启动窗口显示的实际地址为准。
 
-选择厂商，粘贴配置或导入 UTF-8 文本，点击“开始审计”。可先点击“载入示例”。界面支持严重度筛选、查看完整解析清单、导出 JSON / Markdown / HTML。关闭程序请回到启动窗口按 **Ctrl+C**；关闭网页标签页不会停止服务。迁移时复制整个解压文件夹。
+选择厂商，粘贴配置或导入 UTF-8 文本，点击“开始审计”。可先点击“载入示例”。v0.2.0 界面支持严重度筛选、六域覆盖、查看完整解析清单、本地情报输入、可选本机 AI 和 JSON / Markdown / HTML 导出。关闭程序请回到启动窗口按 **Ctrl+C**；关闭网页标签页不会停止服务。迁移时复制整个解压文件夹。
 
 Windows 通常可将 `python` 替换为 `py -3`；Linux/macOS 通常可替换为 `python3`。不安装依赖也可以直接运行。
 
@@ -50,6 +52,24 @@ netaudit audit device.cfg --vendor cisco --format json --out reports/device.json
 
 `audit -` 从标准输入读取配置。输入与输出不能是同一个文件；报告使用原子写入，在支持 POSIX 权限的系统上默认权限为 `0600`。
 
+## 情报与可选 AI
+
+默认审计使用随包 CISA KEV 离线快照，不进行外部联网。CVE 适用性需要用户提供精确设备 CPE、明确版本以及本地 NVD CVE 2.0 数据；不能仅凭品牌或配置片段确认漏洞。KEV 也不能证明当前设备已被入侵。文件格式、官方来源、版本比较限制与快照许可见 [INTELLIGENCE.md](docs/INTELLIGENCE.md)。
+
+```bash
+# 本地产品版本核对；asset.json / nvd-subset.json 格式见情报说明
+python -m netaudit audit device.cfg --asset-info asset.json --nvd-file nvd-subset.json --format html --out reports/device.html
+
+# 显式联网下载官方 KEV；不会上传配置，默认保存到用户缓存或临时目录
+python -m netaudit intel-update --out reports/kev.json
+python -m netaudit audit device.cfg --kev-file reports/kev.json --format md --out reports/device.md
+
+# 可选本机 Ollama；替换为已安装模型名称
+python -m netaudit audit device.cfg --ai-model YOUR_INSTALLED_MODEL --ai-endpoint http://127.0.0.1:11434 --ai-timeout 45 --format md --out reports/device-ai.md
+```
+
+AI 默认关闭，当前只支持本机 Ollama 回环地址。仅在用户明确启用并选定已有模型后调用；模型失败仍生成规则与情报报告。便携配置审计无需 Python，Ollama 仅为可选 AI 功能的额外软件。规则内建建议与模型生成解释分别标注，真实模型输出需人审；发送内容与设置见 [AI.md](docs/AI.md)。
+
 ## 配置如何取得
 
 从设备导出完整运行配置：Cisco 使用 `show running-config`，华为/H3C 使用 `display current-configuration`。导出时关闭分页、去掉命令提示符/分页符/终端颜色转义，保存为 UTF-8 文本。一次输入一台设备，不要拼接多台配置。
@@ -63,12 +83,14 @@ netaudit audit device.cfg --vendor cisco --format json --out reports/device.json
 | 接口 | 地址、secondary、VRF、shutdown、描述、switchport、ACL 绑定、NAT 角色 | 地址/sub、VPN 实例、shutdown、描述、link-type、ACL 绑定 | 地址/sub、VPN 实例、shutdown、描述、link-type、ACL 绑定 |
 | VLAN | VLAN 定义，access/native，trunk 列表与 add/remove/except | vlan batch、default/PVID、allow-pass 与 undo | VLAN 定义、access/PVID、permit 与 undo |
 | 静态路由 | ip route，VRF、下一跳、出接口、管理距离 | ip route-static、VPN 实例、下一跳、preference | ip route-static、VPN 实例、下一跳、preference |
-| 动态路由 | OSPF/BGP/RIP 进程与配置原文 | OSPF/BGP 进程与配置原文 | OSPF/BGP 进程与配置原文 |
+| STP | 显式模式、全局/接口/VLAN 启停、PortFast、BPDU 过滤/保护 | 显式启停、模式、edged-port、BPDU 过滤/保护 | 显式启停、模式、edged-port、BPDU 过滤/保护 |
+| OSPF（IPv4） | 进程、VRF、Router ID、区域、network、被动接口、认证模式与接口绑定 | 进程、VPN 实例、Router ID、区域、network、silent-interface、认证模式与接口绑定 | 进程、VPN 实例、Router ID、区域、network、silent-interface、认证模式与接口绑定 |
+| 其他动态路由 | BGP/RIP 进程与配置原文 | BGP 进程与配置原文 | BGP 进程与配置原文 |
 | IPv4 ACL | 数字/命名 standard/extended，any/host/wildcard，协议、基本端口条件、log | basic/advanced，rule 序号，source/destination、基本端口条件 | basic/advanced，rule 序号，source/destination、基本端口条件 |
 | NAT | inside/outside、source list、pool、static 与 TCP/UDP 端口映射 | nat outbound、address-group、nat server | nat outbound、address-group、nat server |
 | 管理面 | HTTP、SSH 参数、VTY、密码类型、community | HTTP、Telnet、VTY、密码类型、community | HTTP、Telnet、VTY、密码类型、community |
 
-当前以常见 IPv4 配置为目标。Cisco ASA/NX-OS、IPv6、接口 range、ACL object-group、复杂 time-range/established、route-map/PBR、完整动态路由语义、USG 安全策略、现代 NAT 的全部变体尚未建模。动态路由子命令保留在清单并提示人工审查。
+当前以常见 IPv4 配置为目标。Cisco ASA/NX-OS、IPv6、接口 range、ACL object-group、复杂 time-range/established、route-map/PBR、完整动态路由语义、USG 安全策略、现代 NAT 的全部变体尚未建模。未支持的动态路由子命令保留在清单并提示人工审查。STP 检查不确认根桥或实时环路，OSPF 检查不确认邻居、收敛或密钥有效性；缺失命令和继承关系不能直接等同于关闭或未认证。
 
 未建模行会出现在 `inventory.warnings`，最多展示 200 行，并保留实际总数。解析器识别行数表示识别的结构/命令范围，并非所有字段语义覆盖率。未知条件的 ACL 规则不参与覆盖推断，也不会直接判作 unrestricted permit；`match-order auto` 不进行遮蔽推断。审计不足不能当成“已安全”。
 
@@ -76,19 +98,21 @@ netaudit audit device.cfg --vendor cisco --format json --out reports/device.json
 
 - `confirmed-config`：有明确配置证据。实际影响仍依赖网络可达性与运行状态。
 - `needs-review`：需结合版本、拓扑或业务目的核对，例如静态 NAT 映射、Trunk VLAN 范围、缺少来源 ACL。
+- 情报的 `cpe-version-match` 表示本地 NVD 条件与输入产品版本匹配；未知条件保留 `needs-review` 候选，不能冒充已确认受影响或已遭入侵。
+- 六域状态 `checked / needs-review / not-observed` 表示检查覆盖或复核需要，不能当作合规分数。
 - 严重度：`critical / high / medium / low / info`。详情见 [规则目录](docs/RULES.md)。
 - NAT 选流 ACL 会单独标注，宽泛选流不会当成防火墙已放通。
 - 各 VTY 段独立审查；安全段不会掩盖另一段 Telnet 或不认证配置。
 - 同一前缀的多条静态路由可能是 ECMP/浮动路由，工具不会直接认定冲突。
 - 建议命令是审阅模板；工具不会连接设备或下发配置。先核对 NOS 版本、业务和管理回退路径。
 
-JSON 顶层含 `device`、`summary`、`findings`、`inventory`、`limitations`。每项发现包含 `rule_id`、`severity`、`problem`、`risk`、`recommendation`、`confidence`、`evidence` 和可选建议命令。证据行号从 1 开始，按照原始输入计数。
+JSON 使用 `schema_version: "1.1"`，保留 `device`、`summary`、`findings`、`inventory`、`limitations`，增加 `architecture`（六域覆盖）、`intelligence`（来源、候选与产品版本匹配）、`ai`（启用状态与解释）和 `pipeline`（六个阶段状态）。CLI 与网页使用完整流程；直接调用底层 `rules.audit(config)` 仅得到架构与规则结果，不会调用情报或模型。每项发现包含 `rule_id`、`severity`、`problem`、`risk`、`recommendation`、`confidence`、`evidence` 和可选建议命令。证据行号从 1 开始，按照原始输入计数。
 
 接口的 `allowed_vlan_ranges` 使用闭区间列表，例如 `[[10, 12], [20, 20]]` 表示 10、11、12、20；`[[1, 4094]]` 表示 all，`[]` 表示 none，`null` 表示没有已识别的显式允许列表。这样全 VLAN Trunk 不会使报告膨胀。
 
 ## 本地运行与配置保护
 
-网页服务只监听 `127.0.0.1`；校验 Host、Origin 和每次启动生成的会话令牌，不启用跨域读取。页面、样式、脚本均在本地，无第三方 CDN。网页不会持久保存上传配置，也不记录配置请求；用户导出报告时会主动写入下载目录。
+网页服务只监听 `127.0.0.1`；校验 Host、Origin 和每次启动生成的会话令牌，不启用跨域读取。页面、样式、脚本均在本地，无第三方 CDN。默认不请求外部情报和模型；显式 `intel-update` 才连接官方 CISA 数据源，显式 AI 才连接本机 Ollama。网页不会持久保存上传配置，也不记录配置请求；用户导出报告时会主动写入下载目录。
 
 凭据在保留证据和清单前隐藏，HTML 输出使用转义，网页使用 `textContent`。自动脱敏覆盖常见 password/secret、SNMP community、key/key-string 和认证密钥语法；不保证识别所有自定义敏感字段。报告仍含地址、设备名和网络结构，应按内部配置资料保护。真实配置放在被忽略的 `configs/`，报告放在 `reports/`；仓库示例全部为合成数据。
 

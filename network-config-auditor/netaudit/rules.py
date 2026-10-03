@@ -11,6 +11,7 @@ import ipaddress
 import re
 
 from .model import ACLRule, Config, Evidence, Finding
+from .architecture import architecture_summary, check_architecture
 
 SEVERITIES = {"critical": 4, "high": 3, "medium": 2, "low": 1, "info": 0}
 
@@ -238,7 +239,7 @@ PLUGINS = (ManagementChecks, ACLChecks, NetworkChecks)
 
 
 def audit(config: Config) -> dict:
-    findings = []
+    findings = check_architecture(config)
     for plugin_type in PLUGINS:
         plugin = plugin_type()
         plugin.analyze(config)
@@ -246,11 +247,12 @@ def audit(config: Config) -> dict:
     findings.sort(key=lambda f: (-SEVERITIES[f.severity], f.rule_id, f.evidence[0].line if f.evidence else 0))
     counts = Counter(f.severity for f in findings)
     return {
-        "schema_version": "1.0", "tool_version": "0.1.0",
+        "schema_version": "1.1", "tool_version": "0.2.0",
         "device": {"vendor": config.vendor, "hostname": config.hostname, "detection": config.detection},
         "summary": {"total": len(findings), "severity": {s: counts[s] for s in SEVERITIES},
                     "recognized_lines": config.recognized_lines, "relevant_lines": config.relevant_lines,
                     "unsupported_lines": config.unsupported_count},
-        "limitations": "离线配置审计；仅支持所列 IPv4 语法。动态路由仅提取进程。未确认实时状态、拓扑、公网可达性、CVE 或完整基准合规。修改命令是需核对平台版本与管理回退的建议。",
+        "limitations": "本地静态配置审计；仅支持所列 IPv4、STP 与 OSPF 语法。未确认邻居与转发状态、完整拓扑、公网可达性或完整基准合规。CVE 判断需产品与版本证据；KEV 记录不能证明本机已被入侵。AI 仅提供待核对的解释，整改需核对平台版本、业务与管理回退。",
+        "architecture": architecture_summary(config, findings),
         "findings": [f.to_dict() for f in findings], "inventory": config.to_dict(),
     }

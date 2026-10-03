@@ -125,10 +125,11 @@ def verify_bundle(archive, commit, run_id, run_attempt, expected_digest):
     for item in items:
         data = files[item["file"]]
         require(item["sha256"] == digest(data) and item["size_bytes"] == len(data), "Package metadata mismatch")
-    for mode, count in (("source", 9), ("onedir", 8), ("onefile", 8)):
+    counts = (("source", 9), ("onedir", 8), ("onefile", 8)) if version == "0.1.0" else (("source", 10), ("onedir", 9), ("onefile", 9))
+    for mode, count in counts:
         report = json.loads(files[f"smoke-{mode}.json"])
         require(report == manifest["verification"][mode], "Standalone report differs from manifest")
-        require(report["passed"] is True and report["mode"] == mode and len(report["checks"]) == count,
+        require(report["passed"] is True and report["mode"] == mode and len(report["checks"]) >= count,
                 "Incomplete acceptance report")
         for check in report["checks"]:
             require(check["status"] == "passed", "Acceptance check did not pass")
@@ -155,6 +156,18 @@ def notes(repository, tag, manifest, run_id):
     base = f"https://github.com/{repository}"
     rows = "\n".join(f"| `{a['file']}` | `{a['sha256']}` |" for a in manifest["artifacts"])
     env = manifest["environment"]
+    check_count = sum(len(r["checks"]) for r in manifest["verification"].values())
+    features = "" if version == "0.1.0" else """
+### 本版升级
+
+配置解析 → VLAN / STP / OSPF / ACL / NAT / Management Plane 架构检查 → 安全规则 → CVE / KEV 情报 → 可选 AI 解释与整改建议 → Markdown / HTML / JSON 报告。
+
+- 新增 STP / OSPF 结构化解析与保守检查，报告显示各域覆盖、证据和确认程度。
+- 随包提供 CISA 官方 KEV 离线快照及 CC0 来源说明；CVE 匹配需要精确设备 CPE 与导入的 NVD CVE 2.0 JSON。产品/版本不明时明确提示待核对，KEV 收录不代表设备已被入侵。
+- 可显式启用本机 Ollama 模型解释结构化发现；常规便携审计无需模型。未启用或模型不可用时仍可查看规则建议与导出。请使用本地模型；真实模型质量尚未人工验收。
+- 网页保留文件导入、厂商选择、示例、严重度筛选和三种导出，并增加流程、架构、情报和 AI 状态。
+
+"""
     return f"""下载后即可使用的 Windows x64 便携版，配置处理在本机完成。
 
 **推荐下载：[便携 ZIP]({base}/releases/download/{tag}/{portable})**（下方 Assets 中名称以 `-portable.zip` 结尾的文件）。
@@ -168,11 +181,13 @@ def notes(repository, tag, manifest, run_id):
 
 `-onefile.zip` 提供单 EXE 与配套说明、示例、许可证和源码；`-onefile.exe` 可独立启动。再次分发仍需保留 GPL-3.0-only 许可证、归属说明与对应源码。普通用户无需下载 GitHub 自动生成的 “Source code”。
 
+{features}
+
 ### 验证与来源
 
 - 源码提交：[`{commit}`]({base}/commit/{commit})；标签指向该构建提交。
 - [实际 Windows 构建与回归测试]({base}/actions/runs/{run_id})：{env['os']} / {env['architecture']}，Python {env['python']}，PyInstaller {manifest['build_dependencies']['pyinstaller']}。
-- 源码、onedir、onefile 共 25 项真实进程检查通过：中文及空格路径、端口回退、完整网页资源、三厂商及三种报告、退出码、无暂停与服务清理。EXE 子进程 PATH 排除 Python；构建主机仍安装构建 Python。
+- 源码、onedir、onefile 共 {check_count} 项真实进程检查通过：中文及空格路径、端口回退、完整网页资源、三厂商及三种报告、退出码、无暂停与服务清理。EXE 子进程 PATH 排除 Python；构建主机仍安装构建 Python。
 - 尚未人工验收资源管理器双击及默认浏览器界面、独立未安装 Python 的电脑、普通非管理员账户，也未实测 Windows 10/11 或其他架构。详细范围见 `manifest.json` 和三份 `smoke-*.json`。
 - 发布复用已验收原始文件，下载回验通过后才公开 Release；没有重新构建或替换 EXE。
 

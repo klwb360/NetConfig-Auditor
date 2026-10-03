@@ -25,7 +25,7 @@ if not errorlevel 1 goto python3
 
 echo 错误：源码版需要 Python 3.10 或更新版本，当前未检测到可用版本。
 echo 普通用户请下载 Windows 便携 EXE ZIP 包，解压后双击 Start-NetAudit.bat。
-echo 便携包获取入口：https://github.com/klwb360/NetAudit/actions/workflows/netaudit-windows.yml
+echo 便携包获取入口：https://github.com/klwb360/NetAudit/releases/latest
 echo 私人仓库需要先登录具有访问权限的 GitHub 账号。详见同目录使用说明。
 set "NETAUDIT_EXIT=2"
 goto finish
@@ -57,7 +57,7 @@ goto finish
 
 :source_error
 echo 错误：未找到 NetAudit.exe 或完整源码。请完整解压 Windows 便携 ZIP 包。
-echo 下载入口：https://github.com/klwb360/NetAudit/actions/workflows/netaudit-windows.yml
+echo 下载入口：https://github.com/klwb360/NetAudit/releases/latest
 set "NETAUDIT_EXIT=2"
 
 :finish

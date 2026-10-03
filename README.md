@@ -1,6 +1,8 @@
 # NetAudit · 网络配置审计工具
 
-导入 Cisco、华为或 H3C 的设备配置，在中文本地网页中查看配置问题、风险、原始行号和修改建议，导出 JSON、Markdown 或 HTML 报告。配置处理在本机完成，工具不会连接设备或下发命令。
+导入 Cisco、华为或 H3C 的设备配置，完成六个领域的网络架构检查、安全规则审计和本地 CVE / KEV 情报核对；可选使用本机 AI 解释发现，导出 JSON、Markdown 或 HTML 报告。配置处理在本机完成，工具不会连接设备或下发命令。
+
+**v0.2.0 正在完成构建与验收**，以下升级功能对应当前源码；已发布的 v0.1.0 保留下载。正式文件、校验值和实测结果以 [交付记录](DELIVERY.md) 为准。
 
 **[下载 Windows 便携版](https://github.com/klwb360/NetAudit/releases/latest)** · [v0.1.0 发布页](https://github.com/klwb360/NetAudit/releases/tag/v0.1.0) · [使用说明与常见问题](docs/FAQ.md) · [故障排查](docs/TROUBLESHOOTING.md)
 
@@ -28,12 +30,39 @@ Release 同时提供 `SHA256SUMS.txt`、构建清单与验收报告，发布时�
 ## 能做什么
 
 - 解析 Cisco IOS/IOS XE、Huawei VRP、H3C Comware 的常见 IPv4 配置。
-- 提供 27 条审计规则，覆盖管理面、接口、VLAN、路由、ACL 和 NAT。
-- 展示接口、VLAN、路由、ACL、NAT 清单，以及未建模配置行的警告。
+- 按 VLAN、STP、OSPF、ACL、NAT、Management Plane 六个领域展示检查覆盖与待复核问题，保留原有 27 条配置规则并增加 8 条 STP / OSPF 规则，共 35 个规则 ID。
+- 展示接口、VLAN、STP、OSPF、路由、ACL、NAT 清单，以及未建模配置行的警告。
+- 随包提供 CISA 官方 KEV 离线快照；输入精确产品 CPE 与本地 NVD CVE 2.0 数据后进行版本适用性核对，无法确认的项保持候选状态。
+- 显式启用本机 Ollama 后提供 AI 解释与整改建议；未设置模型时不调用 AI，失败仍保留审计报告。
 - 提供中文网页、严重度筛选、三厂商示例、文件导入及三种报告导出。
 - 保留命令行、标准输入、严格模式与严重度退出码，便于本地批量处理。
 
-审计仅覆盖已建模语法。Cisco ASA/NX-OS、IPv6、复杂策略及完整动态路由语义等尚未完整覆盖。没有告警不能视为配置已安全；建议命令需结合设备版本、拓扑和业务人工核对。完整 [支持范围](network-config-auditor/README.md#支持范围) 与 [27 条规则说明](network-config-auditor/docs/RULES.md) 可供查阅。
+审计仅覆盖已建模语法。Cisco ASA/NX-OS、IPv6、复杂策略及完整动态路由语义等尚未完整覆盖。没有告警不能视为配置已安全；建议命令需结合设备版本、拓扑和业务人工核对。完整 [支持范围](network-config-auditor/README.md#支持范围) 与 [规则说明](network-config-auditor/docs/RULES.md) 可供查阅。KEV 记录表示相关漏洞曾在现实中被利用，不能证明当前设备受影响或已被入侵。
+
+## 审计流程
+
+```mermaid
+flowchart TD
+    F[配置文件] --> P[配置解析器]
+    P --> A[网络架构检查]
+    A --> V[VLAN]
+    A --> S[STP]
+    A --> O[OSPF]
+    A --> C[ACL]
+    A --> N[NAT]
+    A --> M[Management Plane]
+    V --> R[安全规则引擎]
+    S --> R
+    O --> R
+    C --> R
+    N --> R
+    M --> R
+    R --> I[CVE / KEV 情报]
+    I --> AI[可选本机 AI 解释与整改建议]
+    AI --> OUT[Markdown / HTML / JSON 报告]
+```
+
+六个领域的状态描述当前输入的检查覆盖，不能证明真实拓扑或运行状态。默认使用本地快照，不联网；显式 `intel-update` 才下载官方 KEV。AI 需要自行安装和运行 Ollama 并选择本机已有模型，只影响可选解释功能，便携版的配置审计仍无需安装 Python。详见 [情报使用说明](network-config-auditor/docs/INTELLIGENCE.md)与 [AI 使用说明](network-config-auditor/docs/AI.md)。
 
 ## 源码与命令行
 
@@ -55,6 +84,15 @@ python -m netaudit audit examples/cisco.cfg --vendor cisco --format html --out r
 
 # 华为示例导出 JSON；Markdown 的格式参数为 md
 python -m netaudit audit examples/huawei.cfg --vendor huawei --format json --out reports/huawei.json
+
+# 使用精确设备 CPE 与本地 NVD 数据核对 CVE；文件格式见情报说明
+python -m netaudit audit device.cfg --asset-info asset.json --nvd-file nvd-subset.json --format html --out reports/device.html
+
+# 显式下载官方 KEV 到用户指定位置；审计时用 --kev-file 指定
+python -m netaudit intel-update --out reports/kev.json
+
+# 可选：调用本机已安装的 Ollama 模型；模型名需替换成实际名称
+python -m netaudit audit device.cfg --ai-model YOUR_INSTALLED_MODEL --format md --out reports/device.md
 ```
 
 Windows 可使用 `py -3`，Linux 常用 `python3`。便携版可以用 `NetAudit.exe` 或 `Start-NetAudit.bat` 传递相同参数。退出码：0 调用成功；1 达到 `--fail-on` 指定严重度；2 参数、输入或文件错误，或 `--strict` 检出未建模行。详细用法见 [项目说明](network-config-auditor/README.md)。
@@ -68,6 +106,7 @@ Windows 可使用 `py -3`，Linux 常用 `python3`。便携版可以用 `NetAudi
 | 开发、测试与 Windows 构建 | [开发指南](docs/DEVELOPMENT.md)、[验证记录](network-config-auditor/docs/TESTING.md) |
 | 发布新版本与下载资产 | [发布指南](docs/RELEASING.md) |
 | 模块职责、数据流与扩展点 | [架构说明](docs/ARCHITECTURE.md) |
+| CVE / KEV 和本机 AI | [情报说明](network-config-auditor/docs/INTELLIGENCE.md)、[AI 说明](network-config-auditor/docs/AI.md) |
 | 规则与上游来源 | [规则目录](network-config-auditor/docs/RULES.md)、[上游审计](network-config-auditor/docs/UPSTREAM_AUDIT.md) |
 | 贡献、反馈与版本变化 | [贡献指南](CONTRIBUTING.md)、[更新记录](CHANGELOG.md) |
 | 交付与迁移历史 | [下载与交付检查点](DELIVERY.md)、[迁移记录](MIGRATION.md) |
@@ -92,10 +131,10 @@ NetAudit/
 
 ## 验证与配置保护
 
-已验收构建在 Windows Server 2022 x64 / Python 3.12.10 上通过 **88 项测试和 25 项进程验收**；Linux Python 3.10/3.12/3.13 检查也通过。普通非管理员账户、物理无 Python 电脑、真实桌面交互、Windows 10/11 和 ARM64 尚未实测，范围以 [交付记录](DELIVERY.md) 为准。
+历史 v0.1.0 已验收构建在 Windows Server 2022 x64 / Python 3.12.10 上通过 **88 项测试和 25 项进程验收**；Linux Python 3.10/3.12/3.13 检查也通过。v0.2.0 的测试、EXE 和新增功能验收正在执行，不能沿用旧版本数字作为新版验收结果。普通非管理员账户、物理无 Python 电脑、真实桌面交互、Windows 10/11 和 ARM64 尚未实测，范围以 [交付记录](DELIVERY.md) 为准。
 
-网页仅监听 `127.0.0.1`，资源随程序提供，上传配置不持久保存。报告仍含网络结构，自动脱敏也不能覆盖所有自定义字段。真实配置放在项目 `configs/`，报告放在 `reports/`；问题反馈使用合成或人工脱敏的最小样例。
+网页仅监听 `127.0.0.1`，资源随程序提供，上传配置不持久保存。默认不请求外部情报或模型；本机 AI 仅在用户显式选择模型后调用，发送内容与限制见 [AI 说明](network-config-auditor/docs/AI.md)。报告仍含网络结构，自动脱敏也不能覆盖所有自定义字段。真实配置放在项目 `configs/`，报告放在 `reports/`；问题反馈使用合成或人工脱敏的最小样例。
 
 ## 许可证与来源
 
-项目使用 **GPL-3.0-only**；根 [LICENSE](LICENSE) 与 [项目许可证](network-config-auditor/LICENSE) 内容一致。项目复用并改写 pynipper-ng 的部分方法，原 [归属说明](network-config-auditor/NOTICE)、固定上游提交与 [审计记录](network-config-auditor/docs/UPSTREAM_AUDIT.md) 均保留。私人仓库属性不改变已有许可证；分发便携包时请保留许可证、归属说明和对应源码。
+项目使用 **GPL-3.0-only**；根 [LICENSE](LICENSE) 与 [项目许可证](network-config-auditor/LICENSE) 内容一致。项目复用并改写 pynipper-ng 的部分方法，原 [归属说明](network-config-auditor/NOTICE)、固定上游提交与 [审计记录](network-config-auditor/docs/UPSTREAM_AUDIT.md) 均保留。私人仓库属性不改变已有许可证；分发便携包时请保留许可证、归属说明和对应源码。随包 CISA KEV 数据按其 CC0 说明保留来源与快照记录，详见 [情报说明](network-config-auditor/docs/INTELLIGENCE.md)。

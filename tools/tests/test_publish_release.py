@@ -13,13 +13,13 @@ spec.loader.exec_module(p)
 COMMIT = "f" * 40
 
 
-def bundle(change=None):
-    prefix = "NetAudit-0.1.0-windows-x64-" + COMMIT[:12]
+def bundle(change=None, version="0.1.0", counts=None):
+    prefix = "NetAudit-" + version + "-windows-x64-" + COMMIT[:12]
     packages = {prefix + "-portable.zip": b"portable", prefix + "-onefile.zip": b"onefile",
-                prefix + "-onefile.exe": b"exe", "NetAudit-0.1.0-source-" + COMMIT[:12] + ".zip": b"source"}
+                prefix + "-onefile.exe": b"exe", "NetAudit-" + version + "-source-" + COMMIT[:12] + ".zip": b"source"}
     reports = {mode: {"mode": mode, "passed": True, "checks": [{"status": "passed"} for _ in range(count)]}
-               for mode, count in (("source", 9), ("onedir", 8), ("onefile", 8))}
-    manifest = {"application": "NetAudit", "application_version": "0.1.0",
+               for mode, count in (counts or (("source", 9), ("onedir", 8), ("onefile", 8)))}
+    manifest = {"application": "NetAudit", "application_version": version,
                 "source": {"commit": COMMIT, "dirty": False},
                 "environment": {"github_run_id": "123", "github_run_attempt": "1",
                                 "architecture": "AMD64", "runner_os": "Windows"},
@@ -67,6 +67,13 @@ class PublicationGuards(unittest.TestCase):
                 "remaining_pids": [123], "forced_cleanup": False, "port_closed": True}
         with self.assertRaisesRegex(ValueError, "Unclean server"):
             self.verify(bundle(change))
+
+    def test_new_version_requires_the_added_process_acceptance(self):
+        with self.assertRaisesRegex(ValueError, "Incomplete acceptance"):
+            self.verify(bundle(version="0.2.0"))
+
+    def test_new_version_accepts_all_passed_extended_checks(self):
+        self.assertEqual(len(self.verify(bundle(version="0.2.0", counts=(("source", 10), ("onedir", 9), ("onefile", 9))))[0]), 9)
 
     def test_reject_failed_or_foreign_workflow(self):
         run = {"status": "completed", "conclusion": "success", "head_sha": COMMIT,

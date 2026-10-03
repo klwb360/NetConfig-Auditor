@@ -9,12 +9,13 @@ import signal
 import threading
 import webbrowser
 
-from .parser import MAX_BYTES, parse_config
+from .parser import MAX_BYTES
 from .reports import render
-from .rules import audit
+from .pipeline import audit_configuration
 
 _SLOTS = threading.BoundedSemaphore(4)
 WEB_DIR = Path(__file__).resolve().parent / "web"
+MAX_REQUEST_BYTES = 36 * 1024 * 1024
 
 
 class LocalServer(ThreadingHTTPServer):
@@ -85,7 +86,7 @@ def make_handler(token: str):
                 length = int(self.headers.get("Content-Length", "-1"))
             except ValueError:
                 return self._error(400, "Content-Length 不合法")
-            if not 0 < length <= MAX_BYTES + 65536:
+            if not 0 < length <= MAX_REQUEST_BYTES:
                 return self._error(413, "输入超过限制")
             if not _SLOTS.acquire(blocking=False):
                 return self._error(429, "并发审计过多，请稍后重试")
@@ -97,11 +98,15 @@ def make_handler(token: str):
                 value = json.loads(data.decode("utf-8"))
                 if not isinstance(value, dict) or not isinstance(value.get("config"), str) or not isinstance(value.get("vendor", "auto"), str):
                     return self._error(400, "config/vendor 类型不合法")
-                result = audit(parse_config(value["config"], value.get("vendor", "auto")))
+                result = audit_configuration(
+                    value["config"], value.get("vendor", "auto"), asset=value.get("asset"),
+                    kev=value.get("kev"), nvd=value.get("nvd"), ai=value.get("ai"))
                 self._send(200, json.dumps({"report": result, "exports": {f: render(result, f) for f in ("json", "md", "html")}}, ensure_ascii=False))
             except (ValueError, UnicodeError) as exc:
                 # Parse errors intentionally never contain credential values.
                 self._error(400, str(exc) if not isinstance(exc, json.JSONDecodeError) else "JSON 格式不合法")
+            except RecursionError:
+                self._error(400, "JSON 嵌套超过限制")
             except (TimeoutError, OSError):
                 self.close_connection = True
             finally:

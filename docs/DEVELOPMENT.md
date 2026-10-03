@@ -52,7 +52,7 @@ python tools/reproduce_upstream.py
 python -m compileall -q netaudit
 ```
 
-单元测试覆盖解析、规则、报告、CLI、本地 HTTP API 和便携启动行为。HTTP 集成测试需要环境允许监听回环地址；若沙箱禁止创建 socket，应记录环境限制，不能将跳过的 HTTP 检查算作通过。上游复现脚本只隔离复现三个固定缺陷，不代表运行过完整上游程序。
+单元测试覆盖解析、规则、报告、CLI、本地 HTTP API 和便携启动行为；v0.2.0 还覆盖 STP / OSPF 的显式与未知状态、CPE 版本适用性、KEV 来源与输入限制、AI 设置/本机请求/失败降级，以及统一流程。AI 的协议替身测试不等于真实模型或桌面交互验收。HTTP 集成测试需要环境允许监听回环地址；若沙箱禁止创建 socket，应记录环境限制，不能将跳过的 HTTP 检查算作通过。上游复现脚本只隔离复现三个固定缺陷，不代表运行过完整上游程序。
 
 修改网页 JavaScript 后，若已安装 Node.js，可检查语法：
 
@@ -66,7 +66,15 @@ Node.js 仅用于这项检查。Python 包构建可使用：
 python -m pip wheel . --no-deps --wheel-dir dist
 ```
 
-Wheel 构建仍会安装隔离的构建依赖；检查 wheel 中包含 `netaudit/web/index.html`、`app.js`、`style.css`。这一结果验证 Python 包，不验证 Windows EXE。历史验证记录见 [TESTING.md](../network-config-auditor/docs/TESTING.md)，已交付构建的环境、结果和限制见 [DELIVERY.md](../DELIVERY.md)。
+Wheel 构建仍会安装隔离的构建依赖；检查 wheel 中包含 `netaudit/web/index.html`、`app.js`、`style.css`，以及 `netaudit/data/` 中的 KEV 快照与来源/许可资料。这一结果验证 Python 包，不验证 Windows EXE。历史验证记录见 [TESTING.md](../network-config-auditor/docs/TESTING.md)，已交付构建的环境、结果和限制见 [DELIVERY.md](../DELIVERY.md)。
+
+## 扩展 v0.2.0 审计流程
+
+CLI 与网页统一调用 `netaudit.pipeline.audit_configuration()`：解析配置 → 架构与规则 → 本地 CVE / KEV → 可选 AI → 同一报告结构。保留 `netaudit.rules.audit(config)` 的底层调用能力；它只执行架构与规则，不隐式联网或调用模型。报告 schema 1.1 保留旧字段，并增加 `architecture`、`intelligence`、`ai` 与 `pipeline`。
+
+新解析或规则应保留原始行号、脱敏证据和 unknown / explicit-off 区别；六域覆盖状态不能用作“已安全”分数。情报匹配需要精确 CPE 与明确版本，本地 NVD 的复杂环境条件或无法比较版本必须降级待核对。默认读取随包官方 KEV，显式更新下载才联网，不能将配置传给更新服务。详情见 [架构说明](ARCHITECTURE.md)、[情报说明](../network-config-auditor/docs/INTELLIGENCE.md)和 [AI 说明](../network-config-auditor/docs/AI.md)。
+
+AI 只接受回环地址的本机 Ollama，必须由用户选定模型并明确启用；不使用规则建议伪装模型输出。测试应验证配置与凭据不进入模型请求、模型不能改写规则/CVE 确认状态、HTML 转义以及超时/无模型后的报告可用性。使用真实 Ollama 前需另外记录安装版本、模型、运行环境和人工审阅，不能用 mock 成功冒充实际模型验收。
 
 ## Windows 便携包构建
 

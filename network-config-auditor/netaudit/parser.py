@@ -204,6 +204,217 @@ def _nat(text: str, interface: str | None, e: Evidence) -> NAT:
     return n
 
 
+def _architecture_redact(text: str) -> str:
+    # VRP/Comware authentication-mode accepts credentials without a password
+    # keyword; retain the algorithm, never its key identifier or value.
+    text = redact(text)
+    return re.sub(r"(?i)(\bauthentication-mode\s+\S+)\s+.+$",
+                  r"\1 [REDACTED]", text)
+
+
+def _stp_command(s: str, cfg: Config, interface: Interface | None) -> bool:
+    """Parse only explicit, supported STP settings, including reset semantics."""
+    inverse = s.startswith(("no ", "undo "))
+    command = s.split(" ", 1)[1] if inverse else s
+    target = cfg.stp
+    value = None if inverse else True
+    if interface is not None:
+        field_name = None
+        if command in ("stp enable", "stp disable"):
+            interface.stp_enabled = (False if inverse and command == "stp enable"
+                                     else None if inverse else command == "stp enable")
+            return True
+        if command in ("spanning-tree portfast", "spanning-tree portfast trunk",
+                       "spanning-tree portfast edge", "spanning-tree portfast edge trunk"):
+            field_name = "stp_edge"
+        elif command in ("spanning-tree portfast disable", "spanning-tree portfast edge disable"):
+            field_name, value = "stp_edge", None if inverse else False
+        elif re.fullmatch(r"stp edged-port(?: (enable|disable))?", command):
+            field_name = "stp_edge"
+            value = None if inverse else not command.endswith(" disable")
+        elif re.fullmatch(r"spanning-tree bpdu(guard|filter) (enable|disable)", command):
+            field_name = "bpdu_guard" if "bpduguard" in command else "bpdu_filter"
+            value = None if inverse else command.endswith(" enable")
+        elif re.fullmatch(r"stp bpdu-filter(?: (enable|disable))?", command):
+            field_name = "bpdu_filter"
+            value = None if inverse else not command.endswith(" disable")
+        if field_name:
+            setattr(interface, field_name, value)
+            return True
+        return False
+    if command in ("stp enable", "stp disable"):
+        target["enabled"] = (False if inverse and command == "stp enable"
+                             else None if inverse else command == "stp enable")
+        return True
+    mode = re.fullmatch(r"(?:spanning-tree mode (pvst|rapid-pvst|mst)|stp mode (stp|rstp|mstp))", command)
+    if mode:
+        target["mode"] = None if inverse else next(x for x in mode.groups() if x)
+        return True
+    defaults = {
+        "spanning-tree portfast default": "edge_default",
+        "spanning-tree portfast edge default": "edge_default",
+        "spanning-tree portfast bpduguard default": "bpdu_guard_default",
+        "spanning-tree portfast edge bpduguard default": "bpdu_guard_default",
+        "spanning-tree portfast bpdufilter default": "bpdu_filter_default",
+        "spanning-tree portfast edge bpdufilter default": "bpdu_filter_default",
+        "stp bpdu-protection": "bpdu_guard_default",
+    }
+    if command in defaults:
+        target[defaults[command]] = value
+        return True
+    if command.startswith("spanning-tree vlan "):
+        values = vlan_ids(command[len("spanning-tree vlan "):])
+        for vid in values:
+            target["vlan_enabled"][vid] = not inverse
+        return True
+    return False
+
+
+def _area_id(value: str) -> str:
+    if "." in value:
+        return str(int(ipaddress.IPv4Address(value)))
+    number = int(value)
+    if not 0 <= number <= 0xffffffff:
+        raise ValueError("OSPF area 超出范围")
+    return str(number)
+
+
+def _ospf_process(s: str, e: Evidence, cfg: Config) -> dict:
+    t = s.split()
+    if t[0] == "router":
+        if len(t) < 3 or not t[2].isdigit():
+            raise ValueError("Cisco OSPF 进程必须指定整数 ID")
+        t = t[1:]
+    t = t[1:]
+    process_id = t.pop(0) if t and t[0].isdigit() else "1"
+    if not 1 <= int(process_id) <= 65535:
+        raise ValueError("OSPF process ID 超出范围")
+    router_id, vrf = None, "default"
+    while t:
+        keyword = t.pop(0)
+        if keyword == "router-id":
+            router_id = t.pop(0)
+        elif keyword in ("vrf", "vpn-instance"):
+            vrf = t.pop(0)
+        else:
+            raise ValueError("未支持的 OSPF 进程参数")
+    proc = next((p for p in cfg.routing_processes if p["protocol"] == "ospf"
+                 and p.get("process_id") == process_id and p.get("vrf") == vrf), None)
+    if proc is None:
+        proc = {"protocol": "ospf", "process_id": process_id, "vrf": vrf,
+                "header": e, "commands": [], "router_id": None,
+                "router_id_evidence": None, "networks": [], "areas": {},
+                "passive_default": None, "passive_interfaces": {}}
+        cfg.routing_processes.append(proc)
+    if router_id is not None:
+        proc["router_id"], proc["router_id_evidence"] = router_id, e
+    return proc
+
+
+def _ospf_command(s: str, proc: dict, area: str | None, e: Evidence) -> bool:
+    inverse = s.startswith(("no ", "undo "))
+    command = s.split(" ", 1)[1] if inverse else s
+    t = command.split()
+    if t[0] == "router-id" and len(t) in (1, 2):
+        if not inverse and len(t) != 2:
+            return False
+        proc["router_id"] = None if inverse else t[1]
+        proc["router_id_evidence"] = e
+        return True
+    if t[0] in ("passive-interface", "silent-interface") and len(t) >= 2:
+        name = "".join(t[1:])
+        if name in ("default", "all"):
+            proc["passive_default"] = not inverse
+        else:
+            proc["passive_interfaces"][name] = not inverse
+        return True
+    if t[0] == "network":
+        if area is None:
+            if len(t) != 5 or t[3] != "area":
+                return False
+            network_area = _area_id(t[4])
+        else:
+            if len(t) != 3:
+                return False
+            network_area = area
+        address = str(ipaddress.IPv4Address(t[1]))
+        wildcard = str(ipaddress.IPv4Address(t[2]))
+        mask = (~int(ipaddress.IPv4Address(wildcard))) & 0xffffffff
+        try:
+            prefix = str(ipaddress.IPv4Network((int(ipaddress.IPv4Address(address)),
+                         str(ipaddress.IPv4Address(mask))), strict=False))
+            if int(ipaddress.IPv4Network(prefix).netmask) != mask:
+                prefix = None
+        except ValueError:
+            prefix = None
+        identity = (address, wildcard, network_area)
+        proc["networks"] = [n for n in proc["networks"]
+                            if (n["address"], n["wildcard"], n["area"]) != identity]
+        if not inverse:
+            proc["networks"].append({"address": address, "wildcard": wildcard,
+                                     "prefix": prefix, "area": network_area, "evidence": e})
+            proc["areas"].setdefault(network_area, {"authentication": None, "evidence": []})
+        return True
+    authentication = None
+    auth_area = area
+    if t[0] == "area" and len(t) >= 3 and t[2] == "authentication":
+        auth_area = _area_id(t[1])
+        if len(t) == 3:
+            authentication = "simple"
+        elif len(t) == 4 and t[3] == "message-digest":
+            authentication = "message-digest"
+        else:
+            return False
+    elif t[0] == "authentication-mode" and area is not None:
+        if inverse and len(t) == 1:
+            authentication = None
+        elif len(t) >= 2 and t[1] in ("simple", "md5", "hmac-md5", "hmac-sha256", "hmac-sha-256", "none", "null"):
+            authentication = "none" if t[1] in ("none", "null") else t[1]
+        else:
+            return False
+    else:
+        return False
+    if auth_area is None:
+        return False
+    settings = proc["areas"].setdefault(auth_area, {"authentication": None, "evidence": []})
+    settings["authentication"] = None if inverse else authentication
+    settings["evidence"].append(e)
+    return True
+
+
+def _ospf_interface(s: str, interface: Interface, e: Evidence) -> bool:
+    inverse = s.startswith(("no ", "undo "))
+    command = s.split(" ", 1)[1] if inverse else s
+    binding = re.fullmatch(r"(?:ip ospf|ospf enable) (\d+) area (\S+)", command)
+    if binding:
+        process_id, area = binding.groups()
+        if not 1 <= int(process_id) <= 65535:
+            raise ValueError("OSPF process ID 超出范围")
+        interface.ospf_binding = None if inverse else {"process_id": process_id,
+                                                       "area": _area_id(area), "evidence": e}
+        return True
+    if inverse and command in ("ip ospf", "ospf enable"):
+        interface.ospf_binding = None
+        return True
+    if re.fullmatch(r"ip ospf authentication(?: (message-digest|null))?", command):
+        interface.ospf_authentication = (None if inverse else "message-digest"
+            if command.endswith("message-digest") else "none" if command.endswith("null") else "simple")
+        return True
+    auth = re.match(r"^ospf authentication-mode (\S+)(?:\s+.*)?$", command)
+    if auth:
+        if auth[1] not in ("simple", "md5", "hmac-md5", "hmac-sha256", "hmac-sha-256", "none", "null"):
+            return False
+        interface.ospf_authentication = None if inverse else "none" if auth[1] in ("none", "null") else auth[1]
+        return True
+    if inverse and command == "ospf authentication-mode":
+        interface.ospf_authentication = None
+        return True
+    if re.match(r"^ip ospf (?:authentication-key|message-digest-key)\s+", command):
+        # Keys alone do not enable an authentication algorithm.
+        return True
+    return False
+
+
 def _parse_config(text: str, vendor: str = "auto") -> Config:
     if vendor not in VENDORS:
         raise ValueError("厂商必须为 auto / cisco / huawei / h3c")
@@ -237,7 +448,10 @@ def _parse_config(text: str, vendor: str = "auto") -> Config:
             continue
         if not s or s in ("!", "#", "return", "end", "exit", "quit"):
             if s:
-                context = None
+                if s in ("exit", "quit") and context and context[0] == "ospf-area":
+                    context = ("routing", context[1][0])
+                else:
+                    context = None
             continue
         if s.startswith(("!", "#")):
             continue
@@ -251,11 +465,33 @@ def _parse_config(text: str, vendor: str = "auto") -> Config:
             context = None
             continue
         cfg.relevant_lines += 1
-        e = Evidence(num, redact(s))
+        e = Evidence(num, _architecture_redact(s))
         if vendor == "cisco" and not raw[:1].isspace():
             context = None
         try:
             inverse = s[3:] if s.startswith("no ") else s[5:] if s.startswith("undo ") else None
+            stp_command = inverse or s
+            if stp_command.startswith(("stp ", "spanning-tree ")):
+                interface = context[1] if context and context[0] == "interface" else None
+                evidence = interface.stp_evidence if interface is not None else cfg.stp["evidence"]
+                evidence.append(e)
+                if interface is not None:
+                    interface.evidence.append(e)
+                else:
+                    cfg.global_commands.append(e)
+                    context = None
+                if _stp_command(s, cfg, interface):
+                    cfg.recognized_lines += 1
+                else:
+                    warn(e, "STP 变体未建模；未据此推断启停状态或拓扑")
+                continue
+            if (inverse and re.match(r"^(?:router ospf(?:\s+\d+|$)|ospf(?:\s+\d+|\s+(?:router-id|vpn-instance)\b|$))", inverse)
+                    and not (context and context[0] == "interface")):
+                removed = _ospf_process(inverse, e, cfg)
+                cfg.routing_processes.remove(removed)
+                context = None
+                cfg.recognized_lines += 1
+                continue
             if inverse and inverse.startswith(("ip nat pool ", "nat address-group ")):
                 t = inverse.split()
                 cfg.nat_pools.pop(t[3] if t[0] == "ip" else t[2], None)
@@ -320,7 +556,10 @@ def _parse_config(text: str, vendor: str = "auto") -> Config:
                 for vid in ids:
                     cfg.vlans[vid] = {"name": "", "evidence": e}
                 context = ("vlan", sorted(ids))
-            elif s.startswith(("router ospf ", "router bgp ", "ospf ", "bgp ", "router rip")):
+            elif re.match(r"^(?:router ospf(?:\s+\d+(?:\s|$)|$)|ospf(?:\s+\d+(?:\s|$)|\s+(?:router-id|vpn-instance)\b|$))", s) and not (context and context[0] == "interface"):
+                proc = _ospf_process(s, e, cfg)
+                context = ("routing", proc)
+            elif s.startswith(("router bgp ", "bgp ", "router rip")):
                 proc = {"protocol": s.split()[1] if s.startswith("router ") else s.split()[0], "header": e, "commands": []}
                 cfg.routing_processes.append(proc)
                 context = ("routing", proc)
@@ -338,7 +577,11 @@ def _parse_config(text: str, vendor: str = "auto") -> Config:
             elif context and context[0] == "interface":
                 it = context[1]
                 it.evidence.append(e)
-                if s in ("shutdown", "undo shutdown", "no shutdown"):
+                if (inverse or s).startswith(("ip ospf", "ospf ")):
+                    it.ospf_evidence.append(e)
+                    if not _ospf_interface(s, it, e):
+                        warn(e, "OSPF 接口变体未建模；认证和邻居状态仍需核对")
+                elif s in ("shutdown", "undo shutdown", "no shutdown"):
                     it.shutdown = s == "shutdown"
                 elif s.startswith("description "):
                     it.description = e.text[12:]
@@ -441,7 +684,7 @@ def _parse_config(text: str, vendor: str = "auto") -> Config:
                 if s.startswith(("transport input ", "protocol inbound ")):
                     vty.transport = s.split()[2:]
                 elif s in ("login", "login local", "no login") or s.startswith(("login authentication ", "authentication-mode ")):
-                    vty.authentication = s
+                    vty.authentication = e.text
                 elif s.startswith(("exec-timeout ", "idle-timeout ")):
                     t = s.split()
                     minutes = int(t[1])
@@ -462,9 +705,25 @@ def _parse_config(text: str, vendor: str = "auto") -> Config:
             elif context and context[0] == "vlan" and s.startswith(("name ", "description ")):
                 for vid in context[1]:
                     cfg.vlans[vid]["name"] = e.text.split(None, 1)[1]
-            elif context and context[0] == "routing":
-                context[1]["commands"].append(e)
-                warn(e, "动态路由仅提取进程与原文，未验证协议策略")
+            elif context and context[0] in ("routing", "ospf-area"):
+                proc, area = context[1] if context[0] == "ospf-area" else (context[1], None)
+                proc["commands"].append(e)
+                if proc["protocol"] != "ospf":
+                    warn(e, "此动态路由仅提取进程与原文，未验证协议策略")
+                elif re.fullmatch(r"area \S+", s):
+                    area = _area_id(s.split()[1])
+                    proc["areas"].setdefault(area, {"authentication": None, "evidence": []})
+                    context = ("ospf-area", (proc, area))
+                elif inverse and re.fullmatch(r"area \S+", inverse):
+                    removed = _area_id(inverse.split()[1])
+                    proc["areas"].pop(removed, None)
+                    proc["networks"] = [n for n in proc["networks"] if n["area"] != removed]
+                    context = ("routing", proc)
+                elif not _ospf_command(s, proc, area, e):
+                    warn(e, "OSPF 变体未建模；未确认邻居、拓扑或协议运行状态")
+                elif (inverse or s).startswith("network ") and any(
+                        n["evidence"] is e and n["prefix"] is None for n in proc["networks"]):
+                    warn(e, "OSPF 非连续 wildcard 已保留，但不转为 CIDR 或据此检查 Network 范围")
             elif context and context[0] == "unsupported":
                 warn(e, "未支持的配置块")
             elif s.startswith(("aaa", "local-user ", "username ", "enable ", "ip ssh ", "ssh server ", "stelnet ", "telnet ", "undo telnet ", "http ", "undo http ", "ip http ", "no ip http ", "snmp", "undo snmp", "no snmp", "no ip ssh", "service ", "no service ", "logging ", "info-center ", "version ", "irf ", "stp ", "ip source routing", "no ip source routing")):

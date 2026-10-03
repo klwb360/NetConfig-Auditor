@@ -97,6 +97,11 @@ def add_user_files(destination: Path) -> None:
     shutil.copy2(instructions, destination / "使用说明.txt")
     shutil.copytree(PROJECT / "docs", destination / "docs", dirs_exist_ok=True)
     shutil.copytree(PROJECT / "examples", destination / "examples", dirs_exist_ok=True)
+    # Keep public intelligence provenance/licensing readable without running
+    # the executable. The executable also embeds the complete data directory.
+    intelligence = PROJECT / "netaudit" / "data"
+    if intelligence.is_dir():
+        shutil.copytree(intelligence, destination / "intelligence-data", dirs_exist_ok=True)
 
 
 def collect_licenses(destination: Path, pins: dict[str, str]) -> None:
@@ -155,6 +160,7 @@ def build_executable(mode: str, work: Path) -> Path:
         "--paths", str(PROJECT), "--workpath", str(work / ("analysis-" + mode)),
         "--specpath", str(work / ("spec-" + mode)), "--distpath", str(output),
         "--add-data", str(PROJECT / "netaudit" / "web") + ":netaudit/web",
+        "--add-data", str(PROJECT / "netaudit" / "data") + ":netaudit/data",
         str(PROJECT / "tools" / "windows_entry.py"),
     ]
     run(command)
@@ -257,10 +263,17 @@ def build(output: Path, work: Path, identity: dict[str, object]) -> None:
             "github_run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT"),
         },
         "build_dependencies": pins, "build_lock_sha256": sha256(LOCK), "pip_freeze": freeze,
+        "intelligence_data": [
+            {"file": path.relative_to(PROJECT).as_posix(),
+             "size_bytes": path.stat().st_size, "sha256": sha256(path)}
+            for path in sorted((PROJECT / "netaudit" / "data").rglob("*"))
+            if path.is_file()
+        ],
         "build_method": {
             "tool": "PyInstaller", "modes_in_order": ["onedir", "onefile"],
             "console": True, "upx": False, "runtime_tmpdir": "system default",
             "data_destination": "netaudit/web",
+            "data_destinations": ["netaudit/web", "netaudit/data"],
             "official_docs": [
                 "https://pyinstaller.org/en/v6.22.3/operating-mode.html",
                 "https://pyinstaller.org/en/v6.22.3/runtime-information.html",

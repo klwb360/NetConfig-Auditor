@@ -1,16 +1,20 @@
 # NetAudit Windows 使用说明
 
-1. **下载**：登录有权访问私人仓库的 GitHub 账号，打开 [Windows 构建列表](https://github.com/klwb360/NetAudit/actions/workflows/netaudit-windows.yml)，进入成功且源码提交对应当前版本的运行，在 Artifacts 下载便携产物。构建未成功时不会提供已验收的 EXE。
-2. **解压**：先解压 GitHub 下载的产物 ZIP，再解压其中名称含 `windows-x64` 和 `portable` 的 ZIP。建议选择自己的桌面或文档文件夹；中文和带空格的路径均支持。不要在 ZIP 预览窗口内直接运行。
+1. **下载**：登录有权访问私人仓库的 GitHub 账号，打开 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest)，在 **Assets** 下载名称含 `windows-x64` 和 `portable` 的 ZIP。各个正式版本的构建与验收记录保留在发布页；旧版 v0.1.0 也保留下载。
+2. **解压**：从 Release 下载的便携 ZIP **解压一次**，找到 `Start-NetAudit.bat` 与 `NetAudit.exe`。建议选择自己的桌面或文档文件夹；中文和带空格的路径均支持。不要在 ZIP 预览窗口内直接运行。
 3. **双击**：打开解压后的文件夹，双击 `Start-NetAudit.bat` 或 `NetAudit.exe`。程序自动打开默认浏览器。若没有自动打开，复制启动窗口显示的 `http://127.0.0.1:端口` 地址到浏览器。
 4. **导入配置**：点击“导入文件”，选择 UTF-8 的 `.cfg`、`.conf` 或 `.txt` 文件，选择 Cisco、华为或 H3C。也可粘贴配置，或先使用“载入示例”。
-5. **查看与导出**：点击“开始审计”，查看问题、原始行号与建议，使用严重度筛选；点击 JSON、Markdown 或 HTML 下载报告。
+5. **查看与导出**：点击“开始审计”，查看发现、原始行号与建议，使用严重度筛选；点击 JSON、Markdown 或 HTML 下载报告。v0.2.0 增加 VLAN、STP、OSPF、ACL、NAT、Management Plane 的检查覆盖、情报状态与来源。
 
-**关闭**：回到启动的命令行窗口按 Ctrl+C（或关闭该窗口）。关闭浏览器标签页不会停止程序。配置处理全部在本机完成，普通使用不需要管理员权限；首次访问可能需要几秒，尤其单 EXE 版本。
+**情报与 AI**：默认使用随包 CISA KEV 离线快照，不联网。需要核对产品漏洞时，在网页导入精确设备信息和本地 NVD JSON；只有充分产品版本证据才确认匹配。用户可导入更新后的 KEV 文件；显式 CLI `intel-update` 才下载官方数据。AI 默认关闭，只有自行运行本机 Ollama 并明确填写已有模型名称后启用；未安装模型也能完成审计。模型解释仅供人审，不自动整改。详见 [情报说明](INTELLIGENCE.md)和 [AI 说明](AI.md)。
+
+**关闭**：回到启动的命令行窗口按 Ctrl+C（或关闭该窗口）。关闭浏览器标签页不会停止程序。配置处理全部在本机完成，普通使用设计为无需管理员权限；首次访问可能需要几秒，尤其单 EXE 版本。
 
 **迁移**：复制整个便携文件夹到另一台 Windows 电脑，继续双击使用。`_internal` 等运行库目录必须随 `NetAudit.exe` 一起复制；目标电脑不需要安装 Python。默认临时目录使用 Windows 用户临时目录，网页上传的配置不会保存到程序文件夹。导出报告请选择自己有写入权限的目录。
 
 **单 EXE**：名称含 `windows-x64` 和 `onefile` 的 ZIP 内提供独立 `NetAudit.exe`，也有 BAT、示例、许可证及对应源码。该 EXE 可以单独运行；再次分发时请同时提供 ZIP 中的许可证、归属说明与对应源码。优先选择便携文件夹版本，启动更快，也便于排查问题。
+
+**Actions 备份下载**：[Windows 构建列表](https://github.com/klwb360/NetAudit/actions/workflows/netaudit-windows.yml) 仍提供成功构建的产物，有保留期限。Actions 下载包含外层 ZIP，先解压外层，再解压其中 `portable.zip`；Release 直接提供内部 ZIP，只需解压一次。两种入口以对应清单的源码提交和 SHA-256 为准。
 
 **校验下载**：产物中的 `SHA256SUMS.txt` 记录分发文件的 SHA-256；构建清单记录源提交与实际环境。可在 PowerShell 使用 `Get-FileHash .\文件名.zip -Algorithm SHA256` 对比。
 
