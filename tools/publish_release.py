@@ -37,14 +37,15 @@ class GitHub:
         self.token = token
         self.opener = urllib.request.build_opener(NoRedirect)
 
-    def request(self, path, method="GET", data=None, binary=False, upload=False):
+    def request(self, path, method="GET", data=None, binary=False, upload=False,
+                accept="application/vnd.github+json"):
         url = path if path.startswith("https://") else API + path
         parsed = urllib.parse.urlsplit(url)
         host = "uploads.github.com" if upload else "api.github.com"
         require(parsed.scheme == "https" and parsed.netloc == host,
                 "Refusing authenticated request outside GitHub API")
         headers = {"Authorization": "Bearer " + self.token,
-                   "Accept": "application/octet-stream" if binary else "application/vnd.github+json",
+                   "Accept": accept,
                    "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "NetAudit-release"}
         if data is not None:
             headers["Content-Type"] = "application/octet-stream" if upload else "application/json"
@@ -59,7 +60,7 @@ class GitHub:
             if exc.code == 404 and method == "GET" and not binary:
                 return None
             # Do not expose signed URLs, response bodies, or credentials in errors.
-            raise RuntimeError(f"GitHub API {method} failed: HTTP {exc.code}") from None
+            raise RuntimeError(f"GitHub API {method} {parsed.path} failed: HTTP {exc.code}") from None
         with response:
             raw = response.read(MAX_DOWNLOAD + 1)
         require(len(raw) <= MAX_DOWNLOAD, "Download exceeds size limit")
@@ -219,7 +220,8 @@ def publish(api, tag, commit, files, body):
             assets[name] = api.request(base + "?name=" + urllib.parse.quote(name),
                                       method="POST", data=data, upload=True)
         asset = assets[name]
-        downloaded = api.repo(f"releases/assets/{asset['id']}", binary=True)
+        downloaded = api.repo(f"releases/assets/{asset['id']}", binary=True,
+                              accept="application/octet-stream")
         require(asset["size"] == len(data) and digest(downloaded) == digest(data), "Uploaded asset verification failed: " + name)
         print(f"Verified {name}: {digest(data)}")
     if release["draft"]:

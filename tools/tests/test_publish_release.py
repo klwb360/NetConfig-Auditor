@@ -91,6 +91,21 @@ class PublicationGuards(unittest.TestCase):
             self.assertEqual(api.repo(""), {"private": True})
             request.assert_called_once_with("/repos/owner/repo")
 
+    def test_artifact_and_asset_use_their_documented_media_types(self):
+        class Response:
+            def __enter__(self):
+                return self
+            def __exit__(self, *args):
+                pass
+            def read(self, limit):
+                return b"bytes"
+        api = p.GitHub("owner/repo", "test-token")
+        with patch.object(api.opener, "open", return_value=Response()) as opening:
+            api.repo("actions/artifacts/1/zip", binary=True)
+            self.assertEqual(opening.call_args.args[0].get_header("Accept"), "application/vnd.github+json")
+            api.repo("releases/assets/2", binary=True, accept="application/octet-stream")
+            self.assertEqual(opening.call_args.args[0].get_header("Accept"), "application/octet-stream")
+
     def test_storage_request_has_no_authorization(self):
         class Response:
             def __enter__(self):
