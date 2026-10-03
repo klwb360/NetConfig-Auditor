@@ -49,6 +49,14 @@ jobs:
           if-no-files-found: error
           retention-days: 90
           compression-level: 0
+      - name: Upload acceptance diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: NetAudit-windows-diagnostics-${{ github.sha }}
+          path: network-config-auditor/build/windows/verification/*.json
+          if-no-files-found: warn
+          retention-days: 14
       - name: Record the authenticated download entry
         run: |
           "Download: ${{ steps.upload.outputs.artifact-url }}" >> $env:GITHUB_STEP_SUMMARY

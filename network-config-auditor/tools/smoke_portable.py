@@ -83,44 +83,150 @@ class Target:
         return self.command + args
 
 
-def windows_descendants(parent_pid: int) -> set[int]:
-    """Read a process snapshot without depending on PowerShell or WMI."""
-    if not WINDOWS:
-        return {parent_pid}
-    import ctypes
-    from ctypes import wintypes
+class WindowsProcessTree:
+    """Track process objects, not recyclable PIDs, until shutdown is verified."""
 
-    class ProcessEntry(ctypes.Structure):
-        _fields_ = [("dwSize", wintypes.DWORD), ("cntUsage", wintypes.DWORD),
-                    ("th32ProcessID", wintypes.DWORD), ("th32DefaultHeapID", ctypes.c_size_t),
-                    ("th32ModuleID", wintypes.DWORD), ("cntThreads", wintypes.DWORD),
-                    ("th32ParentProcessID", wintypes.DWORD), ("pcPriClassBase", wintypes.LONG),
-                    ("dwFlags", wintypes.DWORD), ("szExeFile", wintypes.WCHAR * 260)]
+    def __init__(self, parent_pid: int, parent_handle=None):
+        self.records: dict[int, dict] = {}
+        self.excluded: list[dict] = []
+        self._configure_api()
+        try:
+            entries = self._snapshot()
+            root = self._open_record(parent_pid, entries.get(parent_pid, {}), parent_handle)
+            require(root is not None, f"Cannot inspect launcher process {parent_pid}")
+            self.records[parent_pid] = root
+            seen = {parent_pid}
+            while True:
+                added = False
+                for pid, entry in entries.items():
+                    parent = self.records.get(entry["parent_pid"])
+                    if pid in seen or parent is None:
+                        continue
+                    seen.add(pid)
+                    child = self._open_record(pid, entry)
+                    if child is None:
+                        continue  # This snapshot entry has already exited.
+                    if child["created_ticks"] < parent["created_ticks"]:
+                        self.excluded.append({k: v for k, v in child.items() if k != "handle"} |
+                                             {"parent_created_ticks": parent["created_ticks"],
+                                              "reason": "child predates current parent PID; historical PID reuse"})
+                        self._close_handle(child["handle"])
+                        continue
+                    self.records[pid] = child
+                    added = True
+                if not added:
+                    break
+        except BaseException:
+            self.close()
+            raise
 
-    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
-    kernel.CreateToolhelp32Snapshot.argtypes = [wintypes.DWORD, wintypes.DWORD]
-    kernel.CreateToolhelp32Snapshot.restype = wintypes.HANDLE
-    kernel.Process32FirstW.argtypes = [wintypes.HANDLE, ctypes.POINTER(ProcessEntry)]
-    kernel.Process32NextW.argtypes = [wintypes.HANDLE, ctypes.POINTER(ProcessEntry)]
-    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
-    handle = kernel.CreateToolhelp32Snapshot(2, 0)
-    require(handle not in (None, ctypes.c_void_p(-1).value), "Unable to inspect Windows process tree")
-    entries: list[tuple[int, int]] = []
-    try:
-        entry = ProcessEntry()
-        entry.dwSize = ctypes.sizeof(entry)
-        more = kernel.Process32FirstW(handle, ctypes.byref(entry))
-        while more:
-            entries.append((int(entry.th32ProcessID), int(entry.th32ParentProcessID)))
-            more = kernel.Process32NextW(handle, ctypes.byref(entry))
-    finally:
-        kernel.CloseHandle(handle)
-    descendants = {parent_pid}
-    while True:
-        found = {pid for pid, parent in entries if parent in descendants}
-        if found <= descendants:
-            return descendants
-        descendants.update(found)
+    def _configure_api(self) -> None:
+        import ctypes
+        from ctypes import wintypes
+        self.ctypes, self.wintypes = ctypes, wintypes
+        self.kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+        self.kernel.CreateToolhelp32Snapshot.argtypes = [wintypes.DWORD, wintypes.DWORD]
+        self.kernel.CreateToolhelp32Snapshot.restype = wintypes.HANDLE
+        self.kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+        self.kernel.OpenProcess.restype = wintypes.HANDLE
+        self.kernel.GetProcessTimes.argtypes = [wintypes.HANDLE, *([ctypes.POINTER(wintypes.FILETIME)] * 4)]
+        self.kernel.GetExitCodeProcess.argtypes = [wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD)]
+        self.kernel.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]
+        self.kernel.WaitForSingleObject.restype = wintypes.DWORD
+        self.kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+        self.kernel.GetCurrentProcess.argtypes = []
+        self.kernel.GetCurrentProcess.restype = wintypes.HANDLE
+        self.kernel.DuplicateHandle.argtypes = [wintypes.HANDLE, wintypes.HANDLE, wintypes.HANDLE,
+                                                ctypes.POINTER(wintypes.HANDLE), wintypes.DWORD,
+                                                wintypes.BOOL, wintypes.DWORD]
+
+    def _snapshot(self) -> dict[int, dict]:
+        ctypes, wintypes = self.ctypes, self.wintypes
+
+        class ProcessEntry(ctypes.Structure):
+            _fields_ = [("dwSize", wintypes.DWORD), ("cntUsage", wintypes.DWORD),
+                        ("th32ProcessID", wintypes.DWORD), ("th32DefaultHeapID", ctypes.c_size_t),
+                        ("th32ModuleID", wintypes.DWORD), ("cntThreads", wintypes.DWORD),
+                        ("th32ParentProcessID", wintypes.DWORD), ("pcPriClassBase", wintypes.LONG),
+                        ("dwFlags", wintypes.DWORD), ("szExeFile", wintypes.WCHAR * 260)]
+
+        self.kernel.Process32FirstW.argtypes = [wintypes.HANDLE, ctypes.POINTER(ProcessEntry)]
+        self.kernel.Process32NextW.argtypes = [wintypes.HANDLE, ctypes.POINTER(ProcessEntry)]
+        snapshot = self.kernel.CreateToolhelp32Snapshot(2, 0)
+        require(snapshot not in (None, ctypes.c_void_p(-1).value), "Unable to inspect Windows process tree")
+        entries = {}
+        try:
+            entry = ProcessEntry()
+            entry.dwSize = ctypes.sizeof(entry)
+            more = self.kernel.Process32FirstW(snapshot, ctypes.byref(entry))
+            while more:
+                entries[int(entry.th32ProcessID)] = {"parent_pid": int(entry.th32ParentProcessID),
+                                                      "image": entry.szExeFile}
+                more = self.kernel.Process32NextW(snapshot, ctypes.byref(entry))
+            require(ctypes.get_last_error() == 18, "Windows process snapshot did not finish normally")
+        finally:
+            self._close_handle(snapshot)
+        return entries
+
+    def _open_record(self, pid: int, entry: dict, existing_handle=None) -> dict | None:
+        ctypes, wintypes = self.ctypes, self.wintypes
+        # SYNCHRONIZE lets us inspect the original object's signaled state.
+        if existing_handle is not None:
+            duplicate = wintypes.HANDLE()
+            current = self.kernel.GetCurrentProcess()
+            require(bool(self.kernel.DuplicateHandle(current, existing_handle, current,
+                                                      ctypes.byref(duplicate), 0, False, 2)),
+                    f"DuplicateHandle({pid}) failed with Windows error {ctypes.get_last_error()}")
+            handle = duplicate.value
+        else:
+            handle = self.kernel.OpenProcess(0x1000 | 0x100000, False, pid)
+        if not handle:
+            error = ctypes.get_last_error()
+            require(error == 87, f"OpenProcess({pid}) failed with Windows error {error}")
+            return None
+        try:
+            created, exited, system, user = (wintypes.FILETIME() for _ in range(4))
+            require(bool(self.kernel.GetProcessTimes(handle, ctypes.byref(created), ctypes.byref(exited),
+                                                     ctypes.byref(system), ctypes.byref(user))),
+                    f"GetProcessTimes({pid}) failed with Windows error {ctypes.get_last_error()}")
+            return {"pid": pid, "parent_pid": entry.get("parent_pid"), "image": entry.get("image", "unknown"),
+                    "created_ticks": (int(created.dwHighDateTime) << 32) | int(created.dwLowDateTime),
+                    "handle": handle}
+        except BaseException:
+            self._close_handle(handle)
+            raise
+
+    def _handle_alive(self, handle) -> bool:
+        state = self.kernel.WaitForSingleObject(handle, 0)
+        require(state in (0, 258), f"WaitForSingleObject failed with Windows error {self.ctypes.get_last_error()}")
+        return state == 258
+
+    def _exit_code(self, handle) -> int:
+        code = self.wintypes.DWORD()
+        require(bool(self.kernel.GetExitCodeProcess(handle, self.ctypes.byref(code))),
+                f"GetExitCodeProcess failed with Windows error {self.ctypes.get_last_error()}")
+        return int(code.value)
+
+    def _close_handle(self, handle) -> None:
+        self.kernel.CloseHandle(handle)
+
+    @property
+    def pids(self) -> set[int]:
+        return set(self.records)
+
+    def alive(self, pid: int) -> bool:
+        return self._handle_alive(self.records[pid]["handle"])
+
+    def describe(self) -> list[dict]:
+        return [{k: v for k, v in record.items() if k != "handle"} |
+                {"alive": self._handle_alive(record["handle"]), "exit_code": self._exit_code(record["handle"])}
+                for record in self.records.values()]
+
+    def close(self) -> None:
+        for record in self.records.values():
+            if record["handle"] is not None:
+                self._close_handle(record["handle"])
+                record["handle"] = None
 
 
 def process_alive(pid: int) -> bool:
@@ -153,24 +259,39 @@ def port_open(port: int) -> bool:
         return probe.connect_ex(("127.0.0.1", port)) == 0
 
 
-def kill_tree(process: subprocess.Popen) -> None:
+def taskkill_process(pid: int) -> dict:
+    result = subprocess.run([str(Path(os.environ["SystemRoot"]) / "System32" / "taskkill.exe"),
+                             "/PID", str(pid), "/F"],
+                            stdin=subprocess.DEVNULL, capture_output=True, timeout=15)
+    return {"pid": pid, "returncode": result.returncode,
+            "stdout": result.stdout.decode("utf-8", "replace")[-1500:],
+            "stderr": result.stderr.decode("utf-8", "replace")[-1500:]}
+
+
+def kill_tree(process: subprocess.Popen) -> list[dict]:
+    diagnostics = []
     if WINDOWS:
+        tree = None
         try:
-            pids = windows_descendants(process.pid)
-        except Exception:
-            # Even a failed diagnostic must still attempt taskkill /T.
-            pids = {process.pid}
-        taskkill = str(Path(os.environ["SystemRoot"]) / "System32" / "taskkill.exe")
-        for pid in [process.pid, *sorted(pids - {process.pid})]:
-            if process_alive(pid):
-                subprocess.run([taskkill, "/PID", str(pid), "/T", "/F"],
-                               stdin=subprocess.DEVNULL, capture_output=True, timeout=15)
+            tree = WindowsProcessTree(process.pid, int(process._handle))
+            for pid in [process.pid, *sorted(tree.pids - {process.pid})]:
+                if tree.alive(pid):
+                    diagnostics.append(taskkill_process(pid))
+        except Exception as exc:
+            # Diagnostic failures still trigger cleanup of the live launcher.
+            diagnostics.append({"inspection_error": f"{type(exc).__name__}: {exc}"})
+            if process.poll() is None:
+                diagnostics.append(taskkill_process(process.pid))
+        finally:
+            if tree:
+                tree.close()
     else:
         try:
             os.killpg(process.pid, signal.SIGKILL)
         except ProcessLookupError:
             pass
     process.wait(timeout=15)
+    return diagnostics
 
 
 def run_command(target: Target, args: list[str], cwd: Path) -> subprocess.CompletedProcess:
@@ -225,15 +346,19 @@ class Service:
             return {}
         process = self.process
         pids = {process.pid}
+        tree = None
         inspection_error = None
         try:
-            if process.poll() is None:
-                pids = windows_descendants(process.pid)
+            if WINDOWS:
+                tree = WindowsProcessTree(process.pid, int(process._handle))
+                pids = tree.pids
         except Exception as exc:
             # Snapshot errors must not prevent terminating the actual server.
             inspection_error = str(exc)
+        alive = tree.alive if tree else process_alive
         forced = False
         signal_error = None
+        kill_diagnostics = []
         try:
             if process.poll() is None:
                 try:
@@ -245,29 +370,33 @@ class Service:
                 except (OSError, subprocess.TimeoutExpired) as exc:
                     forced, signal_error = True, str(exc)
             if process.poll() is None:
-                kill_tree(process)
+                kill_diagnostics.extend(kill_tree(process))
             deadline = time.monotonic() + 8
-            while time.monotonic() < deadline and (any(process_alive(pid) for pid in pids)
+            while time.monotonic() < deadline and (any(alive(pid) for pid in pids)
                                                   or self.port is not None and port_open(self.port)):
                 time.sleep(0.1)
-            remaining = sorted(pid for pid in pids if process_alive(pid))
+            remaining = sorted(pid for pid in pids if alive(pid))
             # Kill descendants even if their original launcher has exited.
             for pid in remaining:
                 forced = True
                 if WINDOWS:
-                    subprocess.run([str(Path(os.environ["SystemRoot"]) / "System32" / "taskkill.exe"),
-                                    "/PID", str(pid), "/T", "/F"],
-                                   stdin=subprocess.DEVNULL, capture_output=True, timeout=15)
+                    # The retained original handle prevents targeting an
+                    # unrelated process that later reuses this PID.
+                    if alive(pid):
+                        kill_diagnostics.append(taskkill_process(pid))
                 else:
                     os.kill(pid, signal.SIGKILL)
             if remaining:
                 deadline = time.monotonic() + 3
-                while time.monotonic() < deadline and any(process_alive(pid) for pid in pids):
+                while time.monotonic() < deadline and any(alive(pid) for pid in pids):
                     time.sleep(0.1)
             self.shutdown = {"exit_code": process.returncode, "forced_cleanup": forced,
                              "signal_error": signal_error, "process_inspection_error": inspection_error,
                              "observed_pids": sorted(pids),
-                             "remaining_pids": sorted(pid for pid in pids if process_alive(pid)),
+                             "remaining_pids": sorted(pid for pid in pids if alive(pid)),
+                             "processes": tree.describe() if tree else [],
+                             "excluded_historical_pid_links": tree.excluded if tree else [],
+                             "taskkill": kill_diagnostics,
                              "port_closed": self.port is None or not port_open(self.port)}
             require(not self.shutdown["remaining_pids"], f"Service left processes: {self.shutdown}")
             require(self.shutdown["port_closed"], f"Service port remained open: {self.shutdown}")
@@ -278,6 +407,8 @@ class Service:
             require(process.returncode == 0 or native_cmd_interrupt, f"Service interruption returned {process.returncode}")
             return self.shutdown
         finally:
+            if tree:
+                tree.close()
             self.output.close()
 
 
@@ -382,6 +513,26 @@ def readonly_directory(path: Path) -> Callable[[], None]:
         raise
 
 
+def wait_for_browser_url(marker: Path, encoding: str, expected: str, timeout: float = 10) -> None:
+    """Wait for the stub to finish writing, rather than treating file creation as completion."""
+    deadline = time.monotonic() + timeout
+    observed = "marker not created"
+    while time.monotonic() < deadline:
+        try:
+            value = marker.read_text(encoding=encoding)
+            if value == expected:
+                return
+            observed = repr(value)
+        except (FileNotFoundError, UnicodeError) as exc:
+            observed = f"{type(exc).__name__}: {exc}"
+        except PermissionError as exc:
+            if getattr(exc, "winerror", None) not in (32, 33):
+                raise
+            observed = f"Windows marker sharing error: {exc}"
+        time.sleep(0.1)
+    raise SmokeFailure(f"Browser stub did not finish writing the actual URL {expected!r}: {observed}")
+
+
 class Harness:
     def __init__(self, report: dict, root: Path, install: Path, reference: Path, mode: str):
         self.report, self.root, self.install, self.reference, self.mode = report, root, install, reference, mode
@@ -477,12 +628,7 @@ class Harness:
             port = service.start()
             require(not fallback or port != 8765, "Occupied default port was not replaced")
             if marker:
-                deadline = time.monotonic() + 10
-                while time.monotonic() < deadline and not marker.is_file():
-                    time.sleep(0.1)
-                require(marker.is_file(), "No-argument startup did not dispatch the observable browser stub")
-                require(marker.read_text(encoding=marker_encoding) == f"http://127.0.0.1:{port}",
-                        "Browser was not opened at the actual selected port")
+                wait_for_browser_url(marker, marker_encoding, f"http://127.0.0.1:{port}")
                 metadata["browser_dispatch"] = "actual subprocess dispatched configured stub; OS default GUI not tested"
             metadata.update(exercise_web(port, self.reference, self.install / "examples"))
             metadata.update(actual_port=port, requested_port=8765 if fallback else 0, no_browser=not default_browser,
