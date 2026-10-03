@@ -11,6 +11,8 @@ spec = importlib.util.spec_from_file_location("publish_release", Path(__file__).
 p = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(p)
 COMMIT = "f" * 40
+TAG = "v0.1.0"
+RECORDS_COMMIT = "a" * 40
 
 
 def bundle(change=None, version="0.1.0", counts=None):
@@ -39,6 +41,106 @@ def bundle(change=None, version="0.1.0", counts=None):
     return output.getvalue()
 
 
+def delivery_files():
+    archive = bundle()
+    return p.verify_bundle(archive, COMMIT, "123", 1, p.digest(archive))[0]
+
+
+def runtime_files():
+    files = delivery_files()
+    return {name: files[name] for name in p.runtime_names(TAG, COMMIT)}
+
+
+class PublicationAPI:
+    repository = "owner/repo"
+
+    def __init__(self, files=None, draft=False):
+        self.mutations = []
+        self.downloads = []
+        self.bytes = {}
+        self.release = None if files is None else self.make_release(files, draft)
+
+    def make_release(self, files, draft):
+        assets = []
+        for asset_id, (name, data) in enumerate(sorted(files.items()), start=10):
+            assets.append({"id": asset_id, "name": name, "size": len(data)})
+            self.bytes[asset_id] = data
+        return {"id": 1, "tag_name": TAG, "draft": draft, "assets": assets,
+                "upload_url": "https://uploads.github.com/repos/owner/repo/releases/1/assets{?name,label}",
+                "html_url": "https://github.com/owner/repo/releases/tag/" + TAG}
+
+    def repo(self, path, **kwargs):
+        if kwargs.get("method"):
+            self.mutations.append((path, kwargs))
+        if path.startswith("git/ref/tags/"):
+            return {"object": {"type": "commit", "sha": COMMIT}}
+        if path.startswith("releases?"):
+            return [] if self.release is None else [self.release]
+        if path == "releases" and kwargs.get("method") == "POST":
+            self.release = self.make_release({}, True)
+            return self.release
+        if path == "releases/1" and kwargs.get("method") == "PATCH":
+            self.release.update(kwargs["data"])
+            return self.release
+        if path.startswith("releases/assets/"):
+            asset_id = int(path.rsplit("/", 1)[1])
+            self.downloads.append(asset_id)
+            return self.bytes[asset_id]
+        raise AssertionError("Unexpected API request: " + path)
+
+    def request(self, path, **kwargs):
+        self.mutations.append((path, kwargs))
+        name = p.urllib.parse.parse_qs(p.urllib.parse.urlsplit(path).query)["name"][0]
+        asset_id = len(self.bytes) + 10
+        data = kwargs["data"]
+        self.bytes[asset_id] = data
+        asset = {"id": asset_id, "name": name, "size": len(data)}
+        self.release["assets"].append(asset)
+        return asset
+
+
+class BuildAPI:
+    repository = "owner/repo"
+
+    def __init__(self, expired=False):
+        self.archive = bundle()
+        self.artifact = {"id": 7, "name": "NetAudit-windows-x64-" + COMMIT,
+                         "digest": "sha256:" + p.digest(self.archive), "expired": expired}
+        self.config = {"repository": self.repository, "tag": TAG, "source_commit": COMMIT,
+                       "run_id": "123", "artifact_id": 7, "artifact_sha256": p.digest(self.archive)}
+        self.run = {"status": "completed", "conclusion": "success", "head_sha": COMMIT,
+                    "head_branch": "main", "repository": {"full_name": self.repository},
+                    "head_repository": {"full_name": self.repository}, "event": "push",
+                    "path": ".github/workflows/netaudit-windows.yml", "run_attempt": 1}
+        self.release = PublicationAPI(runtime_files()).release
+        self.requests = []
+
+    def repo(self, path, **kwargs):
+        self.requests.append((path, kwargs))
+        if kwargs.get("method"):
+            raise AssertionError("Delivery preparation must not mutate Release or tags")
+        if path == "":
+            return {"private": True}
+        if path == "actions/runs/123":
+            return self.run
+        if path == "actions/runs/123/artifacts?per_page=100":
+            return {"artifacts": [self.artifact]}
+        if path == "actions/artifacts/7/zip":
+            return self.archive
+        if path == "git/ref/heads/main":
+            return {"object": {"sha": RECORDS_COMMIT}}
+        if path.startswith("git/ref/tags/"):
+            return {"object": {"type": "commit", "sha": COMMIT}}
+        if path == "releases/tags/" + TAG:
+            return self.release
+        raise AssertionError("Unexpected build API request: " + path)
+
+    def record(self):
+        return {"repository": self.repository, "tag": TAG, "source_commit": COMMIT,
+                "run_id": "123", "run_attempt": 1,
+                "artifact": {key: self.artifact[key] for key in ("id", "name", "digest")}}
+
+
 class PublicationGuards(unittest.TestCase):
     def verify(self, data):
         return p.verify_bundle(data, COMMIT, "123", 1, p.digest(data))
@@ -48,6 +150,12 @@ class PublicationGuards(unittest.TestCase):
         self.assertEqual(len(self.verify(data)[0]), 9)
         with self.assertRaisesRegex(ValueError, "digest mismatch"):
             p.verify_bundle(data, COMMIT, "123", 1, "0" * 64)
+
+    def test_recovered_files_still_require_all_original_checksums(self):
+        files = delivery_files()
+        files[next(name for name in files if name.endswith("-onefile.exe"))] = b"changed"
+        with self.assertRaisesRegex(ValueError, "File checksum mismatch"):
+            p.verify_files(files, COMMIT, "123", 1)
 
     def test_reject_path_traversal_even_with_matching_archive_digest(self):
         output = io.BytesIO(bundle())
@@ -98,6 +206,23 @@ class PublicationGuards(unittest.TestCase):
             self.assertEqual(api.repo(""), {"private": True})
             request.assert_called_once_with("/repos/owner/repo")
 
+    def test_delete_asset_accepts_no_content_response(self):
+        class Response:
+            status = 204
+            def __enter__(self):
+                return self
+            def __exit__(self, *args):
+                pass
+            def read(self, limit):
+                return b""
+        api = p.GitHub("owner/repo", "test-token")
+        with patch.object(api.opener, "open", return_value=Response()) as opening:
+            self.assertIsNone(api.repo("releases/assets/2", method="DELETE"))
+            request = opening.call_args.args[0]
+            self.assertEqual(request.get_method(), "DELETE")
+            self.assertEqual(request.full_url,
+                             "https://api.github.com/repos/owner/repo/releases/assets/2")
+
     def test_artifact_and_asset_use_their_documented_media_types(self):
         class Response:
             def __enter__(self):
@@ -137,27 +262,100 @@ class PublicationGuards(unittest.TestCase):
             p.ensure_tag(API(), "v0.1.0", COMMIT)
 
     def test_bad_asset_keeps_draft_unpublished(self):
-        class API:
-            repository = "owner/repo"
-            def repo(self, path, **kwargs):
-                if path.startswith("git/ref/"):
-                    return {"object": {"type": "commit", "sha": COMMIT}}
-                if path.startswith("releases?"):
-                    return [{"id": 1, "tag_name": "v0.1.0", "draft": True,
-                             "assets": [{"id": 2, "name": "test.zip", "size": 4}]}]
-                if path == "releases/assets/2":
-                    return b"bad!"
-                raise AssertionError("Failed verification must not publish")
+        api = PublicationAPI(runtime_files(), draft=True)
+        api.bytes[min(api.bytes)] = b"changed"
         with self.assertRaisesRegex(ValueError, "asset verification failed"):
-            p.publish(API(), "v0.1.0", COMMIT, {"test.zip": b"good"}, "notes")
+            p.publish(api, TAG, COMMIT, runtime_files(), "notes")
+        self.assertTrue(api.release["draft"])
+        self.assertEqual(api.mutations, [])
 
     def test_published_release_missing_asset_is_never_modified(self):
-        class API:
-            def repo(self, path, **kwargs):
-                if kwargs:
-                    raise AssertionError("Published assets must not be modified")
-                if path.startswith("git/ref/"):
-                    return {"object": {"type": "commit", "sha": COMMIT}}
-                return [{"id": 1, "tag_name": "v0.1.0", "draft": False, "assets": []}]
+        files = runtime_files()
+        api = PublicationAPI({name: data for name, data in files.items() if not name.endswith("-portable.zip")})
         with self.assertRaisesRegex(ValueError, "Published release is incomplete"):
-            p.publish(API(), "v0.1.0", COMMIT, {"test.zip": b"good"}, "notes")
+            p.publish(api, TAG, COMMIT, files, "notes")
+        self.assertEqual(api.mutations, [])
+
+    def test_new_release_uploads_and_verifies_only_three_runtime_assets(self):
+        api = PublicationAPI()
+        files = runtime_files()
+        self.assertEqual(p.publish(api, TAG, COMMIT, files, "notes"), api.release["html_url"])
+        self.assertEqual({asset["name"] for asset in api.release["assets"]}, set(files))
+        self.assertEqual(len(api.downloads), 3)
+        uploads = [kwargs for path, kwargs in api.mutations if kwargs.get("upload")]
+        self.assertEqual(len(uploads), 3)
+        self.assertTrue(all(kwargs["method"] == "POST" for kwargs in uploads))
+        self.assertEqual(api.mutations[-1][0], "releases/1")
+        self.assertFalse(api.release["draft"])
+
+    def test_published_three_runtime_assets_reverify_without_writes(self):
+        api = PublicationAPI(runtime_files())
+        p.publish(api, TAG, COMMIT, runtime_files(), "updated notes")
+        self.assertEqual(len(api.downloads), 3)
+        self.assertEqual(api.mutations, [])
+
+    def test_published_legacy_nine_assets_require_explicit_migration(self):
+        api = PublicationAPI(delivery_files())
+        with self.assertRaisesRegex(ValueError, "explicit archival migration"):
+            p.publish(api, TAG, COMMIT, runtime_files(), "notes")
+        self.assertEqual(api.mutations, [])
+        self.assertEqual(api.downloads, [])
+
+    def test_delivery_preparation_verifies_nine_before_archiving_then_returns_three(self):
+        api = BuildAPI()
+        with patch.object(p.records, "ensure_records", return_value=RECORDS_COMMIT) as archive:
+            runtime, manifest, reference, recovered = p.prepare_delivery(api, api.config, TAG, COMMIT, "123")
+        args = archive.call_args.args
+        self.assertEqual(len(args[2]), 9)
+        self.assertEqual(args[3], manifest)
+        self.assertEqual(set(runtime), p.runtime_names(TAG, COMMIT))
+        self.assertEqual(reference, RECORDS_COMMIT)
+        self.assertFalse(recovered)
+
+    def test_failed_permanent_record_verification_stops_before_publish(self):
+        api = BuildAPI()
+        with patch.dict(p.os.environ, {"GITHUB_TOKEN": "test-token"}, clear=True), \
+                patch.object(p.Path, "read_text", return_value=json.dumps(api.config)), \
+                patch.object(p, "GitHub", return_value=api), \
+                patch.object(p.records, "ensure_records", side_effect=ValueError("Archive digest mismatch")), \
+                patch.object(p, "publish") as publish:
+            with self.assertRaisesRegex(ValueError, "Archive digest mismatch"):
+                p.main()
+            publish.assert_not_called()
+
+    def test_expired_artifact_reconstructs_nine_without_downloading_outer_archive(self):
+        api = BuildAPI(expired=True)
+        with patch.object(p.records, "load_records", return_value=(api.record(), {})) as load, \
+                patch.object(p.records, "recover_files", return_value=delivery_files()) as recover, \
+                patch.object(p.records, "ensure_records", return_value=RECORDS_COMMIT):
+            runtime, _, reference, recovered = p.prepare_delivery(api, api.config, TAG, COMMIT, "123")
+        self.assertTrue(recovered)
+        self.assertEqual(reference, RECORDS_COMMIT)
+        self.assertEqual(len(runtime), 3)
+        load.assert_called_once_with(api, TAG, RECORDS_COMMIT)
+        recover.assert_called_once_with(api, TAG, RECORDS_COMMIT, api.release)
+        self.assertNotIn("actions/artifacts/7/zip", [path for path, _ in api.requests])
+
+    def test_expired_artifact_cannot_publish_a_new_draft_or_legacy_release(self):
+        for release in (None, PublicationAPI(runtime_files(), draft=True).release,
+                        PublicationAPI(delivery_files()).release):
+            api = BuildAPI(expired=True)
+            api.release = release
+            with self.subTest(release=release), \
+                    patch.object(p.records, "load_records", return_value=(api.record(), {})), \
+                    patch.object(p.records, "recover_files") as recover, \
+                    patch.object(p.records, "ensure_records") as archive:
+                with self.assertRaisesRegex(ValueError, "Expired build requires"):
+                    p.prepare_delivery(api, api.config, TAG, COMMIT, "123")
+                recover.assert_not_called()
+                archive.assert_not_called()
+
+    def test_expired_artifact_records_cannot_change_build_identity(self):
+        api = BuildAPI(expired=True)
+        record = api.record()
+        record["source_commit"] = "0" * 40
+        with patch.object(p.records, "load_records", return_value=(record, {})), \
+                patch.object(p.records, "recover_files") as recover:
+            with self.assertRaisesRegex(ValueError, "Archived build identity mismatch"):
+                p.prepare_delivery(api, api.config, TAG, COMMIT, "123")
+            recover.assert_not_called()

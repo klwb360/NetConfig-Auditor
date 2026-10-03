@@ -1,0 +1,2 @@
+# Preserve the exact published checksums, manifests and acceptance records.
+docs/releases/** -text

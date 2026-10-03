@@ -28,7 +28,7 @@
 | `*-onefile.zip` | 单 EXE 及配套资料；启动时使用用户临时目录，可能比便携文件夹版稍慢。 |
 | `*-onefile.exe` | 可独立运行的单 EXE；再次分发时仍需提供许可证、归属说明与对应源码。 |
 
-普通使用选择以上运行包即可。仓库保持私人，Release 下载也需要访问权限；源码、校验与验收资料见下方 [源码与命令行](#源码与命令行) 和 [交付记录](DELIVERY.md)。
+三个已发布版本的 Release 均只保留以上三种运行附件。仓库保持私人，Release 下载也需要访问权限；源码、校验与验收资料见下方 [源码与命令行](#源码与命令行) 和 [发布档案](docs/releases/README.md)。
 
 ## 新版网页怎么用
 
@@ -119,7 +119,7 @@ python -m netaudit audit device.cfg --ai-model YOUR_INSTALLED_MODEL --format md 
 
 Windows 可使用 `py -3`，Linux 常用 `python3`。便携版可以用 `NetAudit.exe` 或 `Start-NetAudit.bat` 传递相同参数。退出码：0 调用成功；1 达到 `--fail-on` 指定严重度；2 参数、输入或文件错误，或 `--strict` 检出未建模行。详细用法见 [项目说明](network-config-auditor/README.md)。
 
-`*-source-*.zip` 提供对应完整源码，用于查阅、修改与重建；`SHA256SUMS.txt`、构建清单和验收报告用于文件校验与构建复核。这些资料目前也在 Release 中提供，普通使用无需解压源码。源码提交、SHA-256 和实测范围见 [交付记录](DELIVERY.md)。
+两个运行 ZIP 都包含对应完整 `*-source-*.zip`，用于查阅、修改与重建；版本标签固定到 EXE 的构建源码。Release 不再重复上传独立源码 ZIP。`SHA256SUMS.txt`、构建清单与三份验收报告按原始字节永久保存在 [发布档案](docs/releases/README.md)，其中校验文件仍记录原始九文件构建产物。普通使用无需解压源码；源码提交、SHA-256 和实测范围见 [交付记录](DELIVERY.md)。GitHub 自动生成的 “Source code” ZIP/tar.gz 无法单独隐藏，普通用户选择上方运行包即可。
 
 开发或备份获取途径：[Windows 构建列表](https://github.com/klwb360/NetAudit/actions/workflows/netaudit-windows.yml) 的 Actions 产物仍可下载，但有保留期限；它包含外层产物 ZIP，需先解压外层，再解压其中的 `portable.zip`。Release 直接提供内部便携 ZIP，只需解压一次。不同构建使用各自的校验值。
 
@@ -131,6 +131,7 @@ Windows 可使用 `py -3`，Linux 常用 `python3`。便携版可以用 `NetAudi
 | 启动、导入或报告问题 | [故障排查](docs/TROUBLESHOOTING.md) |
 | 开发、测试与 Windows 构建 | [开发指南](docs/DEVELOPMENT.md)、[验证记录](network-config-auditor/docs/TESTING.md) |
 | 发布新版本与下载资产 | [发布指南](docs/RELEASING.md) |
+| 各版本校验、构建环境与验收报告 | [发布档案](docs/releases/README.md) |
 | 模块职责、数据流与扩展点 | [架构说明](docs/ARCHITECTURE.md) |
 | CVE / KEV 和本机 AI | [情报说明](network-config-auditor/docs/INTELLIGENCE.md)、[AI 说明](network-config-auditor/docs/AI.md) |
 | 规则与上游来源 | [规则目录](network-config-auditor/docs/RULES.md)、[上游审计](network-config-auditor/docs/UPSTREAM_AUDIT.md) |
@@ -157,7 +158,7 @@ NetAudit/
 
 ## 验证与配置保护
 
-v0.2.1 在 Windows Server 2022 x64 / Python 3.12.10 上通过 **192 项单元测试和 28 项真实进程验收**（源码 10、onedir 9、onefile 9）；Linux Python 3.10/3.12/3.13 检查及 Chromium 的 **65 项网页检查**通过。发布保护的 14 项测试与全部 9 个附件下载回验通过。
+v0.2.1 在 Windows Server 2022 x64 / Python 3.12.10 上通过 **192 项单元测试和 28 项真实进程验收**（源码 10、onedir 9、onefile 9）；Linux Python 3.10/3.12/3.13 检查及 Chromium 的 **65 项网页检查**通过。首次发布的 14 项保护测试与当时全部 9 个附件下载回验通过；本次整理保留原运行文件、源码标签及验收记录，没有重新构建 EXE。
 
 历史 [v0.2.0](https://github.com/klwb360/NetAudit/releases/tag/v0.2.0) 的 192 项测试、28 项进程验收与 24 项网页检查，以及 [v0.1.0](https://github.com/klwb360/NetAudit/releases/tag/v0.1.0) 的 88 项测试与 25 项进程验收保持原记录；旧版本保留下载，文件和 SHA-256 均记录在 [交付记录](DELIVERY.md)。
 

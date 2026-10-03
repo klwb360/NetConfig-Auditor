@@ -1,0 +1,698 @@
+{
+  "schema": 1,
+  "mode": "onedir",
+  "platform": "Windows-2022Server-10.0.20348-SP0",
+  "machine": "AMD64",
+  "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "checks": [
+    {
+      "name": "CLI vendors, three exports and exit codes 0/1/2; no pause",
+      "target": "onedir-EXE-no-Python",
+      "runs": [
+        {
+          "vendor": "cisco",
+          "format": "json",
+          "exit_code": 0
+        },
+        {
+          "vendor": "cisco",
+          "format": "md",
+          "exit_code": 0
+        },
+        {
+          "vendor": "cisco",
+          "format": "html",
+          "exit_code": 0
+        },
+        {
+          "vendor": "huawei",
+          "format": "json",
+          "exit_code": 0
+        },
+        {
+          "vendor": "huawei",
+          "format": "md",
+          "exit_code": 0
+        },
+        {
+          "vendor": "huawei",
+          "format": "html",
+          "exit_code": 0
+        },
+        {
+          "vendor": "h3c",
+          "format": "json",
+          "exit_code": 0
+        },
+        {
+          "vendor": "h3c",
+          "format": "md",
+          "exit_code": 0
+        },
+        {
+          "vendor": "h3c",
+          "format": "html",
+          "exit_code": 0
+        },
+        {
+          "arguments": [
+            "--fail-on",
+            "high"
+          ],
+          "exit_code": 1
+        },
+        {
+          "arguments": [
+            "--strict"
+          ],
+          "exit_code": 2
+        },
+        {
+          "arguments": [
+            "--vendor",
+            "invalid"
+          ],
+          "exit_code": 2
+        }
+      ],
+      "stdin": "DEVNULL",
+      "timeout_seconds": 90,
+      "external_cwd": true,
+      "unicode_and_spaces_in_paths": true,
+      "status": "passed",
+      "seconds": 2.187
+    },
+    {
+      "name": "occupied default port, resources, audit API and process cleanup",
+      "target": "onedir-EXE-no-Python",
+      "resources_sha256": {
+        "index.html": "65e4120e1cada754b020ef595906bd6944d2688a9f98bd006f4fb7f8d12663bf",
+        "style.css": "61c99ee2fe9cbb7d87d638232b44bfd11d69ae9ee6ce1f5a663bd720a2cb4ae9",
+        "app.js": "a9499c7a3bed0b7201141733c388af2646e651453e2684ddc5ee30a17f637e94"
+      },
+      "vendors_findings": {
+        "cisco": 16,
+        "huawei": 12,
+        "h3c": 11
+      },
+      "pipeline_integration": {
+        "pipeline": [
+          "parser",
+          "architecture",
+          "security",
+          "intelligence",
+          "ai",
+          "reports"
+        ],
+        "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+        "matched_cve": "CVE-2023-20198",
+        "ai": "disabled; no model requested"
+      },
+      "exports": [
+        "json",
+        "md",
+        "html"
+      ],
+      "session_token": "validated; omitted",
+      "actual_port": 57206,
+      "requested_port": 8765,
+      "no_browser": true,
+      "arguments": [
+        "serve",
+        "--port",
+        "8765",
+        "--no-browser"
+      ],
+      "extraction_directories_observed": [],
+      "shutdown": {
+        "exit_code": 0,
+        "forced_cleanup": false,
+        "signal_error": null,
+        "process_inspection_error": null,
+        "observed_pids": [
+          1480
+        ],
+        "remaining_pids": [],
+        "processes": [
+          {
+            "pid": 1480,
+            "parent_pid": 7724,
+            "image": "NetAudit.exe",
+            "created_ticks": 134355176940484942,
+            "alive": false,
+            "exit_code": 0
+          }
+        ],
+        "excluded_historical_pid_links": [],
+        "taskkill": [],
+        "port_closed": true,
+        "interrupt_code_accepted_as_native_cmd_status": false
+      },
+      "extraction_cleanup": "verified",
+      "status": "passed",
+      "seconds": 1.531
+    },
+    {
+      "name": "no arguments start web and dispatch browser at actual port",
+      "target": "onedir-EXE-no-Python",
+      "browser_dispatch": "actual subprocess dispatched configured stub; OS default GUI not tested",
+      "resources_sha256": {
+        "index.html": "65e4120e1cada754b020ef595906bd6944d2688a9f98bd006f4fb7f8d12663bf",
+        "style.css": "61c99ee2fe9cbb7d87d638232b44bfd11d69ae9ee6ce1f5a663bd720a2cb4ae9",
+        "app.js": "a9499c7a3bed0b7201141733c388af2646e651453e2684ddc5ee30a17f637e94"
+      },
+      "vendors_findings": {
+        "cisco": 16,
+        "huawei": 12,
+        "h3c": 11
+      },
+      "pipeline_integration": {
+        "pipeline": [
+          "parser",
+          "architecture",
+          "security",
+          "intelligence",
+          "ai",
+          "reports"
+        ],
+        "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+        "matched_cve": "CVE-2023-20198",
+        "ai": "disabled; no model requested"
+      },
+      "exports": [
+        "json",
+        "md",
+        "html"
+      ],
+      "session_token": "validated; omitted",
+      "actual_port": 57218,
+      "requested_port": 8765,
+      "no_browser": false,
+      "arguments": [],
+      "extraction_directories_observed": [],
+      "shutdown": {
+        "exit_code": 0,
+        "forced_cleanup": false,
+        "signal_error": null,
+        "process_inspection_error": null,
+        "observed_pids": [
+          2404
+        ],
+        "remaining_pids": [],
+        "processes": [
+          {
+            "pid": 2404,
+            "parent_pid": 7724,
+            "image": "NetAudit.exe",
+            "created_ticks": 134355176955635070,
+            "alive": false,
+            "exit_code": 0
+          }
+        ],
+        "excluded_historical_pid_links": [],
+        "taskkill": [],
+        "port_closed": true,
+        "interrupt_code_accepted_as_native_cmd_status": false
+      },
+      "extraction_cleanup": "verified",
+      "status": "passed",
+      "seconds": 1.5
+    },
+    {
+      "name": "CLI vendors, three exports and exit codes 0/1/2; no pause",
+      "target": "onedir-BAT-no-Python",
+      "runs": [
+        {
+          "vendor": "cisco",
+          "format": "json",
+          "exit_code": 0
+        },
+        {
+          "vendor": "cisco",
+          "format": "md",
+          "exit_code": 0
+        },
+        {
+          "vendor": "cisco",
+          "format": "html",
+          "exit_code": 0
+        },
+        {
+          "vendor": "huawei",
+          "format": "json",
+          "exit_code": 0
+        },
+        {
+          "vendor": "huawei",
+          "format": "md",
+          "exit_code": 0
+        },
+        {
+          "vendor": "huawei",
+          "format": "html",
+          "exit_code": 0
+        },
+        {
+          "vendor": "h3c",
+          "format": "json",
+          "exit_code": 0
+        },
+        {
+          "vendor": "h3c",
+          "format": "md",
+          "exit_code": 0
+        },
+        {
+          "vendor": "h3c",
+          "format": "html",
+          "exit_code": 0
+        },
+        {
+          "arguments": [
+            "--fail-on",
+            "high"
+          ],
+          "exit_code": 1
+        },
+        {
+          "arguments": [
+            "--strict"
+          ],
+          "exit_code": 2
+        },
+        {
+          "arguments": [
+            "--vendor",
+            "invalid"
+          ],
+          "exit_code": 2
+        }
+      ],
+      "stdin": "DEVNULL",
+      "timeout_seconds": 90,
+      "external_cwd": true,
+      "unicode_and_spaces_in_paths": true,
+      "status": "passed",
+      "seconds": 2.313
+    },
+    {
+      "name": "occupied default port, resources, audit API and process cleanup",
+      "target": "onedir-BAT-no-Python",
+      "resources_sha256": {
+        "index.html": "65e4120e1cada754b020ef595906bd6944d2688a9f98bd006f4fb7f8d12663bf",
+        "style.css": "61c99ee2fe9cbb7d87d638232b44bfd11d69ae9ee6ce1f5a663bd720a2cb4ae9",
+        "app.js": "a9499c7a3bed0b7201141733c388af2646e651453e2684ddc5ee30a17f637e94"
+      },
+      "vendors_findings": {
+        "cisco": 16,
+        "huawei": 12,
+        "h3c": 11
+      },
+      "pipeline_integration": {
+        "pipeline": [
+          "parser",
+          "architecture",
+          "security",
+          "intelligence",
+          "ai",
+          "reports"
+        ],
+        "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+        "matched_cve": "CVE-2023-20198",
+        "ai": "disabled; no model requested"
+      },
+      "exports": [
+        "json",
+        "md",
+        "html"
+      ],
+      "session_token": "validated; omitted",
+      "actual_port": 57230,
+      "requested_port": 8765,
+      "no_browser": true,
+      "arguments": [
+        "serve",
+        "--port",
+        "8765",
+        "--no-browser"
+      ],
+      "extraction_directories_observed": [],
+      "shutdown": {
+        "exit_code": 0,
+        "forced_cleanup": false,
+        "signal_error": null,
+        "process_inspection_error": null,
+        "observed_pids": [
+          2172,
+          5292
+        ],
+        "remaining_pids": [],
+        "processes": [
+          {
+            "pid": 5292,
+            "parent_pid": 7724,
+            "image": "cmd.exe",
+            "created_ticks": 134355176993913941,
+            "alive": false,
+            "exit_code": 0
+          },
+          {
+            "pid": 2172,
+            "parent_pid": 5292,
+            "image": "NetAudit.exe",
+            "created_ticks": 134355176994110316,
+            "alive": false,
+            "exit_code": 0
+          }
+        ],
+        "excluded_historical_pid_links": [],
+        "taskkill": [],
+        "port_closed": true,
+        "interrupt_code_accepted_as_native_cmd_status": false
+      },
+      "extraction_cleanup": "verified",
+      "status": "passed",
+      "seconds": 1.594
+    },
+    {
+      "name": "no arguments start web and dispatch browser at actual port",
+      "target": "onedir-BAT-no-Python",
+      "browser_dispatch": "actual subprocess dispatched configured stub; OS default GUI not tested",
+      "resources_sha256": {
+        "index.html": "65e4120e1cada754b020ef595906bd6944d2688a9f98bd006f4fb7f8d12663bf",
+        "style.css": "61c99ee2fe9cbb7d87d638232b44bfd11d69ae9ee6ce1f5a663bd720a2cb4ae9",
+        "app.js": "a9499c7a3bed0b7201141733c388af2646e651453e2684ddc5ee30a17f637e94"
+      },
+      "vendors_findings": {
+        "cisco": 16,
+        "huawei": 12,
+        "h3c": 11
+      },
+      "pipeline_integration": {
+        "pipeline": [
+          "parser",
+          "architecture",
+          "security",
+          "intelligence",
+          "ai",
+          "reports"
+        ],
+        "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+        "matched_cve": "CVE-2023-20198",
+        "ai": "disabled; no model requested"
+      },
+      "exports": [
+        "json",
+        "md",
+        "html"
+      ],
+      "session_token": "validated; omitted",
+      "actual_port": 57242,
+      "requested_port": 8765,
+      "no_browser": false,
+      "arguments": [],
+      "extraction_directories_observed": [],
+      "shutdown": {
+        "exit_code": 0,
+        "forced_cleanup": false,
+        "signal_error": null,
+        "process_inspection_error": null,
+        "observed_pids": [
+          1412,
+          7768
+        ],
+        "remaining_pids": [],
+        "processes": [
+          {
+            "pid": 1412,
+            "parent_pid": 7724,
+            "image": "cmd.exe",
+            "created_ticks": 134355177009693544,
+            "alive": false,
+            "exit_code": 0
+          },
+          {
+            "pid": 7768,
+            "parent_pid": 1412,
+            "image": "NetAudit.exe",
+            "created_ticks": 134355177009950518,
+            "alive": false,
+            "exit_code": 0
+          }
+        ],
+        "excluded_historical_pid_links": [],
+        "taskkill": [],
+        "port_closed": true,
+        "interrupt_code_accepted_as_native_cmd_status": false
+      },
+      "extraction_cleanup": "verified",
+      "status": "passed",
+      "seconds": 1.515
+    },
+    {
+      "name": "pipeline, exact local NVD/KEV, three reports and explicit AI protocol stub",
+      "target": "onedir-EXE-no-Python, onedir-BAT-no-Python",
+      "targets": {
+        "onedir-EXE-no-Python": {
+          "runs": [
+            {
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "format": "html",
+              "exit_code": 0
+            }
+          ],
+          "stages": [
+            "parser",
+            "architecture",
+            "security",
+            "intelligence",
+            "ai",
+            "reports"
+          ],
+          "extraction_cleanup": "verified",
+          "matched_cve": "CVE-2023-20198",
+          "nvd_applicability": "synthetic local exact CPE/version fixture",
+          "kev": "real bundled CISA snapshot loaded and enriched the matched CVE",
+          "ai": {
+            "backend": "HTTP protocol stub, not an actual Ollama model",
+            "status": "completed",
+            "rule_findings_unchanged": true,
+            "raw_config_and_asset_not_sent": true,
+            "stub_thread_stopped": true,
+            "stub_port_closed": true
+          }
+        },
+        "onedir-BAT-no-Python": {
+          "runs": [
+            {
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "format": "html",
+              "exit_code": 0
+            }
+          ],
+          "stages": [
+            "parser",
+            "architecture",
+            "security",
+            "intelligence",
+            "ai",
+            "reports"
+          ],
+          "extraction_cleanup": "verified",
+          "matched_cve": "CVE-2023-20198",
+          "nvd_applicability": "synthetic local exact CPE/version fixture",
+          "kev": "real bundled CISA snapshot loaded and enriched the matched CVE",
+          "ai": {
+            "backend": "HTTP protocol stub, not an actual Ollama model",
+            "status": "completed",
+            "rule_findings_unchanged": true,
+            "raw_config_and_asset_not_sent": true,
+            "stub_thread_stopped": true,
+            "stub_port_closed": true
+          }
+        }
+      },
+      "status": "passed",
+      "seconds": 3.375
+    },
+    {
+      "name": "read-only application directory with writable user temporary directory",
+      "target": "onedir-EXE-no-Python",
+      "resources_sha256": {
+        "index.html": "65e4120e1cada754b020ef595906bd6944d2688a9f98bd006f4fb7f8d12663bf",
+        "style.css": "61c99ee2fe9cbb7d87d638232b44bfd11d69ae9ee6ce1f5a663bd720a2cb4ae9",
+        "app.js": "a9499c7a3bed0b7201141733c388af2646e651453e2684ddc5ee30a17f637e94"
+      },
+      "vendors_findings": {
+        "cisco": 16,
+        "huawei": 12,
+        "h3c": 11
+      },
+      "pipeline_integration": {
+        "pipeline": [
+          "parser",
+          "architecture",
+          "security",
+          "intelligence",
+          "ai",
+          "reports"
+        ],
+        "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+        "matched_cve": "CVE-2023-20198",
+        "ai": "disabled; no model requested"
+      },
+      "exports": [
+        "json",
+        "md",
+        "html"
+      ],
+      "session_token": "validated; omitted",
+      "actual_port": 57262,
+      "requested_port": 0,
+      "no_browser": true,
+      "arguments": [
+        "serve",
+        "--port",
+        "0",
+        "--no-browser"
+      ],
+      "extraction_directories_observed": [],
+      "shutdown": {
+        "exit_code": 0,
+        "forced_cleanup": false,
+        "signal_error": null,
+        "process_inspection_error": null,
+        "observed_pids": [
+          5184
+        ],
+        "remaining_pids": [],
+        "processes": [
+          {
+            "pid": 5184,
+            "parent_pid": 7724,
+            "image": "NetAudit.exe",
+            "created_ticks": 134355177059310588,
+            "alive": false,
+            "exit_code": 0
+          }
+        ],
+        "excluded_historical_pid_links": [],
+        "taskkill": [],
+        "port_closed": true,
+        "interrupt_code_accepted_as_native_cmd_status": false
+      },
+      "extraction_cleanup": "verified",
+      "status": "passed",
+      "seconds": 1.5
+    },
+    {
+      "name": "read-only application directory with writable user temporary directory",
+      "target": "onedir-BAT-no-Python",
+      "resources_sha256": {
+        "index.html": "65e4120e1cada754b020ef595906bd6944d2688a9f98bd006f4fb7f8d12663bf",
+        "style.css": "61c99ee2fe9cbb7d87d638232b44bfd11d69ae9ee6ce1f5a663bd720a2cb4ae9",
+        "app.js": "a9499c7a3bed0b7201141733c388af2646e651453e2684ddc5ee30a17f637e94"
+      },
+      "vendors_findings": {
+        "cisco": 16,
+        "huawei": 12,
+        "h3c": 11
+      },
+      "pipeline_integration": {
+        "pipeline": [
+          "parser",
+          "architecture",
+          "security",
+          "intelligence",
+          "ai",
+          "reports"
+        ],
+        "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+        "matched_cve": "CVE-2023-20198",
+        "ai": "disabled; no model requested"
+      },
+      "exports": [
+        "json",
+        "md",
+        "html"
+      ],
+      "session_token": "validated; omitted",
+      "actual_port": 57274,
+      "requested_port": 0,
+      "no_browser": true,
+      "arguments": [
+        "serve",
+        "--port",
+        "0",
+        "--no-browser"
+      ],
+      "extraction_directories_observed": [],
+      "shutdown": {
+        "exit_code": 0,
+        "forced_cleanup": false,
+        "signal_error": null,
+        "process_inspection_error": null,
+        "observed_pids": [
+          3132,
+          6448
+        ],
+        "remaining_pids": [],
+        "processes": [
+          {
+            "pid": 3132,
+            "parent_pid": 7724,
+            "image": "cmd.exe",
+            "created_ticks": 134355177074277625,
+            "alive": false,
+            "exit_code": 0
+          },
+          {
+            "pid": 6448,
+            "parent_pid": 3132,
+            "image": "NetAudit.exe",
+            "created_ticks": 134355177074465175,
+            "alive": false,
+            "exit_code": 0
+          }
+        ],
+        "excluded_historical_pid_links": [],
+        "taskkill": [],
+        "port_closed": true,
+        "interrupt_code_accepted_as_native_cmd_status": false
+      },
+      "extraction_cleanup": "verified",
+      "status": "passed",
+      "seconds": 1.484
+    }
+  ],
+  "not_tested": [
+    "Actual OS default-browser GUI launch and interactive file picker/filter/export clicks; real no-argument processes dispatch an observable configured browser stub",
+    "Actual Ollama model inference; AI integration is tested with a local HTTP protocol stub only",
+    "Live NVD applicability for the smoke asset; NVD applicability is a clearly labeled synthetic local exact-CPE fixture",
+    "A separate Windows computer with Python physically absent; subprocess no-Python PATH checks do not uninstall host build Python",
+    "A standard non-administrator Windows account; this runner is administrative, with write-deny ACLs applied during read-only checks"
+  ],
+  "path_case": "application/config/report/runtime locations contain Chinese characters and spaces; external working directory",
+  "windows_process_is_admin": true,
+  "console_allocated_for_process_group_signals": false,
+  "executable_sha256": "860a825aa82628b925cb6c9e8a07c3c947f8e905eb5716a96afe8e3bea062e8d",
+  "migration_base_libraries_sha256": {
+    "_internal\\base_library.zip": "81c4ed47e62a520d7fb88579d717ff7156663f27431ad1d73899f3236cb52314"
+  },
+  "python_independence": "EXE/BAT child PATH excludes Python, py and Python-related environment variables; host still has build Python installed",
+  "passed": true
+}

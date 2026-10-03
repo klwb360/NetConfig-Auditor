@@ -1,8 +1,10 @@
 # NetAudit Windows 下载与交付检查点
 
-2026-10-03：私人仓库 `klwb360/NetAudit` 已发布 **v0.2.1 界面优化版**。旧 v0.2.0 与 v0.1.0 及其原始文件继续保留。
+2026-10-03：私人仓库 `klwb360/NetAudit` 已发布 **v0.2.1 界面优化版**。旧 v0.2.0 与 v0.1.0 的运行文件、对应源码与验收记录继续保留。
 
-[打开 v0.2.1 Release](https://github.com/klwb360/NetAudit/releases/tag/v0.2.1) · **[直接下载推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.1/NetAudit-0.2.1-windows-x64-befb38bbecbb-portable.zip)**（需登录有权限的 GitHub 账号）。共 9 个原始附件，包含便携 ZIP、单 EXE 配套 ZIP、独立 EXE、对应源码、构建清单、三份验收报告和 SHA-256。
+[打开 v0.2.1 Release](https://github.com/klwb360/NetAudit/releases/tag/v0.2.1) · **[直接下载推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.1/NetAudit-0.2.1-windows-x64-befb38bbecbb-portable.zip)**（需登录有权限的 GitHub 账号）。当前共 3 个运行附件：便携 ZIP、单 EXE 配套 ZIP、独立 EXE；源码在两个 ZIP 内提供，校验、构建清单与验收报告见 [v0.2.1 发布档案](docs/releases/v0.2.1/README.md)。
+
+三个版本均按此方式整理：原五份校验与构建/验收资料按原始字节归档到 `docs/releases/<版本>/`，独立源码 ZIP 移除，包内源码及固定版本标签保留。原始 `SHA256SUMS.txt` 仍覆盖完整九文件构建产物；下表的源码 ZIP 哈希用于核对包内源码，并非独立附件下载。GitHub 自动生成的 Source code ZIP/tar.gz 仍会显示。本次仅整理下载入口和发布资料，没有重建 Windows EXE，也不增加其实际验收环境。
 
 使用：下载 → 解压一次 → 双击 BAT 或 EXE → 导入配置 → 开始审计 → 切换结果页签 → 查看与导出。关闭回到启动窗口按 Ctrl+C；迁移时复制整个文件夹，包括 `_internal`。
 
@@ -21,7 +23,7 @@
 | `NetAudit-0.2.1-windows-x64-befb38bbecbb-portable.zip` | `67e207dc67a6ce0d3c09fb6f69f0fb7de62ab46ca2273673c6034ca9014d7f9d` |
 | `NetAudit-0.2.1-windows-x64-befb38bbecbb-onefile.zip` | `4498444bdbc5f36816fe71b1fa730c3440b92d1937b3e49a21759ab632ad55a4` |
 | `NetAudit-0.2.1-windows-x64-befb38bbecbb-onefile.exe` | `a20572e92de8891b6f4f27204a4a7fccef3ebe0facc907a2d7aeb1dba013e3d8` |
-| `NetAudit-0.2.1-source-befb38bbecbb.zip` | `7d9b3c654a727269dbec07d2df40b8f4295d69ec868e4877e4cdc49341cef44e` |
+| `NetAudit-0.2.1-source-befb38bbecbb.zip`（两个运行 ZIP 内） | `7d9b3c654a727269dbec07d2df40b8f4295d69ec868e4877e4cdc49341cef44e` |
 
 实际 EXE 源码与 Release 标签指向 [`befb38bbecbbaa9d0d97c48c922e50e18c42f462`](https://github.com/klwb360/NetAudit/commit/befb38bbecbbaa9d0d97c48c922e50e18c42f462)。后续发布元数据和文档提交不改变 EXE 或附件字节。两包均提供完整对应源码、原 LICENSE/NOTICE、运行库许可、示例、网页和官方情报来源资料。
 
@@ -52,7 +54,7 @@ Windows 三种运行形式继续覆盖中文/空格路径、BAT/CLI 返回码与
 
 2026-10-03：私人仓库 `klwb360/NetAudit` 已发布 **v0.2.0**。原仓库、已合并的 PR #1、许可证和归属继续保留；旧 v0.1.0 不覆盖。
 
-[打开 v0.2.0 Release](https://github.com/klwb360/NetAudit/releases/tag/v0.2.0) · **[直接下载推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.0/NetAudit-0.2.0-windows-x64-8a9840601d6c-portable.zip)**（需登录有权访问本私人仓库的 GitHub 账号）。共 9 个原始附件，包含 Windows 便携 ZIP、单 EXE 包、独立 EXE、对应源码、构建清单、三份验收报告和校验文件。
+[打开 v0.2.0 Release](https://github.com/klwb360/NetAudit/releases/tag/v0.2.0) · **[直接下载推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.0/NetAudit-0.2.0-windows-x64-8a9840601d6c-portable.zip)**（需登录有权访问本私人仓库的 GitHub 账号）。首次发布包含 9 个原始附件；整理后保留 3 个运行附件，包内提供源码，工程资料见 [v0.2.0 发布档案](docs/releases/v0.2.0/README.md)。
 
 使用：下载 `*-portable.zip` → 解压一次 → 双击 `Start-NetAudit.bat` 或 `NetAudit.exe` → 导入配置并选择厂商 → 查看与导出。Ctrl+C 关闭程序；迁移时复制整个便携文件夹，包括 `_internal`。配置审计保持本地运行，不需要另装 Python；本机 Ollama 和模型仅用于用户显式启用的 AI 建议。
 
@@ -67,9 +69,9 @@ Windows 三种运行形式继续覆盖中文/空格路径、BAT/CLI 返回码与
 | `NetAudit-0.2.0-windows-x64-8a9840601d6c-portable.zip` | `72eb86ba6b99b8bef964c388b84bc9ad251e5e181dadfd537b082b73299bb794` |
 | `NetAudit-0.2.0-windows-x64-8a9840601d6c-onefile.zip` | `77f4849a3ca90b5d1ca7b5698ddf92b29d9d1bb7e08d741be94204b482b98e92` |
 | `NetAudit-0.2.0-windows-x64-8a9840601d6c-onefile.exe` | `bc0ae2627bd1baca884a4b1cc9950e912beaa9a0f0ff9b012c9a5d46539e70ab` |
-| `NetAudit-0.2.0-source-8a9840601d6c.zip` | `6727e00ba46557b7839673cf6cc4c84bed07241f105d69dc4f2755493bb68f52` |
+| `NetAudit-0.2.0-source-8a9840601d6c.zip`（两个运行 ZIP 内） | `6727e00ba46557b7839673cf6cc4c84bed07241f105d69dc4f2755493bb68f52` |
 
-完整校验、环境和范围见 Release 的 `SHA256SUMS.txt`、`manifest.json` 与三份 smoke 报告。PowerShell 校验：`Get-FileHash .\文件名.zip -Algorithm SHA256`。
+完整校验、环境和范围见 [v0.2.0 发布档案](docs/releases/v0.2.0/README.md) 的 `SHA256SUMS.txt`、`manifest.json` 与三份 smoke 报告。PowerShell 校验：`Get-FileHash .\文件名.zip -Algorithm SHA256`。
 
 实际构建源码及 Release 标签：[8a9840601d6c51dbdaff1fbbf62aeaf84cc0b490](https://github.com/klwb360/NetAudit/commit/8a9840601d6c51dbdaff1fbbf62aeaf84cc0b490)。后续发布元数据及本交付说明不改变 EXE 对应源码。两种分发 ZIP 都含同一完整源码归档、原 LICENSE/NOTICE、第三方许可证、示例、网页、情报快照和使用说明。
 
@@ -98,13 +100,13 @@ AI 已通过实际本机 HTTP 协议替身的单元、CLI、网页和 Windows �
 
 普通非管理员 Windows 账户、物理上未安装 Python 的独立电脑、Explorer 人工双击、系统默认浏览器可视交互与文件选择/下载对话框、Windows 10/11、ARM64 尚未实测。冻结版验收去除 Python 环境并限制 PATH；构建 runner 本身仍安装 Python，不能视为独立无 Python 电脑的实测。
 
-以下保留 **v0.1.0 历史交付记录**，其中文件名、下载、提交与测试数仅对应旧版；该历史版本以本节 v0.2.0 和对应 Release 清单为准。
+以下保留 **v0.1.0 历史交付记录**，其中文件名、下载、提交与测试数仅对应旧版；该历史版本以本节 v0.1.0 和对应 Release 清单为准。
 
 ## v0.1.0 历史交付记录
 
 2026-10-03：迁移至私人仓库 `klwb360/NetAudit` 已完成。原仓库保留，原 PR #1 已由仓库所有者合并。现有实现与许可证已复用，仓库使用、排错、开发、架构与贡献资料已补齐。
 
-[打开 v0.1.0 Release 下载页](https://github.com/klwb360/NetAudit/releases/tag/v0.1.0) · **[直接下载推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.1.0/NetAudit-0.1.0-windows-x64-f2002b79bd6d-portable.zip)**（需登录有权访问本私人仓库的 GitHub 账号）。Release 保存本次验收的原始文件、对应源码、构建清单、三份验收报告与校验文件，共 9 个附件。
+[打开 v0.1.0 Release 下载页](https://github.com/klwb360/NetAudit/releases/tag/v0.1.0) · **[直接下载推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.1.0/NetAudit-0.1.0-windows-x64-f2002b79bd6d-portable.zip)**（需登录有权访问本私人仓库的 GitHub 账号）。首次发布包含 9 个原始附件；整理后保留 3 个运行附件，包内提供源码，工程资料见 [v0.1.0 发布档案](docs/releases/v0.1.0/README.md)。
 
 使用：下载 Release 的 `*-portable.zip` → 解压一次 → 双击 `Start-NetAudit.bat` 或 `NetAudit.exe` → 导入配置并选择厂商 → 查看与导出。Ctrl+C 关闭程序；迁移时复制整个便携文件夹，包括 `_internal`。
 
@@ -117,9 +119,9 @@ AI 已通过实际本机 HTTP 协议替身的单元、CLI、网页和 Windows �
 | `NetAudit-0.1.0-windows-x64-f2002b79bd6d-portable.zip` | `66f0400a0522395c3cf3cf19aa1294aed0f8243de7c10a6e04c658edff44090d` |
 | `NetAudit-0.1.0-windows-x64-f2002b79bd6d-onefile.zip` | `645cc8b90956c82e870d671c0c09698336e288de10eb3672da4722385ad97aa3` |
 | `NetAudit-0.1.0-windows-x64-f2002b79bd6d-onefile.exe` | `a1b7f309a5f98e8139cfd99dde446ff0466f1ad846196c977abc5c3756571010` |
-| `NetAudit-0.1.0-source-f2002b79bd6d.zip` | `0bac018b90e1709f5e7f826558b66df004c448f6e6a18e275ad6643342157f15` |
+| `NetAudit-0.1.0-source-f2002b79bd6d.zip`（两个运行 ZIP 内） | `0bac018b90e1709f5e7f826558b66df004c448f6e6a18e275ad6643342157f15` |
 
-Actions 下载的外层 ZIP SHA-256：`f84bfff005504715e83edadd9f78560a57e0d8efe8436f0ac9140d0ea305ee26`。Release 附件与该 ZIP 内的文件逐字节一致；上表是可直接下载文件的校验值。`SHA256SUMS.txt`、`manifest.json` 和三个验收报告提供完整校验值、环境与范围。PowerShell 校验示例：`Get-FileHash .\文件名.zip -Algorithm SHA256`。
+Actions 下载的外层 ZIP SHA-256：`f84bfff005504715e83edadd9f78560a57e0d8efe8436f0ac9140d0ea305ee26`。保留的 Release 运行附件与该 ZIP 内的文件逐字节一致；上表同时记录运行文件与包内源码的校验值。[v0.1.0 发布档案](docs/releases/v0.1.0/README.md) 的 `SHA256SUMS.txt`、`manifest.json` 和三个验收报告提供完整校验值、环境与范围。PowerShell 校验示例：`Get-FileHash .\文件名.zip -Algorithm SHA256`。
 
 构建对应源码提交：[`f2002b79bd6da91e2a29f741c8483951e20bba86`](https://github.com/klwb360/NetAudit/commit/f2002b79bd6da91e2a29f741c8483951e20bba86)。本交付说明随后作为文档提交保存，不改变该次 EXE 对应的源码提交。两个分发 ZIP 都包含同一对应源码归档、原 LICENSE/NOTICE、第三方许可证、示例和使用说明。
 

@@ -6,7 +6,11 @@
 
 使用有访问权限的 GitHub 账号登录，在 [v0.2.1 发布页](https://github.com/klwb360/NetAudit/releases/tag/v0.2.1) 的 **Assets** 下载名称以 `-portable.zip` 结尾的文件，也可点击 [推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.1/NetAudit-0.2.1-windows-x64-befb38bbecbb-portable.zip)。解压一次，进入便携文件夹，双击 `Start-NetAudit.bat` 或 `NetAudit.exe`；在网页导入配置、选择厂商并开始审计。不要在 ZIP 预览窗口内运行。
 
-普通使用无需下载 GitHub 自动生成的 “Source code”。Release 随附的 `*-source-*.zip` 是分发所对应的源码，供查阅、修改与重建。
+普通使用无需下载 GitHub 自动生成的 “Source code”。两个运行 ZIP 内的 `*-source-*.zip` 是分发所对应的完整源码，供查阅、修改与重建；Release 已移除重复的独立源码附件，版本标签仍固定到构建提交。
+
+## 为什么 Release 只剩三个运行附件？
+
+v0.2.1、v0.2.0、v0.1.0 均保留 `portable.zip`、`onefile.zip` 和 `onefile.exe`，运行文件与原版本标签不变。校验文件 `SHA256SUMS.txt`、构建清单 `manifest.json` 和三份 `smoke-*.json` 验收报告永久保存在仓库 [发布档案](releases/README.md)，可按版本查看。原校验文件仍覆盖完整九文件构建产物，其中独立源码 ZIP 可从运行 ZIP 内取得。GitHub 自动生成的 “Source code” ZIP/tar.gz 无法单独隐藏。
 
 ## 新版网页如何查看结果？
 

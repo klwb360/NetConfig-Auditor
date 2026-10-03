@@ -11,6 +11,13 @@ import urllib.parse
 import urllib.request
 import zipfile
 
+try:
+    from tools import release_records as records
+except ModuleNotFoundError as exc:
+    if exc.name != "tools":
+        raise
+    import release_records as records
+
 API = "https://api.github.com"
 MAX_DOWNLOAD = 64 * 1024 * 1024
 
@@ -64,7 +71,7 @@ class GitHub:
         with response:
             raw = response.read(MAX_DOWNLOAD + 1)
         require(len(raw) <= MAX_DOWNLOAD, "Download exceeds size limit")
-        return raw if binary else json.loads(raw)
+        return raw if binary else (json.loads(raw) if raw else None)
 
     @staticmethod
     def storage_download(url):
@@ -96,6 +103,14 @@ def verify_bundle(archive, commit, run_id, run_attempt, expected_digest):
         require(sum(e.file_size for e in entries) <= MAX_DOWNLOAD, "Archive expands beyond limit")
         require(all(e.file_size <= MAX_DOWNLOAD and not e.is_dir() for e in entries), "Invalid archive entries")
         files = {name: z.read(name) for name in names}  # Reading also verifies ZIP CRCs.
+    return verify_files(files, commit, run_id, run_attempt)
+
+
+def verify_files(files, commit, run_id, run_attempt):
+    """Verify all nine original delivery files, including recovered archival bytes."""
+    require(all(re.fullmatch(r"[A-Za-z0-9_.-]+", name) for name in files), "Unsafe delivery paths")
+    require(all(isinstance(data, bytes) for data in files.values()), "Delivery files must be bytes")
+    require(sum(len(data) for data in files.values()) <= MAX_DOWNLOAD, "Delivery files exceed size limit")
     manifest = json.loads(files["manifest.json"])
     version = manifest["application_version"]
     require(re.fullmatch(r"\d+\.\d+\.\d+", version), "Invalid application version")
@@ -149,12 +164,14 @@ def validate_run(run, repository, commit):
             and run["event"] in ("push", "workflow_dispatch"), "Wrong build workflow or event")
 
 
-def notes(repository, tag, manifest, run_id):
+def notes(repository, tag, manifest, run_id, records_commit="main"):
     version = manifest["application_version"]
     commit = manifest["source"]["commit"]
     portable = next(a["file"] for a in manifest["artifacts"] if a["file"].endswith("-portable.zip"))
     base = f"https://github.com/{repository}"
-    rows = "\n".join(f"| `{a['file']}` | `{a['sha256']}` |" for a in manifest["artifacts"])
+    archive = f"{base}/tree/{records_commit}/docs/releases/{tag}"
+    rows = "\n".join(f"| `{a['file']}` | `{a['sha256']}` |" for a in manifest["artifacts"]
+                     if a["file"].endswith(("-portable.zip", "-onefile.zip", "-onefile.exe")))
     env = manifest["environment"]
     check_count = sum(len(r["checks"]) for r in manifest["verification"].values())
     features = "" if version == "0.1.0" else """
@@ -197,22 +214,22 @@ def notes(repository, tag, manifest, run_id):
 - 源码提交：[`{commit}`]({base}/commit/{commit})；标签指向该构建提交。
 - [实际 Windows 构建与回归测试]({base}/actions/runs/{run_id})：{env['os']} / {env['architecture']}，Python {env['python']}，PyInstaller {manifest['build_dependencies']['pyinstaller']}。
 - 源码、onedir、onefile 共 {check_count} 项真实进程检查通过：中文及空格路径、端口回退、完整网页资源、三厂商及三种报告、退出码、无暂停与服务清理。EXE 子进程 PATH 排除 Python；构建主机仍安装构建 Python。
-- 尚未人工验收资源管理器双击及默认浏览器界面、独立未安装 Python 的电脑、普通非管理员账户，也未实测 Windows 10/11 或其他架构。详细范围见 `manifest.json` 和三份 `smoke-*.json`。
+- 尚未人工验收资源管理器双击及默认浏览器界面、独立未安装 Python 的电脑、普通非管理员账户，也未实测 Windows 10/11 或其他架构。详细范围见[永久归档的构建与验收记录]({archive})中的 `manifest.json` 和三份 `smoke-*.json`。
 - 发布复用已验收原始文件，下载回验通过后才公开 Release；没有重新构建或替换 EXE。
 
 ### 文件校验
 
-下载 `SHA256SUMS.txt` 可校验全部交付资料。Windows PowerShell 示例：`Get-FileHash .\\{portable} -Algorithm SHA256`。
+下方仅提供三个可运行附件。[校验文件、构建清单和三份验收记录]({archive})永久保存在仓库 `docs/releases/{tag}/`，无需普通用户下载。原始 `SHA256SUMS.txt` 保留完整九文件交付时其余八个文件的校验值。Windows PowerShell 示例：`Get-FileHash .\\{portable} -Algorithm SHA256`。
 
 | 文件 | SHA-256 |
 |---|---|
 {rows}
 
-版本 {version}；许可证与来源说明已包含在两个分发 ZIP 和对应源码 ZIP 中。
+版本 {version}；两个分发 ZIP 内保留对应源码 ZIP、许可证与来源说明。也可从固定[版本标签]({base}/tree/{tag})查阅源码。
 """
 
 
-def ensure_tag(api, tag, commit):
+def ensure_tag(api, tag, commit, allow_create=True):
     ref = api.repo("git/ref/tags/" + urllib.parse.quote(tag, safe=""))
     if ref:
         obj = ref["object"]
@@ -222,10 +239,17 @@ def ensure_tag(api, tag, commit):
             obj = api.repo("git/tags/" + obj["sha"])["object"]
         require(obj["type"] == "commit" and obj["sha"] == commit, "Existing version tag points to different source")
     else:
+        require(allow_create, "Existing version tag is required for archival re-verification")
         api.repo("git/refs", method="POST", data={"ref": "refs/tags/" + tag, "sha": commit})
 
 
+def runtime_names(tag, commit):
+    prefix = f"NetAudit-{tag[1:]}-windows-x64-{commit[:12]}"
+    return {prefix + "-portable.zip", prefix + "-onefile.zip", prefix + "-onefile.exe"}
+
+
 def publish(api, tag, commit, files, body):
+    require(set(files) == runtime_names(tag, commit), "Publisher accepts exactly the three runtime files")
     ensure_tag(api, tag, commit)
     releases = api.repo("releases?per_page=100")
     matches = [r for r in releases if r["tag_name"] == tag]
@@ -234,7 +258,10 @@ def publish(api, tag, commit, files, body):
         "tag_name": tag, "target_commitish": commit, "name": f"NetAudit {tag[1:]} · Windows x64 便携版",
         "body": body, "draft": True, "prerelease": False})
     assets = {a["name"]: a for a in release["assets"]}
-    require(len(assets) == len(release["assets"]) and set(assets) <= set(files), "Unexpected release assets")
+    require(len(assets) == len(release["assets"]), "Duplicate release assets")
+    require(release["draft"] or not (set(assets) - set(files)),
+            "Published release contains additional assets; explicit archival migration is required")
+    require(set(assets) <= set(files), "Unexpected release assets")
     require(release["draft"] or set(assets) == set(files), "Published release is incomplete; refusing mutation")
     for name, data in sorted(files.items()):
         if name not in assets:
@@ -256,6 +283,58 @@ def publish(api, tag, commit, files, body):
     return release["html_url"]
 
 
+def prepare_delivery(api, config, tag, commit, run_id):
+    """Verify the original nine files and their permanent records before publication."""
+    run = api.repo(f"actions/runs/{run_id}")
+    validate_run(run, api.repository, commit)
+    artifacts = api.repo(f"actions/runs/{run_id}/artifacts?per_page=100")["artifacts"]
+    matches = [a for a in artifacts if a["name"] == "NetAudit-windows-x64-" + commit]
+    require(len(matches) <= 1, "Duplicate verified build artifacts")
+    artifact = matches[0] if matches else None
+    from_records = artifact is None or artifact["expired"]
+    if from_records:
+        # An expired artifact can only re-verify an already published curated release.
+        # The fixed archive commit identifies which records were actually read.
+        reference = api.repo("git/ref/heads/main")["object"]["sha"]
+        require(re.fullmatch(r"[a-f0-9]{40}", reference), "Invalid records reference")
+        record, _ = records.load_records(api, tag, reference)
+        require(record["repository"] == api.repository and record["tag"] == tag
+                and record["source_commit"] == commit and record["run_id"] == str(run_id)
+                and record["run_attempt"] == run["run_attempt"], "Archived build identity mismatch")
+        archived_artifact = record["artifact"]
+        require(archived_artifact["name"] == "NetAudit-windows-x64-" + commit,
+                "Archived artifact name mismatch")
+        if artifact:
+            require(all(artifact[key] == archived_artifact[key] for key in ("id", "name", "digest")),
+                    "Archived artifact differs from GitHub build identity")
+        artifact = archived_artifact
+        release = api.repo("releases/tags/" + urllib.parse.quote(tag, safe=""))
+        require(release and release["draft"] is False, "Expired build requires an existing published release")
+        names = [asset["name"] for asset in release["assets"]]
+        require(len(names) == len(set(names)) and set(names) == runtime_names(tag, commit),
+                "Expired build requires exactly three existing runtime assets")
+        ensure_tag(api, tag, commit, allow_create=False)
+    expected_digest = artifact.get("digest", "").removeprefix("sha256:")
+    require(re.fullmatch(r"[a-f0-9]{64}", expected_digest), "GitHub artifact digest unavailable")
+    if run_id == config["run_id"]:
+        require(artifact["id"] == config["artifact_id"] and expected_digest == config["artifact_sha256"],
+                "Initial acceptance artifact identity mismatch")
+    if from_records:
+        files = records.recover_files(api, tag, reference, release)
+        files, manifest = verify_files(files, commit, run_id, run["run_attempt"])
+        print("Verified original nine delivery files from permanent records and runtime packages; "
+              "the expired outer artifact archive was not downloaded or re-verified.")
+    else:
+        archive = api.repo(f"actions/artifacts/{artifact['id']}/zip", binary=True)
+        files, manifest = verify_bundle(archive, commit, run_id, run["run_attempt"], expected_digest)
+    require(tag == "v" + manifest["application_version"], "Tag must match the built application version")
+    records_commit = records.ensure_records(api, tag, files, manifest, artifact)
+    require(re.fullmatch(r"[a-f0-9]{40}", records_commit), "Invalid permanent records commit")
+    runtime = records.runnable_files(files, manifest)
+    require(set(runtime) == runtime_names(tag, commit), "Permanent records runtime list mismatch")
+    return runtime, manifest, records_commit, from_records
+
+
 def main():
     config = json.loads((Path(__file__).resolve().parents[1] / ".github/release-source.json").read_text())
     repository = os.environ.get("GITHUB_REPOSITORY", config["repository"])
@@ -267,27 +346,21 @@ def main():
             and re.fullmatch(r"\d+", run_id), "Invalid release inputs")
     api = GitHub(repository, os.environ.get("GITHUB_TOKEN", ""))
     require(api.repo("")["private"] is True, "Expected the existing private repository")
-    run = api.repo(f"actions/runs/{run_id}")
-    validate_run(run, repository, commit)
-    artifacts = api.repo(f"actions/runs/{run_id}/artifacts?per_page=100")["artifacts"]
-    matches = [a for a in artifacts if a["name"] == "NetAudit-windows-x64-" + commit]
-    require(len(matches) == 1 and not matches[0]["expired"], "Verified build artifact missing or expired")
-    artifact = matches[0]
-    expected_digest = artifact.get("digest", "").removeprefix("sha256:")
-    require(re.fullmatch(r"[a-f0-9]{64}", expected_digest), "GitHub artifact digest unavailable")
-    if run_id == config["run_id"]:
-        require(artifact["id"] == config["artifact_id"] and expected_digest == config["artifact_sha256"],
-                "Initial acceptance artifact identity mismatch")
-    archive = api.repo(f"actions/artifacts/{artifact['id']}/zip", binary=True)
-    files, manifest = verify_bundle(archive, commit, run_id, run["run_attempt"], expected_digest)
-    require(tag == "v" + manifest["application_version"], "Tag must match the built application version")
-    url = publish(api, tag, commit, files, notes(repository, tag, manifest, run_id))
+    runtime, manifest, records_commit, from_records = prepare_delivery(api, config, tag, commit, run_id)
+    url = publish(api, tag, commit, runtime, notes(repository, tag, manifest, run_id, records_commit))
     print("Release: " + url)
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
         with open(summary, "a", encoding="utf-8") as f:
             f.write(f"## Published NetAudit\n\n[Download {tag}]({url})\n\nSource: `{commit}`\n\n")
-            f.write("All nine assets were downloaded and SHA-256 verified before publication.\n")
+            f.write("All nine original delivery files passed the complete checksum, source and acceptance guards; "
+                    "their records are permanently archived. All three runtime release assets were "
+                    "downloaded and SHA-256 verified.\n\n")
+            f.write(f"[Permanent verification records](https://github.com/{repository}/tree/{records_commit}/docs/releases/{tag})\n")
+            if from_records:
+                f.write("\nExpired outer build artifact was not downloaded or re-verified; "
+                        "this existing release was reconstructed and verified from its permanent records "
+                        "and original runtime packages.\n")
 
 
 if __name__ == "__main__":
