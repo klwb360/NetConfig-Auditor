@@ -1,0 +1,272 @@
+"""Publish verified Windows bytes; never rebuild or replace a published asset."""
+import hashlib
+import io
+import json
+import os
+from pathlib import Path
+import re
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+import zipfile
+
+API = "https://api.github.com"
+MAX_DOWNLOAD = 64 * 1024 * 1024
+
+
+def require(condition, message):
+    if not condition:
+        raise ValueError(message)
+
+
+def digest(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+class GitHub:
+    def __init__(self, repository, token):
+        require(re.fullmatch(r"[\w.-]+/[\w.-]+", repository), "Invalid repository")
+        require(bool(token), "GITHUB_TOKEN is required")
+        self.repository = repository
+        self.token = token
+        self.opener = urllib.request.build_opener(NoRedirect)
+
+    def request(self, path, method="GET", data=None, binary=False, upload=False):
+        url = path if path.startswith("https://") else API + path
+        parsed = urllib.parse.urlsplit(url)
+        host = "uploads.github.com" if upload else "api.github.com"
+        require(parsed.scheme == "https" and parsed.netloc == host,
+                "Refusing authenticated request outside GitHub API")
+        headers = {"Authorization": "Bearer " + self.token,
+                   "Accept": "application/octet-stream" if binary else "application/vnd.github+json",
+                   "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "NetAudit-release"}
+        if data is not None:
+            headers["Content-Type"] = "application/octet-stream" if upload else "application/json"
+            if not upload:
+                data = json.dumps(data).encode()
+        request = urllib.request.Request(url, data=data, headers=headers, method=method)
+        try:
+            response = self.opener.open(request, timeout=60)
+        except urllib.error.HTTPError as exc:
+            if binary and exc.code in (301, 302, 303, 307, 308):
+                return self.storage_download(exc.headers["Location"])
+            if exc.code == 404 and method == "GET" and not binary:
+                return None
+            # Do not expose signed URLs, response bodies, or credentials in errors.
+            raise RuntimeError(f"GitHub API {method} failed: HTTP {exc.code}") from None
+        with response:
+            raw = response.read(MAX_DOWNLOAD + 1)
+        require(len(raw) <= MAX_DOWNLOAD, "Download exceeds size limit")
+        return raw if binary else json.loads(raw)
+
+    @staticmethod
+    def storage_download(url):
+        parsed = urllib.parse.urlsplit(url)
+        require(parsed.scheme == "https" and parsed.hostname is not None,
+                "Artifact redirect must use HTTPS")
+        # A fresh opener/request has no Authorization header from the API call.
+        request = urllib.request.Request(url, headers={"User-Agent": "NetAudit-release"})
+        try:
+            with urllib.request.build_opener(NoRedirect).open(request, timeout=60) as response:
+                data = response.read(MAX_DOWNLOAD + 1)
+        except (urllib.error.URLError, OSError):
+            raise RuntimeError("Signed GitHub storage download failed") from None
+        require(len(data) <= MAX_DOWNLOAD, "Download exceeds size limit")
+        return data
+
+    def repo(self, suffix, **kwargs):
+        path = f"/repos/{self.repository}" + ("/" + suffix if suffix else "")
+        return self.request(path, **kwargs)
+
+
+def verify_bundle(archive, commit, run_id, run_attempt, expected_digest):
+    require(digest(archive) == expected_digest, "Artifact archive digest mismatch")
+    with zipfile.ZipFile(io.BytesIO(archive)) as z:
+        entries = z.infolist()
+        names = [e.filename for e in entries]
+        require(len(names) == len(set(names)), "Duplicate archive entries")
+        require(all(re.fullmatch(r"[A-Za-z0-9_.-]+", n) for n in names), "Unsafe archive paths")
+        require(sum(e.file_size for e in entries) <= MAX_DOWNLOAD, "Archive expands beyond limit")
+        require(all(e.file_size <= MAX_DOWNLOAD and not e.is_dir() for e in entries), "Invalid archive entries")
+        files = {name: z.read(name) for name in names}  # Reading also verifies ZIP CRCs.
+    manifest = json.loads(files["manifest.json"])
+    version = manifest["application_version"]
+    require(re.fullmatch(r"\d+\.\d+\.\d+", version), "Invalid application version")
+    prefix = f"NetAudit-{version}-windows-x64-{commit[:12]}"
+    packages = {prefix + "-portable.zip", prefix + "-onefile.zip", prefix + "-onefile.exe",
+                f"NetAudit-{version}-source-{commit[:12]}.zip"}
+    expected = packages | {"manifest.json", "SHA256SUMS.txt", "smoke-source.json",
+                           "smoke-onedir.json", "smoke-onefile.json"}
+    require(set(files) == expected, "Artifact must contain exactly the nine delivery files")
+    sums = {}
+    for line in files["SHA256SUMS.txt"].decode().splitlines():
+        match = re.fullmatch(r"([a-f0-9]{64})  ([A-Za-z0-9_.-]+)", line)
+        require(match is not None, "Invalid checksum line")
+        sha, name = match.groups()
+        require(name not in sums, "Duplicate checksum")
+        sums[name] = sha
+    require(set(sums) == expected - {"SHA256SUMS.txt"}, "Checksum file list mismatch")
+    require(all(digest(files[n]) == sha for n, sha in sums.items()), "File checksum mismatch")
+    require(manifest["application"] == "NetAudit" and manifest["source"]["commit"] == commit
+            and manifest["source"]["dirty"] is False, "Manifest source mismatch")
+    env = manifest["environment"]
+    require(env["github_run_id"] == str(run_id) and env["github_run_attempt"] == str(run_attempt),
+            "Manifest workflow identity mismatch")
+    require(env["architecture"] == "AMD64" and env["runner_os"] == "Windows", "Not a Windows x64 build")
+    items = manifest["artifacts"]
+    require(len(items) == 4 and {item["file"] for item in items} == packages, "Manifest package list mismatch")
+    for item in items:
+        data = files[item["file"]]
+        require(item["sha256"] == digest(data) and item["size_bytes"] == len(data), "Package metadata mismatch")
+    for mode, count in (("source", 9), ("onedir", 8), ("onefile", 8)):
+        report = json.loads(files[f"smoke-{mode}.json"])
+        require(report == manifest["verification"][mode], "Standalone report differs from manifest")
+        require(report["passed"] is True and report["mode"] == mode and len(report["checks"]) == count,
+                "Incomplete acceptance report")
+        for check in report["checks"]:
+            require(check["status"] == "passed", "Acceptance check did not pass")
+            if "shutdown" in check:
+                shutdown = check["shutdown"]
+                require(shutdown["remaining_pids"] == [] and shutdown["forced_cleanup"] is False
+                        and shutdown["port_closed"] is True, "Unclean server shutdown")
+    return files, manifest
+
+
+def validate_run(run, repository, commit):
+    require(run and run["status"] == "completed" and run["conclusion"] == "success", "Build must be successful")
+    require(run["head_sha"] == commit and run["head_branch"] == "main", "Wrong build source")
+    require(run["repository"]["full_name"] == repository and run["head_repository"]["full_name"] == repository,
+            "Build belongs to another repository")
+    require(run["path"] == ".github/workflows/netaudit-windows.yml"
+            and run["event"] in ("push", "workflow_dispatch"), "Wrong build workflow or event")
+
+
+def notes(repository, tag, manifest, run_id):
+    version = manifest["application_version"]
+    commit = manifest["source"]["commit"]
+    portable = next(a["file"] for a in manifest["artifacts"] if a["file"].endswith("-portable.zip"))
+    base = f"https://github.com/{repository}"
+    rows = "\n".join(f"| `{a['file']}` | `{a['sha256']}` |" for a in manifest["artifacts"])
+    env = manifest["environment"]
+    return f"""下载后即可使用的 Windows x64 便携版，配置处理在本机完成。
+
+**推荐下载：[便携 ZIP]({base}/releases/download/{tag}/{portable})**（下方 Assets 中名称以 `-portable.zip` 结尾的文件）。
+
+1. 使用有权访问本私人仓库的 GitHub 账号下载便携 ZIP。
+2. 解压一次，双击文件夹中的 `Start-NetAudit.bat` 或 `NetAudit.exe`。
+3. 浏览器打开后导入 UTF-8 配置，选择 Cisco、华为或 H3C，点击“开始审计”；也可先载入示例。
+4. 查看发现与严重度，导出 JSON、Markdown 或 HTML 报告。
+
+关闭：回到启动窗口按 Ctrl+C；关闭浏览器标签页不会停止服务。迁移：复制整个文件夹（包括 `_internal`）到另一台电脑。EXE 自带 Python 运行库，普通使用设计为无需安装 Python、无需管理员权限。端口占用时以启动窗口显示的实际地址为准。
+
+`-onefile.zip` 提供单 EXE 与配套说明、示例、许可证和源码；`-onefile.exe` 可独立启动。再次分发仍需保留 GPL-3.0-only 许可证、归属说明与对应源码。普通用户无需下载 GitHub 自动生成的 “Source code”。
+
+### 验证与来源
+
+- 源码提交：[`{commit}`]({base}/commit/{commit})；标签指向该构建提交。
+- [实际 Windows 构建与回归测试]({base}/actions/runs/{run_id})：{env['os']} / {env['architecture']}，Python {env['python']}，PyInstaller {manifest['build_dependencies']['pyinstaller']}。
+- 源码、onedir、onefile 共 25 项真实进程检查通过：中文及空格路径、端口回退、完整网页资源、三厂商及三种报告、退出码、无暂停与服务清理。EXE 子进程 PATH 排除 Python；构建主机仍安装构建 Python。
+- 尚未人工验收资源管理器双击及默认浏览器界面、独立未安装 Python 的电脑、普通非管理员账户，也未实测 Windows 10/11 或其他架构。详细范围见 `manifest.json` 和三份 `smoke-*.json`。
+- 发布复用已验收原始文件，下载回验通过后才公开 Release；没有重新构建或替换 EXE。
+
+### 文件校验
+
+下载 `SHA256SUMS.txt` 可校验全部交付资料。Windows PowerShell 示例：`Get-FileHash .\\{portable} -Algorithm SHA256`。
+
+| 文件 | SHA-256 |
+|---|---|
+{rows}
+
+版本 {version}；许可证与来源说明已包含在两个分发 ZIP 和对应源码 ZIP 中。
+"""
+
+
+def ensure_tag(api, tag, commit):
+    ref = api.repo("git/ref/tags/" + urllib.parse.quote(tag, safe=""))
+    if ref:
+        obj = ref["object"]
+        for _ in range(10):
+            if obj["type"] != "tag":
+                break
+            obj = api.repo("git/tags/" + obj["sha"])["object"]
+        require(obj["type"] == "commit" and obj["sha"] == commit, "Existing version tag points to different source")
+    else:
+        api.repo("git/refs", method="POST", data={"ref": "refs/tags/" + tag, "sha": commit})
+
+
+def publish(api, tag, commit, files, body):
+    ensure_tag(api, tag, commit)
+    releases = api.repo("releases?per_page=100")
+    matches = [r for r in releases if r["tag_name"] == tag]
+    require(len(matches) <= 1, "Duplicate version releases")
+    release = matches[0] if matches else api.repo("releases", method="POST", data={
+        "tag_name": tag, "target_commitish": commit, "name": f"NetAudit {tag[1:]} · Windows x64 便携版",
+        "body": body, "draft": True, "prerelease": False})
+    assets = {a["name"]: a for a in release["assets"]}
+    require(len(assets) == len(release["assets"]) and set(assets) <= set(files), "Unexpected release assets")
+    require(release["draft"] or set(assets) == set(files), "Published release is incomplete; refusing mutation")
+    for name, data in sorted(files.items()):
+        if name not in assets:
+            base = release["upload_url"].split("{", 1)[0]
+            expected = f"https://uploads.github.com/repos/{api.repository}/releases/{release['id']}/assets"
+            require(base == expected, "Unexpected upload endpoint")
+            assets[name] = api.request(base + "?name=" + urllib.parse.quote(name),
+                                      method="POST", data=data, upload=True)
+        asset = assets[name]
+        downloaded = api.repo(f"releases/assets/{asset['id']}", binary=True)
+        require(asset["size"] == len(data) and digest(downloaded) == digest(data), "Uploaded asset verification failed: " + name)
+        print(f"Verified {name}: {digest(data)}")
+    if release["draft"]:
+        # The version stays a draft if any upload or verification above fails.
+        release = api.repo(f"releases/{release['id']}", method="PATCH", data={
+            "draft": False, "prerelease": False, "body": body, "make_latest": "true"})
+    require(release["draft"] is False, "Release did not become downloadable")
+    return release["html_url"]
+
+
+def main():
+    config = json.loads((Path(__file__).resolve().parents[1] / ".github/release-source.json").read_text())
+    repository = os.environ.get("GITHUB_REPOSITORY", config["repository"])
+    require(repository == config["repository"], "Publisher repository mismatch")
+    tag = os.environ.get("RELEASE_TAG") or config["tag"]
+    commit = os.environ.get("RELEASE_SOURCE_COMMIT") or config["source_commit"]
+    run_id = os.environ.get("RELEASE_RUN_ID") or config["run_id"]
+    require(re.fullmatch(r"v\d+\.\d+\.\d+", tag) and re.fullmatch(r"[a-f0-9]{40}", commit)
+            and re.fullmatch(r"\d+", run_id), "Invalid release inputs")
+    api = GitHub(repository, os.environ.get("GITHUB_TOKEN", ""))
+    require(api.repo("")["private"] is True, "Expected the existing private repository")
+    run = api.repo(f"actions/runs/{run_id}")
+    validate_run(run, repository, commit)
+    artifacts = api.repo(f"actions/runs/{run_id}/artifacts?per_page=100")["artifacts"]
+    matches = [a for a in artifacts if a["name"] == "NetAudit-windows-x64-" + commit]
+    require(len(matches) == 1 and not matches[0]["expired"], "Verified build artifact missing or expired")
+    artifact = matches[0]
+    expected_digest = artifact.get("digest", "").removeprefix("sha256:")
+    require(re.fullmatch(r"[a-f0-9]{64}", expected_digest), "GitHub artifact digest unavailable")
+    if run_id == config["run_id"]:
+        require(artifact["id"] == config["artifact_id"] and expected_digest == config["artifact_sha256"],
+                "Initial acceptance artifact identity mismatch")
+    archive = api.repo(f"actions/artifacts/{artifact['id']}/zip", binary=True)
+    files, manifest = verify_bundle(archive, commit, run_id, run["run_attempt"], expected_digest)
+    require(tag == "v" + manifest["application_version"], "Tag must match the built application version")
+    url = publish(api, tag, commit, files, notes(repository, tag, manifest, run_id))
+    print("Release: " + url)
+    summary = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary:
+        with open(summary, "a", encoding="utf-8") as f:
+            f.write(f"## Published NetAudit\n\n[Download {tag}]({url})\n\nSource: `{commit}`\n\n")
+            f.write("All nine assets were downloaded and SHA-256 verified before publication.\n")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (ValueError, KeyError, RuntimeError, zipfile.BadZipFile) as exc:
+        print("Release stopped: " + str(exc), file=sys.stderr)
+        sys.exit(1)
