@@ -1,13 +1,17 @@
 # 故障排查
 
-先确认使用的是 [已验收构建](../DELIVERY.md)，并已解压 GitHub 外层产物 ZIP 和内部 `portable.zip`。完整下载步骤见 [Windows 使用说明](../network-config-auditor/docs/WINDOWS.md)。
+先确认从 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest) 的 **Assets** 下载了 `*-portable.zip`，并完整解压一次。若使用开发或备份用的 Actions 产物，需要先解压外层 ZIP，再解压内部便携 ZIP。完整下载步骤见 [常见问题](FAQ.md)，实际校验与验收范围见 [交付记录](../DELIVERY.md)。
+
+## 无法下载或解压后没有程序
+
+私人仓库需要登录有访问权限的 GitHub 账号。优先在 [v0.1.0 发布页](https://github.com/klwb360/NetAudit/releases/tag/v0.1.0) 的 **Assets** 下载便携 ZIP；访问受限时检查当前账号权限，不能通过公开访问获取私人资产。GitHub 自动生成的 “Source code” 只包含源码，不包含 Windows EXE。
 
 ## 双击后没有正常启动
 
 | 现象 | 检查与处理 |
 |---|---|
 | 提示需要 Python 3.10 或更新版本 | 当前运行的是源码版，或 EXE 没有与 BAT 放在同一目录。普通用户下载便携 EXE 包并完整解压；无需安装 Python、pip 或 PyInstaller。 |
-| 提示找不到 EXE 或完整源码 | 确认已经解压内部 `portable.zip`，且运行的是其中的 BAT。不要只下载单个 BAT。 |
+| 提示找不到 EXE 或完整源码 | 确认已经完整解压 Release 的便携 ZIP，且运行的是其中的 BAT；使用 Actions 包时还需解压内部 `portable.zip`。不要只下载单个 BAT。 |
 | EXE 提示缺少运行库、`base_library.zip` 或模块 | 重新完整解压便携 ZIP，保留 `_internal`。可用产物内的 SHA-256 清单检查文件；不要混用不同构建的 EXE 和运行库。 |
 | 启动窗口一闪而过 | 在解压文件夹中打开命令提示符，运行 `Start-NetAudit.bat`，保留窗口中的错误信息。BAT 仅在识别到无参数 Explorer 双击且启动错误时暂停，不能依赖所有启动方式都会停住。 |
 | 单 EXE 等待较久或解压失败 | 等待几秒；确认用户临时目录有可写空间。优先使用便携文件夹版；只读程序目录不要求可写，但临时目录仍需可写。 |

@@ -2,12 +2,12 @@
 
 导入 Cisco、华为或 H3C 的设备配置，在中文本地网页中查看配置问题、风险、原始行号和修改建议，导出 JSON、Markdown 或 HTML 报告。配置处理在本机完成，工具不会连接设备或下发命令。
 
-**[下载已验收的 Windows 便携包](DELIVERY.md)** · [使用说明](network-config-auditor/docs/WINDOWS.md) · [常见问题](docs/FAQ.md) · [故障排查](docs/TROUBLESHOOTING.md)
+**[下载 Windows 便携版](https://github.com/klwb360/NetAudit/releases/latest)** · [v0.1.0 发布页](https://github.com/klwb360/NetAudit/releases/tag/v0.1.0) · [使用说明与常见问题](docs/FAQ.md) · [故障排查](docs/TROUBLESHOOTING.md)
 
 ## Windows：下载后双击使用
 
-1. 登录有权访问本私人仓库的 GitHub 账号，在 [下载与校验记录](DELIVERY.md) 打开构建产物链接。
-2. 解压 GitHub 下载的外层 ZIP，再解压其中名称带 `portable` 的 ZIP；不要在 ZIP 预览窗口中运行。
+1. 登录有权访问本私人仓库的 GitHub 账号，下载 [推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.1.0/NetAudit-0.1.0-windows-x64-f2002b79bd6d-portable.zip)，或在 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest) 的 **Assets** 选择名称以 `-portable.zip` 结尾的文件。
+2. 将便携 ZIP **解压一次**；不要在 ZIP 预览窗口中运行。普通使用无需下载页面自动生成的 “Source code”。
 3. 双击解压文件夹中的 `Start-NetAudit.bat` 或 `NetAudit.exe`，浏览器会自动打开。若未打开，复制启动窗口显示的实际地址到浏览器。
 4. 导入 UTF-8 配置、选择厂商，点击“开始审计”；也可先使用“载入示例”。
 5. 查看发现、严重度和证据，点击 JSON、Markdown 或 HTML 导出。
@@ -21,7 +21,9 @@
 | `*-onefile.exe` | 可独立运行的单 EXE；再次分发时仍需提供许可证、归属说明与对应源码。 |
 | `*-source-*.zip` | 对应完整源码，用于查阅、修改与重建。普通使用无需解压源码。 |
 
-Actions 产物有保留期限。文件名、SHA-256、源码提交、构建环境和有效期见 [交付记录](DELIVERY.md)；后续成功构建见 [Windows 构建列表](https://github.com/klwb360/NetAudit/actions/workflows/netaudit-windows.yml)。不同构建使用各自的校验值。
+Release 同时提供 `SHA256SUMS.txt`、构建清单与验收报告，发布时复用已验收的原始文件。源码提交、SHA-256 和实测范围见 [交付记录](DELIVERY.md)。仓库保持私人，Release 下载也需要访问权限。
+
+开发或备份获取途径：[Windows 构建列表](https://github.com/klwb360/NetAudit/actions/workflows/netaudit-windows.yml) 的 Actions 产物仍可下载，但有保留期限；它包含外层产物 ZIP，需先解压外层，再解压其中的 `portable.zip`。Release 直接提供内部便携 ZIP，只需解压一次。不同构建使用各自的校验值。
 
 ## 能做什么
 
@@ -61,9 +63,10 @@ Windows 可使用 `py -3`，Linux 常用 `python3`。便携版可以用 `NetAudi
 
 | 想了解 | 文档 |
 |---|---|
-| 下载、双击、关闭、迁移 | [Windows 使用说明](network-config-auditor/docs/WINDOWS.md)、[常见问题](docs/FAQ.md) |
+| 下载、双击、关闭、迁移 | [使用说明与常见问题](docs/FAQ.md)；[详细启动说明](network-config-auditor/docs/WINDOWS.md)保留 Actions 包获取方式 |
 | 启动、导入或报告问题 | [故障排查](docs/TROUBLESHOOTING.md) |
 | 开发、测试与 Windows 构建 | [开发指南](docs/DEVELOPMENT.md)、[验证记录](network-config-auditor/docs/TESTING.md) |
+| 发布新版本与下载资产 | [发布指南](docs/RELEASING.md) |
 | 模块职责、数据流与扩展点 | [架构说明](docs/ARCHITECTURE.md) |
 | 规则与上游来源 | [规则目录](network-config-auditor/docs/RULES.md)、[上游审计](network-config-auditor/docs/UPSTREAM_AUDIT.md) |
 | 贡献、反馈与版本变化 | [贡献指南](CONTRIBUTING.md)、[更新记录](CHANGELOG.md) |
@@ -75,6 +78,7 @@ Windows 可使用 `py -3`，Linux 常用 `python3`。便携版可以用 `NetAudi
 NetAudit/
 ├── .github/                  自动构建、问题反馈与 PR 模板
 ├── docs/                     仓库使用、排错、开发与架构资料
+├── tools/                    已验收产物的 Release 发布与校验
 ├── network-config-auditor/
 │   ├── netaudit/             解析、规则、报告、CLI、本地服务与网页
 │   ├── examples/             三厂商合成配置

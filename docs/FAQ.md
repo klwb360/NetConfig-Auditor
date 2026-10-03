@@ -1,12 +1,16 @@
 # 常见问题
 
-面向 Windows 便携版用户。首次使用请看 [Windows 使用说明](../network-config-auditor/docs/WINDOWS.md)，已生成文件、校验值与实测范围见 [下载与交付记录](../DELIVERY.md)。
+面向 Windows 便携版用户。下载入口是 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest)；文件、校验值与实测范围见 [下载与交付记录](../DELIVERY.md)。
 
-## 下载后为什么没有直接看到 NetAudit.exe？
+## 如何下载并开始使用？
 
-GitHub Actions 下载的是外层产物 ZIP。先解压它，再解压其中名称带 `portable` 的 ZIP，进入解压后的便携文件夹，双击 `Start-NetAudit.bat` 或 `NetAudit.exe`。不要在 ZIP 预览窗口内运行。
+使用有访问权限的 GitHub 账号登录，在 [v0.1.0 发布页](https://github.com/klwb360/NetAudit/releases/tag/v0.1.0) 的 **Assets** 下载名称以 `-portable.zip` 结尾的文件，也可点击 [推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.1.0/NetAudit-0.1.0-windows-x64-f2002b79bd6d-portable.zip)。解压一次，进入便携文件夹，双击 `Start-NetAudit.bat` 或 `NetAudit.exe`；在网页导入配置、选择厂商并开始审计。不要在 ZIP 预览窗口内运行。
 
-私人仓库需要使用有访问权限的 GitHub 账号登录。优先选择 [交付记录](../DELIVERY.md) 中已验收的产物；过期后可在 [Windows 构建列表](https://github.com/klwb360/NetAudit/actions/workflows/netaudit-windows.yml) 下载后续成功构建。
+普通使用无需下载 GitHub 自动生成的 “Source code”。Release 随附的 `*-source-*.zip` 是分发所对应的源码，供查阅、修改与重建。
+
+## 为什么有的下载包需要解压两次？
+
+从 Release 下载的便携 ZIP 只需解压一次。开发或备份使用的 [Windows Actions 产物](https://github.com/klwb360/NetAudit/actions/workflows/netaudit-windows.yml) 有外层 ZIP，需先解压外层，再解压其中的 `portable.zip`，才能找到 EXE。Actions 产物有保留期限；Release 下载仍需要私人仓库访问权限。
 
 ## portable 和 onefile 有什么区别？
 
