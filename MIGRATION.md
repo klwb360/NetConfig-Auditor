@@ -10,7 +10,9 @@
 - 保留原目录结构、配置解析、27 条审计规则、网页、报告、测试、构建脚本、依赖锁定、示例、完整 LICENSE、NOTICE 和上游来源说明。
 - 迁移修改仅涉及新仓库下载链接、Windows workflow 的 `main` 分支触发、根 README 与迁移说明。旧仓库内容保留。
 
-新仓库从独立初始提交导入源码快照，旧 Git 历史、PR 讨论、Actions 运行与构建产物仍在原仓库；本文件保留对应出处。新仓库将重新构建并生成与新提交对应的 EXE、便携 ZIP 和 SHA-256，旧产物校验值不能作为新构建的校验值。
+新仓库已从独立初始提交导入源码快照，旧 Git 历史、PR 讨论、Actions 运行与构建产物仍在原仓库；本文件保留对应出处。新仓库已重新构建并生成与新提交对应的 EXE、便携 ZIP 和 SHA-256，旧产物校验值不能作为新构建的校验值。
+
+独立仓库构建对应源码提交：[`16fb4254150f0cfd48014b3b628efc805dec0095`](https://github.com/klwb360/NetAudit/commit/16fb4254150f0cfd48014b3b628efc805dec0095)。[Windows 构建 37101723226](https://github.com/klwb360/NetAudit/actions/runs/37101723226) 在 Windows Server 2022 10.0.20348 AMD64、Python 3.12.10 x64、PyInstaller 6.22.3 环境通过 78 项单元测试和 25 项实际进程验收（源码 9、onedir 8、onefile 8）。[Linux 构建 37101723192](https://github.com/klwb360/NetAudit/actions/runs/37101723192) 的 Python 3.10 / 3.12 / 3.13 检查也全部通过。已实际下载核对产物与包内文件；下载入口、文件名和 SHA-256 见 [DELIVERY.md](DELIVERY.md)。后续文档提交不改变该次 EXE 对应的源码。
 
 原已验收运行（供追溯）：[Windows 构建 37100067081](https://github.com/klwb360/Codex-code/actions/runs/37100067081)，[原构建产物](https://github.com/klwb360/Codex-code/actions/runs/37100067081/artifacts/11265925710)。原 Windows Server 2022 x64 / Python 3.12.10 环境通过 78 项单元测试和 25 项实际进程验收（源码 9、onedir 8、onefile 8）。
 

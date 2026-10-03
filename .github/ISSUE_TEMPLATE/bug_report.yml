@@ -1,0 +1,47 @@
+name: 问题反馈
+description: 报告启动、解析、审计或导出的问题。
+title: "[问题] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请先查看常见问题与故障排查。配置和报告可能含内部信息，请提供合成或人工脱敏的最小样例。
+  - type: input
+    id: version
+    attributes:
+      label: 文件名或源码提交
+      description: 例如下载的 portable ZIP 文件名，或 git rev-parse HEAD 的结果。
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: 系统与启动方式
+      description: Windows 版本，使用 BAT、EXE 还是源码；源码运行时补充 Python 版本。
+    validations:
+      required: true
+  - type: input
+    id: vendor
+    attributes:
+      label: 厂商、设备系列与配置语法
+      description: 如 Cisco IOS、Huawei VRP、H3C Comware；启动问题可填写“不适用”。
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 描述操作或完整命令，注明所选厂商与报告格式。
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: 预期与实际结果
+      description: 写明预期行为、实际行为和相关错误提示。
+    validations:
+      required: true
+  - type: textarea
+    id: sample
+    attributes:
+      label: 脱敏的最小配置或日志（可选）
+      description: 提交前人工检查，不包含真实凭据、完整内部配置或未经检查的报告。
+      render: text

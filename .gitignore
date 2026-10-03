@@ -1,0 +1,18 @@
+# Python and local development
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.coverage
+htmlcov/
+
+# Local data and root-level generated output
+/configs/
+/reports/
+/build/
+/dist/
+
+# Editor / OS files
+*.swp
+.DS_Store
+Thumbs.db
