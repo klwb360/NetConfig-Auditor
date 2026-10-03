@@ -2,11 +2,11 @@
 
 发布使用 [`NetAudit release` 工作流](../.github/workflows/netaudit-release.yml)和 [`tools/publish_release.py`](../tools/publish_release.py)，将已经通过 Windows 验收的原始产物上传为 Release，不重新构建或替换 EXE。仓库保持私人，下载 Release 也需要访问权限。
 
-当前版本：[v0.2.0](https://github.com/klwb360/NetAudit/releases/tag/v0.2.0)。构建源码为 `8a9840601d6c51dbdaff1fbbf62aeaf84cc0b490`，[Windows run 37120272682](https://github.com/klwb360/NetAudit/actions/runs/37120272682) 通过 192 项应用测试与 28 项真实进程检查，[发布 run 37120600936](https://github.com/klwb360/NetAudit/actions/runs/37120600936) 通过 14 项保护测试和全部 9 个附件下载回验。版本标签指向构建源码提交，而不是后来加入发布元数据或更新说明的提交。下载、SHA-256 与验收边界见 [DELIVERY.md](../DELIVERY.md)。旧 [v0.1.0](https://github.com/klwb360/NetAudit/releases/tag/v0.1.0) 与其原始附件保留，不移动标签或覆盖。
+当前版本：[v0.2.1](https://github.com/klwb360/NetAudit/releases/tag/v0.2.1)。构建源码为 `befb38bbecbbaa9d0d97c48c922e50e18c42f462`，[Windows run 37136065995](https://github.com/klwb360/NetAudit/actions/runs/37136065995) 通过 192 项应用测试与 28 项真实进程检查，[发布 run 37136432263](https://github.com/klwb360/NetAudit/actions/runs/37136432263) 通过 14 项保护测试和全部 9 个附件下载回验。界面另有 Linux Chromium 65 项实际检查通过。版本标签指向 EXE 构建源码，而不是后来的发布元数据或文档提交。下载、SHA-256 与验收边界见 [DELIVERY.md](../DELIVERY.md)。旧 [v0.2.0](https://github.com/klwb360/NetAudit/releases/tag/v0.2.0) 与 [v0.1.0](https://github.com/klwb360/NetAudit/releases/tag/v0.1.0) 保留原始附件，不移动标签或覆盖。
 
 ## 发布下一个版本
 
-1. 修改代码时同步项目版本：[`pyproject.toml`](../network-config-auditor/pyproject.toml) 的 `[project].version` 与 [`netaudit/__init__.py`](../network-config-auditor/netaudit/__init__.py) 的 `__version__`。CLI、报告与清单从同一版本常量读取。版本使用 `X.Y.Z`，例如 `0.2.1`；不要复用已经发布的版本标签。
+1. 修改代码时同步项目版本：[`pyproject.toml`](../network-config-auditor/pyproject.toml) 的 `[project].version` 与 [`netaudit/__init__.py`](../network-config-auditor/netaudit/__init__.py) 的 `__version__`。CLI、报告与清单从同一版本常量读取。版本使用 `X.Y.Z`，例如 `0.2.2`；不要复用已经发布的版本标签。
 2. 提交到 main，等待 [NetAudit Windows portable](https://github.com/klwb360/NetAudit/actions/workflows/netaudit-windows.yml) 构建成功。只修改根文档不会自动构建，需要时手动 **Run workflow** 并选择 main。
 3. 记录成功运行的 run ID 和该运行的完整 40 位源码 SHA。确认 `NetAudit-windows-x64-<完整SHA>` 产物尚未过期，`manifest.json` 的版本、源码提交和实际验收报告与本次构建一致。
 4. 打开 [NetAudit release](https://github.com/klwb360/NetAudit/actions/workflows/netaudit-release.yml)，点击 **Run workflow**，选择 **main**，填写下列三个输入。留空时使用 `.github/release-source.json` 已锁定的发行来源；新版本应填写全部三项。
@@ -36,7 +36,7 @@
 | `SHA256SUMS.txt` | 其余八个文件的 SHA-256 |
 | `smoke-source.json`、`smoke-onedir.json`、`smoke-onefile.json` | 三种运行方式的验收报告 |
 
-清单必须记录干净源码、对应 run/attempt 和 Windows AMD64 环境，三份独立报告须与清单一致。v0.1.0 要求至少源码 9 项、onedir 8 项、onefile 8 项；v0.2.0 新增完整流程验收，要求至少源码 10 项、onedir 9 项、onefile 9 项，报告中的全部检查均须通过。包含停服记录的检查必须没有剩余进程、没有强制清理且端口已关闭。
+清单必须记录干净源码、对应 run/attempt 和 Windows AMD64 环境，三份独立报告须与清单一致。v0.1.0 要求至少源码 9 项、onedir 8 项、onefile 8 项；v0.2.0 起新增完整流程验收，要求至少源码 10 项、onedir 9 项、onefile 9 项，报告中的全部检查均须通过。包含停服记录的检查必须没有剩余进程、没有强制清理且端口已关闭。
 
 随后创建或确认版本标签，上传到草稿 Release，并逐个下载回验九个资产的大小与 SHA-256。只有全部通过，才将草稿转为正式 Release 并设置为 latest。这里“发布”仍是私人仓库内提供下载，不改变仓库可见性。
 

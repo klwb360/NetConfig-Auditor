@@ -2,17 +2,17 @@
 
 导入 Cisco、华为或 H3C 的设备配置，完成六个领域的网络架构检查、安全规则审计和本地 CVE / KEV 情报核对；可选使用本机 AI 解释发现，导出 JSON、Markdown 或 HTML 报告。配置处理在本机完成，工具不会连接设备或下发命令。
 
-**[v0.2.0 已发布](https://github.com/klwb360/NetAudit/releases/tag/v0.2.0)**，提供 Windows 便携 ZIP、单 EXE 包、单 EXE 和对应源码；[v0.1.0](https://github.com/klwb360/NetAudit/releases/tag/v0.1.0) 保留下载。正式文件、校验值和实测结果见 [交付记录](DELIVERY.md)。
+**[v0.2.1 已发布](https://github.com/klwb360/NetAudit/releases/tag/v0.2.1)**，提供新版网页工作区、Windows 便携 ZIP、单 EXE 包、单 EXE 和对应源码；[v0.2.0](https://github.com/klwb360/NetAudit/releases/tag/v0.2.0) 与 [v0.1.0](https://github.com/klwb360/NetAudit/releases/tag/v0.1.0) 保留下载。正式文件、校验值和实测结果见 [交付记录](DELIVERY.md)。
 
-**[下载 Windows 便携版](https://github.com/klwb360/NetAudit/releases/latest)** · [v0.2.0 发布页](https://github.com/klwb360/NetAudit/releases/tag/v0.2.0) · [使用说明与常见问题](docs/FAQ.md) · [故障排查](docs/TROUBLESHOOTING.md)
+**[下载 Windows 便携版](https://github.com/klwb360/NetAudit/releases/latest)** · [v0.2.1 发布页](https://github.com/klwb360/NetAudit/releases/tag/v0.2.1) · [使用说明与常见问题](docs/FAQ.md) · [故障排查](docs/TROUBLESHOOTING.md)
 
-**0.2.1 界面优化正在验收**：新版将配置输入与结果分区，增加六个结果页签和集中显示的操作状态。当前下载仍为已发布的 v0.2.0；新版 EXE 与验收记录完成后再更新下载入口。
+新版将配置输入与结果分区，增加六个结果页签和集中显示的操作状态。源码、便携文件夹版与单 EXE 已完成对应版本验收，下载后即可使用。
 
 [下载与双击](#windows下载后双击使用) · [新版网页怎么用](#新版网页怎么用) · [审计流程](#审计流程) · [命令行](#源码与命令行) · [文档索引](#文档导航)
 
 ## Windows：下载后双击使用
 
-1. 登录有权访问本私人仓库的 GitHub 账号，下载 [推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.0/NetAudit-0.2.0-windows-x64-8a9840601d6c-portable.zip)，或在 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest) 的 **Assets** 选择名称以 `-portable.zip` 结尾的文件。
+1. 登录有权访问本私人仓库的 GitHub 账号，下载 [推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.1/NetAudit-0.2.1-windows-x64-befb38bbecbb-portable.zip)，或在 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest) 的 **Assets** 选择名称以 `-portable.zip` 结尾的文件。
 2. 将便携 ZIP **解压一次**；不要在 ZIP 预览窗口中运行。普通使用无需下载页面自动生成的 “Source code”。
 3. 双击解压文件夹中的 `Start-NetAudit.bat` 或 `NetAudit.exe`，浏览器会自动打开。若未打开，复制启动窗口显示的实际地址到浏览器。
 4. 导入 UTF-8 配置、选择厂商，点击“开始审计”；也可先使用“载入示例”。
@@ -35,7 +35,7 @@ Release 同时提供 `SHA256SUMS.txt`、构建清单与验收报告，发布时�
 
 ![NetAudit 0.2.1 本地审计工作台，使用 Cisco 合成示例](docs/images/workspace.png)
 
-以下为 0.2.1 的界面组织；新版本正在验收。宽屏顶部显示审计概览与入门提示，左侧准备配置，右侧查看统计和结果；窄屏会按顺序堆叠。先选择厂商、导入或粘贴配置，再点击“开始审计”。设备版本与本地情报、本机 AI 设置按需展开，普通审计无需填写。
+宽屏顶部显示审计概览与入门提示，左侧准备配置，右侧查看统计和结果；窄屏会按顺序堆叠。先选择厂商、导入或粘贴配置，再点击“开始审计”。设备版本与本地情报、本机 AI 设置按需展开，普通审计无需填写。
 
 | 结果页签 | 查看内容 |
 |---|---|
@@ -154,7 +154,9 @@ NetAudit/
 
 ## 验证与配置保护
 
-v0.2.0 在 Windows Server 2022 x64 / Python 3.12.10 上通过 **192 项单元测试和 28 项真实进程验收**（源码 10、onedir 9、onefile 9）；Linux Python 3.10/3.12/3.13 检查及 Chromium 的 24 项网页检查通过。发布保护的 14 项测试与全部 9 个附件下载回验通过。历史 v0.1.0 的 88 项测试与 25 项进程验收保持原记录。
+v0.2.1 在 Windows Server 2022 x64 / Python 3.12.10 上通过 **192 项单元测试和 28 项真实进程验收**（源码 10、onedir 9、onefile 9）；Linux Python 3.10/3.12/3.13 检查及 Chromium 的 **65 项网页检查**通过。发布保护的 14 项测试与全部 9 个附件下载回验通过。
+
+历史 v0.2.0 的 192 项测试、28 项进程验收与 24 项网页检查，以及 v0.1.0 的 88 项测试与 25 项进程验收保持原记录；旧版本文件和 SHA-256 均保留在 [交付记录](DELIVERY.md)。
 
 真实 Ollama 模型推理、真实 NVD 适用记录、普通非管理员账户、物理无 Python 电脑、Windows 真实桌面交互、Windows 10/11 和 ARM64 尚未实测；AI 使用本机协议替身、NVD 使用合成格式用例验证。范围以 [交付记录](DELIVERY.md) 为准。
 

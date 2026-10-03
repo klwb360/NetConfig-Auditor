@@ -1,6 +1,6 @@
 # 验证记录
 
-## v0.2.1 界面更新：源码与网页验证（2026-10-03）
+## v0.2.1 已发布界面版本验收（2026-10-03）
 
 界面独立参考 `copy-only` 的抽象工作区结构：顶部概览与入门提示、左侧配置、右侧六页签、集中操作与状态、窄屏堆叠。解析器、35 条规则、漏洞适用性、AI 和报告逻辑保留。
 
@@ -10,7 +10,11 @@ Linux Chromium headless 的 **65 项实际网页检查**通过：六页签和 AR
 
 浏览器报告记录最终三个网页文件 SHA-256，运行前后与源码完全一致。首页截图使用清理可选设置后的 Cisco 合成示例，不包含真实配置。该结果是 Linux 浏览器自动化，不能等同于 Windows 人工桌面验收。真实 Ollama 模型未运行，NVD/KEV 匹配用例为标注的合成数据；随包官方 KEV 校验仍独立保留。
 
-新版 Windows onedir / onefile 的实际构建与进程验收尚待对应 runner；通过后再发布新版本，不覆盖 v0.2.0 或 v0.1.0。最终文件和环境见 [交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md)。
+实际源码及 Release 标签对应 `befb38bbecbbaa9d0d97c48c922e50e18c42f462`。[Windows 构建 37136065995](https://github.com/klwb360/NetAudit/actions/runs/37136065995) 在 Windows Server 2022 10.0.20348 AMD64 / Python 3.12.10 x64 / PyInstaller 6.22.3 / runner image 20260927.320.1 通过 **192 项应用测试、28 项真实进程验收**（源码 10、onedir 9、onefile 9）。[Linux CI 37136065998](https://github.com/klwb360/NetAudit/actions/runs/37136065998) 的 Python 3.10 / 3.12 / 3.13 全部通过。
+
+[发布运行 37136432263](https://github.com/klwb360/NetAudit/actions/runs/37136432263) 的 14 项保护测试与全部 9 个附件下载回验通过，[v0.2.1](https://github.com/klwb360/NetAudit/releases/tag/v0.2.1) 已正式发布。实际下载后另行核对全部 ZIP CRC/SHA、78 个完整对应源码文件和 PNG、原许可证与官方情报字节、运行库、AMD64 PE；直接提取 onefile 内嵌的三个网页资源并确认与源码、onedir 和实际服务内容一致。Windows 继续检查路径、BAT/CLI、端口回退、只读目录、报告与流程、默认启动、退出和临时目录；全部停服无剩余进程/无强制清理/端口关闭。
+
+新版本不覆盖 v0.2.0 或 v0.1.0。后续发布元数据及文档提交不改变对应 EXE；最终文件、SHA-256 与未测边界见 [交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md)。
 
 ## v0.2.0 已发布版本验收（2026-10-03）
 

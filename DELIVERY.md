@@ -1,5 +1,55 @@
 # NetAudit Windows 下载与交付检查点
 
+2026-10-03：私人仓库 `klwb360/NetAudit` 已发布 **v0.2.1 界面优化版**。旧 v0.2.0 与 v0.1.0 及其原始文件继续保留。
+
+[打开 v0.2.1 Release](https://github.com/klwb360/NetAudit/releases/tag/v0.2.1) · **[直接下载推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.1/NetAudit-0.2.1-windows-x64-befb38bbecbb-portable.zip)**（需登录有权限的 GitHub 账号）。共 9 个原始附件，包含便携 ZIP、单 EXE 配套 ZIP、独立 EXE、对应源码、构建清单、三份验收报告和 SHA-256。
+
+使用：下载 → 解压一次 → 双击 BAT 或 EXE → 导入配置 → 开始审计 → 切换结果页签 → 查看与导出。关闭回到启动窗口按 Ctrl+C；迁移时复制整个文件夹，包括 `_internal`。
+
+## v0.2.1 界面优化
+
+独立参考 `copy-only` 的概览、主题分区、内容与操作分离以及窄屏层次，整理为顶部概览和三步入门提示、左侧配置/折叠情报与 AI、右侧摘要与六页签。页签为安全发现、网络架构、漏洞情报、AI 建议、报告与清单、使用帮助；支持键盘方向键、Home/End 和原生按钮操作，切换保留输入。
+
+修改配置、厂商或可选情报/模型设置后，旧结果和导出失效，需重新审计。进行中修改输入及慢文件读取期间启动旧文本审计，都不会把旧快照保留为新输入的结果。字体、证据文本与状态对比度已优化，桌面左右布局、窄屏堆叠。首页附 [真实合成示例截图](docs/images/workspace.png)。
+
+解析器、35 条规则、六阶段流程、CVE/KEV、可选本机 AI 及三种报告逻辑保留。无外部字体、CDN 或新运行时依赖；原许可证和来源说明保留。
+
+## v0.2.1 实际生成文件
+
+| 文件 | SHA-256 |
+|---|---|
+| `NetAudit-0.2.1-windows-x64-befb38bbecbb-portable.zip` | `67e207dc67a6ce0d3c09fb6f69f0fb7de62ab46ca2273673c6034ca9014d7f9d` |
+| `NetAudit-0.2.1-windows-x64-befb38bbecbb-onefile.zip` | `4498444bdbc5f36816fe71b1fa730c3440b92d1937b3e49a21759ab632ad55a4` |
+| `NetAudit-0.2.1-windows-x64-befb38bbecbb-onefile.exe` | `a20572e92de8891b6f4f27204a4a7fccef3ebe0facc907a2d7aeb1dba013e3d8` |
+| `NetAudit-0.2.1-source-befb38bbecbb.zip` | `7d9b3c654a727269dbec07d2df40b8f4295d69ec868e4877e4cdc49341cef44e` |
+
+实际 EXE 源码与 Release 标签指向 [`befb38bbecbbaa9d0d97c48c922e50e18c42f462`](https://github.com/klwb360/NetAudit/commit/befb38bbecbbaa9d0d97c48c922e50e18c42f462)。后续发布元数据和文档提交不改变 EXE 或附件字节。两包均提供完整对应源码、原 LICENSE/NOTICE、运行库许可、示例、网页和官方情报来源资料。
+
+备用下载：[Actions 原始产物](https://github.com/klwb360/NetAudit/actions/runs/37136065995/artifacts/11278162885)，保留至 2027-01-01。Actions 外层 ZIP SHA-256：`06ce04dae8a15f345a159dbdcd5bdfcb50ae9b6954887379d65442aaa9ebee40`。Release 附件即其中原始文件；下载 Release 便携 ZIP 只需解压一次。
+
+## v0.2.1 实际验收
+
+| 环境与检查 | 结果与证据 |
+|---|---|
+| Windows Server 2022 10.0.20348 AMD64；Python 3.12.10 x64、PyInstaller 6.22.3；runner image 20260927.320.1 | [构建 37136065995](https://github.com/klwb360/NetAudit/actions/runs/37136065995)：192 项应用测试、28 项真实进程检查通过（源码 10、onedir 9、onefile 9） |
+| Linux CI；Python 3.10 / 3.12 / 3.13 | [运行 37136065998](https://github.com/klwb360/NetAudit/actions/runs/37136065998)：三个版本全部通过 |
+| 本地 Linux Python 3.12.14、Chromium headless | 192 项应用测试、65 项实际网页检查通过，0 JavaScript 错误；1440×1000、390×844、320×844 六页无整页横向溢出 |
+| 发布器 | [运行 37136432263](https://github.com/klwb360/NetAudit/actions/runs/37136432263)：14 项保护测试与全部 9 个附件下载回验通过，再正式发布 |
+
+网页验证包括六页签及键盘焦点、中文 UTF-8 导入、输入/情报文件保留、导出失效及异步竞态、原架构和情报流程、严重度筛选、三种真实下载、可选 AI 本机 HTTP 协议、恶意模型文本与 HTML 导出转义；最终三个网页文件 SHA 在整个检查期间不变，与本次源码和冻结版实际服务的资源 SHA 一致。截图使用清理可选设置后的 Cisco 合成示例。
+
+Windows 三种运行形式继续覆盖中文/空格路径、BAT/CLI 返回码与无暂停、端口占用回退、资源加载、三厂商/三导出、完整流程、只读目录、默认启动与浏览器调用、退出和临时目录清理。报告全部停服记录无剩余进程、无强制清理且端口关闭。
+
+实际下载后独立核对外层 SHA、全部 ZIP CRC、8 个顶层校验值、onedir 127 / onefile 64 个包内校验值、78 个完整对应源码文件、PNG 原始字节、原 GPL/NOTICE/CC0、官方情报字节、AMD64 PE 与运行库；直接解析 onefile CArchive，提取三个网页文件、四个情报文件和 `base_library.zip`，与 onedir/源码对应内容一致。Linux 独立核对不执行 Windows EXE，真实 EXE 进程验证由上述 Windows runner 完成。
+
+## v0.2.1 未测边界
+
+尚未实测真实 Ollama 模型质量、实际设备 NVD 适用条件、普通非管理员账户、物理独立无 Python 的电脑、Windows 10/11、ARM64，以及 Windows Explorer 人工双击/系统默认浏览器可视交互。AI 使用本机 HTTP 协议替身，NVD 匹配使用明确合成数据；官方 KEV 快照与许可另行核对。Linux Chromium 页面验收不能等同于 Windows 人工桌面验收。冻结版通过限制 PATH/移除 Python 环境验证随包运行库，构建 runner 本身仍安装 Python。
+
+以下保留旧版本交付历史，其中的文件、提交、下载与测试数量仅对应各自版本；当前下载以本页上方 v0.2.1 与其 Release 清单为准。
+
+## v0.2.0 历史交付记录
+
 2026-10-03：私人仓库 `klwb360/NetAudit` 已发布 **v0.2.0**。原仓库、已合并的 PR #1、许可证和归属继续保留；旧 v0.1.0 不覆盖。
 
 [打开 v0.2.0 Release](https://github.com/klwb360/NetAudit/releases/tag/v0.2.0) · **[直接下载推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.0/NetAudit-0.2.0-windows-x64-8a9840601d6c-portable.zip)**（需登录有权访问本私人仓库的 GitHub 账号）。共 9 个原始附件，包含 Windows 便携 ZIP、单 EXE 包、独立 EXE、对应源码、构建清单、三份验收报告和校验文件。
@@ -48,7 +98,7 @@ AI 已通过实际本机 HTTP 协议替身的单元、CLI、网页和 Windows �
 
 普通非管理员 Windows 账户、物理上未安装 Python 的独立电脑、Explorer 人工双击、系统默认浏览器可视交互与文件选择/下载对话框、Windows 10/11、ARM64 尚未实测。冻结版验收去除 Python 环境并限制 PATH；构建 runner 本身仍安装 Python，不能视为独立无 Python 电脑的实测。
 
-以下保留 **v0.1.0 历史交付记录**，其中文件名、下载、提交与测试数仅对应旧版；当前版本以本页上方 v0.2.0 和对应 Release 清单为准。
+以下保留 **v0.1.0 历史交付记录**，其中文件名、下载、提交与测试数仅对应旧版；该历史版本以本节 v0.2.0 和对应 Release 清单为准。
 
 ## v0.1.0 历史交付记录
 
