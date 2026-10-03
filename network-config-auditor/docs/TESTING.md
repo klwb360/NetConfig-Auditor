@@ -2,13 +2,15 @@
 
 ## v0.2.0 本地验证（2026-10-03）
 
-当前源码已完成六阶段审计流程。Linux Python 3.12.14 上 191 项应用测试通过，原解析/规则与启动测试继续保留；另有 14 项 Release 发布保护测试通过。源码真实进程 5 项检查通过，覆盖新情报资源、精确 CPE/NVD 条件、三种导出、AI 协议、中文与空格路径、只读目录、端口回退和退出清理。
+当前源码已完成六阶段审计流程。Linux Python 3.12.14 上 192 项应用测试通过，原解析/规则与启动测试继续保留；另有 14 项 Release 发布保护测试通过。源码真实进程 5 项检查通过，覆盖新情报资源、精确 CPE/NVD 条件、三种导出、AI 协议、中文与空格路径、只读目录、端口回退和退出清理。
 
 Linux Chromium headless 的 24 项实际网页检查通过：文件导入、示例、六域与流程、精确匹配和候选区分、严重度筛选、三种真实下载、AI 设置、模型文字转义及桌面/移动布局。HTML/CSS/JavaScript 完整加载，未见脚本错误，测试服务均关闭。该检查不是 Windows 人工桌面验收。
 
 真实 CISA KEV 快照为 2026.10.02 / 1733 条，原始文件 SHA、来源和 CC0 许可证已核对。NVD 官方 API 在本次环境被网络代理返回 403；NVD 测试采用明确标注的合成适用条件，不能作为真实设备漏洞适用证明。AI 使用真实 loopback HTTP 协议测试服务，尚未运行实际 Ollama 模型；模型解释质量与真实设备整改均需另行验证。
 
 标准 0.2.0 wheel 构建与资源核对、Python 编译、JavaScript 语法和 3 项上游复现检查通过。新版 Windows onedir/onefile 尚待对应 runner 结果；最终源码提交、下载和验收环境见 [交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md)。
+
+首次 [Windows 检查 37119894388](https://github.com/klwb360/NetAudit/actions/runs/37119894388) 因 Git 检出转换 KEV 换行而触发官方文件 SHA 校验失败，未生成分发 EXE。项目 `.gitattributes` 保持情报数据及许可证的原始字节，并用 Windows `core.autocrlf=true` 检出模拟回归。数据校验继续要求完整原始 SHA；最终 EXE 验收以修复后的成功构建为准。
 
 ## 已交付版本验收（2026-10-03）
 
