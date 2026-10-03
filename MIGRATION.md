@@ -12,10 +12,12 @@
 
 新仓库已从独立初始提交导入源码快照，旧 Git 历史、PR 讨论、Actions 运行与构建产物仍在原仓库；本文件保留对应出处。新仓库已重新构建并生成与新提交对应的 EXE、便携 ZIP 和 SHA-256，旧产物校验值不能作为新构建的校验值。
 
-独立仓库构建对应源码提交：[`16fb4254150f0cfd48014b3b628efc805dec0095`](https://github.com/klwb360/NetAudit/commit/16fb4254150f0cfd48014b3b628efc805dec0095)。[Windows 构建 37101723226](https://github.com/klwb360/NetAudit/actions/runs/37101723226) 在 Windows Server 2022 10.0.20348 AMD64、Python 3.12.10 x64、PyInstaller 6.22.3 环境通过 78 项单元测试和 25 项实际进程验收（源码 9、onedir 8、onefile 8）。[Linux 构建 37101723192](https://github.com/klwb360/NetAudit/actions/runs/37101723192) 的 Python 3.10 / 3.12 / 3.13 检查也全部通过。已实际下载核对产物与包内文件；下载入口、文件名和 SHA-256 见 [DELIVERY.md](DELIVERY.md)。后续文档提交不改变该次 EXE 对应的源码。
+独立仓库首次构建对应源码提交：[`16fb4254150f0cfd48014b3b628efc805dec0095`](https://github.com/klwb360/NetAudit/commit/16fb4254150f0cfd48014b3b628efc805dec0095)。[Windows 构建 37101723226](https://github.com/klwb360/NetAudit/actions/runs/37101723226) 在 Windows Server 2022 10.0.20348 AMD64、Python 3.12.10 x64、PyInstaller 6.22.3 环境通过 78 项单元测试和 25 项实际进程验收（源码 9、onedir 8、onefile 8）。[Linux 构建 37101723192](https://github.com/klwb360/NetAudit/actions/runs/37101723192) 的 Python 3.10 / 3.12 / 3.13 检查也全部通过。已实际下载核对产物与包内文件；下载入口、文件名和 SHA-256 见 [DELIVERY.md](DELIVERY.md)。后续文档提交不改变该次 EXE 对应的源码。
 
 原已验收运行（供追溯）：[Windows 构建 37100067081](https://github.com/klwb360/Codex-code/actions/runs/37100067081)，[原构建产物](https://github.com/klwb360/Codex-code/actions/runs/37100067081/artifacts/11265925710)。原 Windows Server 2022 x64 / Python 3.12.10 环境通过 78 项单元测试和 25 项实际进程验收（源码 9、onedir 8、onefile 8）。
 
 验收范围：含中文及空格路径、CLI 返回码与无暂停、端口冲突回退、完整网页资源、三厂商及三种报告、无参数打开浏览器的自动化调用、只读位置、退出无遗留服务。冻结版进程通过去除 Python 相关环境变量并限制 PATH 验证其使用随包运行库。尚未在物理无 Python 的电脑、普通非管理员账户、Windows 10/11 或 ARM64 上实测；默认浏览器真实窗口与资源管理器双击未作人工实测。
 
 使用方式见 [Windows 使用说明](network-config-auditor/docs/WINDOWS.md)。许可证与归属说明继续见 [LICENSE](network-config-auditor/LICENSE) 和 [NOTICE](network-config-auditor/NOTICE)。
+
+后续仓库资料与构建验收工具维护已经完成；最新已验收构建及对应源码、校验值见 [DELIVERY.md](DELIVERY.md)，旧迁移与首次验收记录继续保留。
