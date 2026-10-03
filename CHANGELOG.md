@@ -2,7 +2,7 @@
 
 应用版本以 `network-config-auditor/pyproject.toml` 为准。构建文件名同时包含源码提交前 12 位；同一应用版本的不同提交具有各自 SHA-256。
 
-## 0.2.0 — Unreleased
+## 0.2.0 — 2026-10-03
 
 - 将配置解析、六域架构检查、安全规则、CVE / KEV、本机可选 AI 和报告输出组织为同一审计流程，网页、CLI 与三种报告展示一致的阶段状态。
 - 新增显式 STP 与 IPv4 OSPF 配置解析和审计，保留未知状态及单设备离线检查边界；原有 27 条配置规则保留，共 35 个规则 ID。
@@ -11,7 +11,10 @@
 - 增加显式 `intel-update` 官方 KEV 下载，默认审计保持离线，更新输出使用用户目录。
 - 增加显式启用的本机 Ollama 解释；未启用、模型不可用或解释失败时保留规则和情报结果，模型输出作为待人工审阅建议。
 - JSON 报告升级为 schema 1.1，保留原有字段并增加架构、情报、AI 和流程信息；Markdown / HTML 保留相同结论与来源。
-- 同步升级源码版、Windows onedir 便携 ZIP 和 onefile EXE，v0.1.0 保留。新版构建、测试与下载校验正在执行，真实记录发布后补齐。
+- 发布 [v0.2.0](https://github.com/klwb360/NetAudit/releases/tag/v0.2.0)，提供源码版、Windows onedir 便携 ZIP 和 onefile EXE，共 9 个附件；v0.1.0 保留。
+- Windows Server 2022 x64 通过 192 项单元测试与 28 项真实进程验收（源码 10、onedir 9、onefile 9）；Linux Python 3.10 / 3.12 / 3.13 与 Chromium 24 项网页检查通过。
+- 发布保护 14 项测试通过，全部 9 个附件上传后下载回验；Release 标签指向实际 EXE 源码提交 `8a9840601d6c51dbdaff1fbbf62aeaf84cc0b490`。
+- AI 使用本机协议替身、NVD 使用合成格式用例；真实模型推理与真实 NVD 产品适用性，以及未列为实测的 Windows 人工/物理环境仍待验证。
 
 ## Release 下载 — 2026-10-03
 

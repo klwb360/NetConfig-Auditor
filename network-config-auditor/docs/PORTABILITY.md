@@ -1,10 +1,14 @@
 # Windows 便携化与验收记录
 
-## v0.2.0 升级状态
+## v0.2.0 发布与验收（2026-10-03）
 
 v0.2.0 在原有便携入口上扩展六域架构、离线 CVE / KEV 和可选本机 AI，源码、onedir、onefile 三种运行形式使用相同审计流程。网页、情报快照和来源资料均需随包保留；资源路径不依赖当前目录，默认不联网、不向安装目录写运行数据。显式情报更新保存到用户指定路径或用户缓存/临时目录，Ollama 是可选外部本机服务，不影响无需 Python 的便携配置审计。
 
-新版 Windows 构建和进程验收正在执行；本页下方的旧提交、78 / 88 项测试和 25 项进程记录是 v0.1.0 历史验收，不能用作 v0.2.0 EXE 或新增模型的验收结果。正式新版文件、环境、校验值与未实测项以 [当前交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md) 和该构建报告为准。v0.1.0 保留下载，不覆盖已发布字节。
+[v0.2.0 Release](https://github.com/klwb360/NetAudit/releases/tag/v0.2.0) 已提供 9 个附件，实际 EXE 对应源码 `8a9840601d6c51dbdaff1fbbf62aeaf84cc0b490`。Windows Server 2022 x64 / Python 3.12.10 / PyInstaller 6.22.3 的 [构建 37120272682](https://github.com/klwb360/NetAudit/actions/runs/37120272682) 通过 **192 项单元测试和 28 项真实进程验收**（源码 10、onedir 9、onefile 9）。[Linux 构建 37120272642](https://github.com/klwb360/NetAudit/actions/runs/37120272642) 的 Python 3.10 / 3.12 / 3.13 检查通过，另有 Linux Chromium 24 项网页自动检查通过。[发布运行 37120600936](https://github.com/klwb360/NetAudit/actions/runs/37120600936) 通过 14 项发布保护测试，9 个附件上传后逐个下载回验。
+
+真实 Ollama 模型推理与真实 NVD 产品适用记录尚未实测；AI 使用本机协议替身、NVD 使用合成格式用例验证。普通非管理员账户、物理无 Python 电脑、Windows 10/11、ARM64 和 Windows 真人桌面交互仍待验证，不能从自动进程测试推定通过。
+
+本页下方的旧提交、78 / 88 项测试和 25 项进程记录是 v0.1.0 历史验收。新版文件、环境、校验值与未测项以 [当前交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md) 和该构建报告为准；v0.1.0 保留下载，不覆盖已发布字节。
 
 ## 开始时的状态
 
@@ -44,7 +48,7 @@ python tools/build_windows.py
 
 Linux 源码单元测试、静态检查或打包入口检查不能代替 Windows EXE 验收。自动测试默认浏览器调用与打开完整网页资源；真实 Windows 桌面的双击、浏览器可视交互、下载保存对话框仍需人工验证。具体结果以本次构建的验收 JSON 和 Actions 日志为准。
 
-## 已交付版本的实际验收（2026-10-03）
+## v0.1.0 已交付版本的实际验收（2026-10-03）
 
 - 原仓库源码提交 `741bb5a70e675e28735da1182ab0cc9f1de33773` 在 [Windows 构建 37100067081](https://github.com/klwb360/Codex-code/actions/runs/37100067081) 通过 78 项单元测试与 25 项实际进程验收。
 - 独立仓库迁移后源码提交 `16fb4254150f0cfd48014b3b628efc805dec0095` 在 [Windows 构建 37101723226](https://github.com/klwb360/NetAudit/actions/runs/37101723226) 再次通过 78 项单元测试与 25 项实际进程验收（源码 9、onedir 8、onefile 8）。环境为 Windows Server 2022 10.0.20348 AMD64、Python 3.12.10 x64、PyInstaller 6.22.3，runner image 20260927.320.1。

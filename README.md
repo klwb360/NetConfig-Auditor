@@ -2,13 +2,13 @@
 
 导入 Cisco、华为或 H3C 的设备配置，完成六个领域的网络架构检查、安全规则审计和本地 CVE / KEV 情报核对；可选使用本机 AI 解释发现，导出 JSON、Markdown 或 HTML 报告。配置处理在本机完成，工具不会连接设备或下发命令。
 
-**v0.2.0 正在完成构建与验收**，以下升级功能对应当前源码；已发布的 v0.1.0 保留下载。正式文件、校验值和实测结果以 [交付记录](DELIVERY.md) 为准。
+**[v0.2.0 已发布](https://github.com/klwb360/NetAudit/releases/tag/v0.2.0)**，提供 Windows 便携 ZIP、单 EXE 包、单 EXE 和对应源码；[v0.1.0](https://github.com/klwb360/NetAudit/releases/tag/v0.1.0) 保留下载。正式文件、校验值和实测结果见 [交付记录](DELIVERY.md)。
 
-**[下载 Windows 便携版](https://github.com/klwb360/NetAudit/releases/latest)** · [v0.1.0 发布页](https://github.com/klwb360/NetAudit/releases/tag/v0.1.0) · [使用说明与常见问题](docs/FAQ.md) · [故障排查](docs/TROUBLESHOOTING.md)
+**[下载 Windows 便携版](https://github.com/klwb360/NetAudit/releases/latest)** · [v0.2.0 发布页](https://github.com/klwb360/NetAudit/releases/tag/v0.2.0) · [使用说明与常见问题](docs/FAQ.md) · [故障排查](docs/TROUBLESHOOTING.md)
 
 ## Windows：下载后双击使用
 
-1. 登录有权访问本私人仓库的 GitHub 账号，下载 [推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.1.0/NetAudit-0.1.0-windows-x64-f2002b79bd6d-portable.zip)，或在 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest) 的 **Assets** 选择名称以 `-portable.zip` 结尾的文件。
+1. 登录有权访问本私人仓库的 GitHub 账号，下载 [推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.0/NetAudit-0.2.0-windows-x64-8a9840601d6c-portable.zip)，或在 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest) 的 **Assets** 选择名称以 `-portable.zip` 结尾的文件。
 2. 将便携 ZIP **解压一次**；不要在 ZIP 预览窗口中运行。普通使用无需下载页面自动生成的 “Source code”。
 3. 双击解压文件夹中的 `Start-NetAudit.bat` 或 `NetAudit.exe`，浏览器会自动打开。若未打开，复制启动窗口显示的实际地址到浏览器。
 4. 导入 UTF-8 配置、选择厂商，点击“开始审计”；也可先使用“载入示例”。
@@ -131,7 +131,9 @@ NetAudit/
 
 ## 验证与配置保护
 
-历史 v0.1.0 已验收构建在 Windows Server 2022 x64 / Python 3.12.10 上通过 **88 项测试和 25 项进程验收**；Linux Python 3.10/3.12/3.13 检查也通过。v0.2.0 的测试、EXE 和新增功能验收正在执行，不能沿用旧版本数字作为新版验收结果。普通非管理员账户、物理无 Python 电脑、真实桌面交互、Windows 10/11 和 ARM64 尚未实测，范围以 [交付记录](DELIVERY.md) 为准。
+v0.2.0 在 Windows Server 2022 x64 / Python 3.12.10 上通过 **192 项单元测试和 28 项真实进程验收**（源码 10、onedir 9、onefile 9）；Linux Python 3.10/3.12/3.13 检查及 Chromium 的 24 项网页检查通过。发布保护的 14 项测试与全部 9 个附件下载回验通过。历史 v0.1.0 的 88 项测试与 25 项进程验收保持原记录。
+
+真实 Ollama 模型推理、真实 NVD 适用记录、普通非管理员账户、物理无 Python 电脑、Windows 真实桌面交互、Windows 10/11 和 ARM64 尚未实测；AI 使用本机协议替身、NVD 使用合成格式用例验证。范围以 [交付记录](DELIVERY.md) 为准。
 
 网页仅监听 `127.0.0.1`，资源随程序提供，上传配置不持久保存。默认不请求外部情报或模型；本机 AI 仅在用户显式选择模型后调用，发送内容与限制见 [AI 说明](network-config-auditor/docs/AI.md)。报告仍含网络结构，自动脱敏也不能覆盖所有自定义字段。真实配置放在项目 `configs/`，报告放在 `reports/`；问题反馈使用合成或人工脱敏的最小样例。
 

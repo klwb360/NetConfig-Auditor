@@ -1,10 +1,10 @@
 # 常见问题
 
-面向 Windows 便携版用户。v0.2.0 新增能力对应正在验收的当前源码；发布前可继续使用已有 v0.1.0。下载入口是 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest)；文件、校验值与实测范围见 [下载与交付记录](../DELIVERY.md)。
+面向 Windows 便携版用户。当前正式版本为 v0.2.0；旧版 v0.1.0 保留。下载入口是 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest)；文件、校验值与实测范围见 [下载与交付记录](../DELIVERY.md)。
 
 ## 如何下载并开始使用？
 
-使用有访问权限的 GitHub 账号登录，在 [v0.1.0 发布页](https://github.com/klwb360/NetAudit/releases/tag/v0.1.0) 的 **Assets** 下载名称以 `-portable.zip` 结尾的文件，也可点击 [推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.1.0/NetAudit-0.1.0-windows-x64-f2002b79bd6d-portable.zip)。解压一次，进入便携文件夹，双击 `Start-NetAudit.bat` 或 `NetAudit.exe`；在网页导入配置、选择厂商并开始审计。不要在 ZIP 预览窗口内运行。
+使用有访问权限的 GitHub 账号登录，在 [v0.2.0 发布页](https://github.com/klwb360/NetAudit/releases/tag/v0.2.0) 的 **Assets** 下载名称以 `-portable.zip` 结尾的文件，也可点击 [推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.0/NetAudit-0.2.0-windows-x64-8a9840601d6c-portable.zip)。解压一次，进入便携文件夹，双击 `Start-NetAudit.bat` 或 `NetAudit.exe`；在网页导入配置、选择厂商并开始审计。不要在 ZIP 预览窗口内运行。
 
 普通使用无需下载 GitHub 自动生成的 “Source code”。Release 随附的 `*-source-*.zip` 是分发所对应的源码，供查阅、修改与重建。
 
@@ -25,7 +25,7 @@
 
 便携 EXE 自带 Python 运行库；源码版 BAT 需要 Python 3.10 或更新版本。普通使用设计为无需管理员权限，报告请选择自己有写入权限的位置。
 
-当前实际验收在 Windows Server 2022 x64 完成。Windows 10/11、普通非管理员账户、物理上未安装 Python 的独立电脑及真实浏览器交互尚未实测；详见 [交付记录](../DELIVERY.md)。
+v0.2.0 在 Windows Server 2022 x64 完成 192 项单元测试与 28 项真实进程验收；Linux Chromium 24 项网页自动检查通过。Windows 10/11、ARM64、普通非管理员账户、物理上未安装 Python 的独立电脑及 Windows 真实浏览器交互尚未实测；详见 [交付记录](../DELIVERY.md)。
 
 ## 配置文件如何准备，支持哪些设备？
 

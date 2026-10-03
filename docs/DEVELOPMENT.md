@@ -101,9 +101,11 @@ python tools/build_windows.py
 |---|---|---|
 | [Network Config Auditor](../.github/workflows/network-config-auditor.yml) | push / pull request 修改项目目录或该工作流 | Linux Python 3.10、3.12、3.13：单元测试、上游复现、wheel 构建 |
 | [NetAudit Windows portable](../.github/workflows/netaudit-windows.yml) | main 分支 push 修改项目目录或 Windows 工作流；也可手动运行 | Windows Server 2022、Python 3.12.10 x64：单元测试、源码/onedir/onefile 验收与上传 |
-| [NetAudit release](../.github/workflows/netaudit-release.yml) | main 修改发布工作流、发布脚本或 `.github/release-source.json`；也可手动运行 | 验证成功 Windows 构建的九个原始文件，上传草稿、下载回验后发布 Release |
+| [NetAudit release](../.github/workflows/netaudit-release.yml) | main 修改发布工作流或 `.github/release-source.json`；也可手动运行 | 验证成功 Windows 构建的九个原始文件，上传草稿、下载回验后发布 Release |
 
 只修改根目录说明或根 `docs/` 不会自动触发上述工作流。需要重新生成便携包时，进入 [Windows Actions 页面](https://github.com/klwb360/NetAudit/actions/workflows/netaudit-windows.yml)，选择 **Run workflow** 和所需分支；用于正式发布的构建必须来自 main。验收失败时如已生成 JSON 报告，会上传 `NetAudit-windows-diagnostics-<完整提交>`（保留 14 天），用于定位失败；其中没有可分发的 EXE。成功后在该次运行的 **Artifacts** 下载 `NetAudit-windows-x64-<完整提交>`；私人仓库下载需要相应权限，当前保留期为 90 天。以对应运行的清单和校验和为准，不把旧文件的哈希用于新构建。
+
+当前已发布 [v0.2.0](https://github.com/klwb360/NetAudit/releases/tag/v0.2.0)，标签与 EXE 对应源码为 `8a9840601d6c51dbdaff1fbbf62aeaf84cc0b490`。[Windows 构建 37120272682](https://github.com/klwb360/NetAudit/actions/runs/37120272682) 通过 192 项单元测试与 28 项真实进程验收，[Linux 构建 37120272642](https://github.com/klwb360/NetAudit/actions/runs/37120272642) 三个 Python 版本通过；Linux Chromium 24 项网页检查通过。[发布运行 37120600936](https://github.com/klwb360/NetAudit/actions/runs/37120600936) 的 14 项保护测试与 9 个附件下载回验通过。AI 本机协议替身和 NVD 合成格式用例不等于真实模型或真实 NVD 适用范围验收。
 
 普通用户优先从 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest) 下载便携 ZIP，只需解压一次。Actions 下载是外层产物 ZIP，开发或备份使用时需先解压外层，再解压内部便携 ZIP。发布工作流复用成功构建的字节，不重新构建 EXE；输入、版本标签和重试规则见 [发布指南](RELEASING.md)。
 

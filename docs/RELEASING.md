@@ -2,11 +2,11 @@
 
 发布使用 [`NetAudit release` 工作流](../.github/workflows/netaudit-release.yml)和 [`tools/publish_release.py`](../tools/publish_release.py)，将已经通过 Windows 验收的原始产物上传为 Release，不重新构建或替换 EXE。仓库保持私人，下载 Release 也需要访问权限。
 
-当前版本：[v0.1.0](https://github.com/klwb360/NetAudit/releases/tag/v0.1.0)。其构建源码是 `f2002b79bd6da91e2a29f741c8483951e20bba86`，成功 [Windows run 为 37116561468](https://github.com/klwb360/NetAudit/actions/runs/37116561468)，[发布 run 为 37118017366](https://github.com/klwb360/NetAudit/actions/runs/37118017366)。版本标签指向构建源码提交，而不是后来加入发布脚本或更新说明的提交。下载、SHA-256 与验收边界见 [DELIVERY.md](../DELIVERY.md)。
+当前版本：[v0.2.0](https://github.com/klwb360/NetAudit/releases/tag/v0.2.0)。构建源码为 `8a9840601d6c51dbdaff1fbbf62aeaf84cc0b490`，[Windows run 37120272682](https://github.com/klwb360/NetAudit/actions/runs/37120272682) 通过 192 项应用测试与 28 项真实进程检查，[发布 run 37120600936](https://github.com/klwb360/NetAudit/actions/runs/37120600936) 通过 14 项保护测试和全部 9 个附件下载回验。版本标签指向构建源码提交，而不是后来加入发布元数据或更新说明的提交。下载、SHA-256 与验收边界见 [DELIVERY.md](../DELIVERY.md)。旧 [v0.1.0](https://github.com/klwb360/NetAudit/releases/tag/v0.1.0) 与其原始附件保留，不移动标签或覆盖。
 
 ## 发布下一个版本
 
-1. 修改代码时同步项目版本：[`pyproject.toml`](../network-config-auditor/pyproject.toml) 的 `[project].version`、[`netaudit/__init__.py`](../network-config-auditor/netaudit/__init__.py) 的 `__version__`，以及 [`rules.py`](../network-config-auditor/netaudit/rules.py) 中报告的 `tool_version`。版本使用 `X.Y.Z`，例如 `0.1.1`；不要复用已经发布的版本标签。
+1. 修改代码时同步项目版本：[`pyproject.toml`](../network-config-auditor/pyproject.toml) 的 `[project].version` 与 [`netaudit/__init__.py`](../network-config-auditor/netaudit/__init__.py) 的 `__version__`。CLI、报告与清单从同一版本常量读取。版本使用 `X.Y.Z`，例如 `0.2.1`；不要复用已经发布的版本标签。
 2. 提交到 main，等待 [NetAudit Windows portable](https://github.com/klwb360/NetAudit/actions/workflows/netaudit-windows.yml) 构建成功。只修改根文档不会自动构建，需要时手动 **Run workflow** 并选择 main。
 3. 记录成功运行的 run ID 和该运行的完整 40 位源码 SHA。确认 `NetAudit-windows-x64-<完整SHA>` 产物尚未过期，`manifest.json` 的版本、源码提交和实际验收报告与本次构建一致。
 4. 打开 [NetAudit release](https://github.com/klwb360/NetAudit/actions/workflows/netaudit-release.yml)，点击 **Run workflow**，选择 **main**，填写下列三个输入。留空时使用 `.github/release-source.json` 已锁定的发行来源；新版本应填写全部三项。
