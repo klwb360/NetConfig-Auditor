@@ -1,16 +1,16 @@
 # 常见问题
 
-面向 Windows 便携版用户。当前正式版本为 v0.2.1；旧版 v0.2.0 与 v0.1.0 保留。下载入口是 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest)；文件、校验值与实测范围见 [下载与交付记录](../DELIVERY.md)。
+面向 Windows 便携版用户。当前正式版本为 v0.2.2；旧版 v0.2.1、v0.2.0 与 v0.1.0 保留。下载入口是 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest)；文件、校验值与实测范围见 [下载与交付记录](../DELIVERY.md)。
 
 ## 如何下载并开始使用？
 
-使用有访问权限的 GitHub 账号登录，在 [v0.2.1 发布页](https://github.com/klwb360/NetAudit/releases/tag/v0.2.1) 的 **Assets** 下载名称以 `-portable.zip` 结尾的文件，也可点击 [推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.1/NetAudit-0.2.1-windows-x64-befb38bbecbb-portable.zip)。解压一次，进入便携文件夹，双击 `Start-NetAudit.bat` 或 `NetAudit.exe`；在网页导入配置、选择厂商并开始审计。不要在 ZIP 预览窗口内运行。
+使用有访问权限的 GitHub 账号登录，点击 [v0.2.2 单 EXE](https://github.com/klwb360/NetAudit/releases/download/v0.2.2/NetAudit-0.2.2-windows-x64-8015ed5ed3d2-onefile.exe)，下载后双击即可打开本地网页。需要配套资料时下载 [便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.2/NetAudit-0.2.2-windows-x64-8015ed5ed3d2-portable.zip)，解压一次，进入文件夹双击 `Start-NetAudit.bat` 或 `NetAudit.exe`；不要在 ZIP 预览窗口内运行。在网页左侧拖入一份配置，核对识别的厂商并点击“开始审计”。
 
 普通使用无需下载 GitHub 自动生成的 “Source code”。两个运行 ZIP 内的 `*-source-*.zip` 是分发所对应的完整源码，供查阅、修改与重建；Release 已移除重复的独立源码附件，版本标签仍固定到构建提交。
 
 ## 为什么 Release 只剩三个运行附件？
 
-v0.2.1、v0.2.0、v0.1.0 均保留 `portable.zip`、`onefile.zip` 和 `onefile.exe`，运行文件与原版本标签不变。校验文件 `SHA256SUMS.txt`、构建清单 `manifest.json` 和三份 `smoke-*.json` 验收报告永久保存在仓库 [发布档案](releases/README.md)，可按版本查看。原校验文件仍覆盖完整九文件构建产物，其中独立源码 ZIP 可从运行 ZIP 内取得。GitHub 自动生成的 “Source code” ZIP/tar.gz 无法单独隐藏。
+v0.2.2、v0.2.1、v0.2.0、v0.1.0 均保留 `portable.zip`、`onefile.zip` 和 `onefile.exe`，运行文件与原版本标签不变。校验文件 `SHA256SUMS.txt`、构建清单 `manifest.json` 和三份 `smoke-*.json` 验收报告永久保存在仓库 [发布档案](releases/README.md)，可按版本查看。原校验文件仍覆盖完整九文件构建产物，其中独立源码 ZIP 可从运行 ZIP 内取得。GitHub 自动生成的 “Source code” ZIP/tar.gz 无法单独隐藏。
 
 ## 新版网页如何查看结果？
 
@@ -35,25 +35,25 @@ v0.2.1、v0.2.0、v0.1.0 均保留 `portable.zip`、`onefile.zip` 和 `onefile.e
 
 便携 EXE 自带 Python 运行库；源码版 BAT 需要 Python 3.10 或更新版本。普通使用设计为无需管理员权限，报告请选择自己有写入权限的位置。
 
-v0.2.1 在 Windows Server 2022 x64 完成 192 项单元测试与 28 项真实进程验收；Linux Chromium 65 项网页自动检查通过，Linux Python 3.10 / 3.12 / 3.13 检查通过。Windows 10/11、ARM64、普通非管理员账户、物理上未安装 Python 的独立电脑及 Windows 真实浏览器交互尚未实测；详见 [交付记录](../DELIVERY.md)。旧版 v0.2.0 的 192 项测试、28 项进程验收和 24 项网页检查保持历史记录。
+v0.2.2 在 Windows Server 2022 x64 完成 272 项应用测试与 28 项真实进程验收；Linux Chromium 85 项拖入追加检查通过（此前 RGOS 184 项），Linux Python 3.10 / 3.12 / 3.13 CI 通过。Windows 10/11、ARM64、普通非管理员账户、物理上未安装 Python 的独立电脑及 Windows 真实浏览器交互尚未实测；详见 [交付记录](../DELIVERY.md)。旧版 v0.2.0 的 192 项测试、28 项进程验收和 24 项网页检查保持历史记录。
 
 ## 配置文件如何准备，支持哪些设备？
 
-一次导入一台设备的完整 UTF-8 配置。Cisco 使用 `show running-config`，华为/H3C 使用 `display current-configuration`；导出时去掉分页符、终端提示符和颜色控制字符。
+一次导入一台设备的完整 UTF-8 配置。可拖入网页左侧配置文本区域，或点击导入按钮；支持无扩展名、中文和空格文件名，最大 2 MiB / 30000 行。文件夹和多个文件会给出提示。识别不明确时手动选择厂商，仍需点击“开始审计”。Cisco / 锐捷使用 `show running-config`，华为/H3C 使用 `display current-configuration`；导出时去掉分页符、终端提示符和颜色控制字符。
 
-支持 Cisco IOS/IOS XE、Huawei VRP、H3C Comware 的常见 IPv4 配置。华为和 H3C 共享不少语法，不能自动识别时请明确选择厂商。Cisco ASA/NX-OS、IPv6、复杂策略与完整动态路由语义等尚未完整建模，具体范围见 [项目说明](../network-config-auditor/README.md#支持范围)。
+支持 Cisco IOS/IOS XE、Huawei VRP、H3C Comware 和锐捷 RGOS 已建模的常见 IPv4 配置。华为和 H3C 共享不少语法，不能自动识别时请明确选择厂商。Cisco ASA/NX-OS、IPv6、复杂策略与完整动态路由语义等尚未完整建模，具体范围见 [项目说明](../network-config-auditor/README.md#支持范围)。
 
-当前正在准备的 v0.2.2 源码增加锐捷 RGOS 已建模语法；有明确 `version ...RGOS` 标记时自动识别，否则手动选择“锐捷 RGOS”或使用 `--vendor ruijie`。已发布 v0.2.1 的 Windows 包尚不包含这项支持。
+v0.2.2 已提供锐捷 RGOS 已建模语法；有明确 `version ...RGOS` 标记时自动识别，否则手动选择“锐捷 RGOS”或使用 `--vendor ruijie`。旧版 v0.2.1 Windows 包不包含这项支持。
 
 ## 为什么多个端口都提示 VLAN 未定义？
 
-端口引用同一 VLAN 时，旧版可能逐端口重复提示；如果原始配置使用解析器尚未支持的 VLAN 范围声明，也可能遗漏定义。v0.2.2 源码补充已支持的 RGOS VLAN 范围语法，并按 VLAN ID 合并为一项发现，保留全部关联端口与行号；不同 VLAN 仍分别报告。
+端口引用同一 VLAN 时，旧版可能逐端口重复提示；如果原始配置使用解析器尚未支持的 VLAN 范围声明，也可能遗漏定义。v0.2.2 补充已支持的 RGOS VLAN 范围语法，并按 VLAN ID 合并为一项发现，保留全部关联端口与行号；不同 VLAN 仍分别报告。
 
 “输入未见 VLAN 定义”只表示需要核对，不证明设备未创建。先取得完整配置，并在 Cisco / 锐捷执行 `show version`、`show vlan`，华为 / H3C 执行 `display version`、`display vlan`；确认 VLAN 数据库和动态来源，再重新导入配置审计。只有确认缺失、VLAN ID 与业务规划正确时才考虑报告中的创建建议，避免把解析不足当成真实故障。
 
 ## 建议命令能直接复制执行吗？
 
-v0.2.2 源码把建议分为只读核查、参数已知的候选整改脚本和需填参数的模板，并列出适用前提。先用只读命令核查设备版本与现状，再确认业务和管理回退路径；模板中的 `<参数名>` 必须替换。工具不会猜测地址、密钥或业务 ACL，也不会连接设备、执行命令或自动保存配置。合并后的发现仍保留每个对象的完整脚本和证据。
+v0.2.2 把建议分为只读核查、参数已知的候选整改脚本和需填参数的模板，并列出适用前提。先用只读命令核查设备版本与现状，再确认业务和管理回退路径；模板中的 `<参数名>` 必须替换。工具不会猜测地址、密钥或业务 ACL，也不会连接设备、执行命令或自动保存配置。合并后的发现仍保留每个对象的完整脚本和证据。
 
 ## 没有发现问题，是否说明配置安全？
 

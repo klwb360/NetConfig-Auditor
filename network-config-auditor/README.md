@@ -2,7 +2,7 @@
 
 输入一台 Cisco、华为、H3C 或锐捷 RGOS 交换机/路由器的完整配置，依次进行 **配置解析 → 六域架构检查 → 安全规则 → CVE / KEV 情报 → 可选本机 AI 解释 → 报告输出**。保留带原始行号的配置问题、风险、建议和结构化清单，提供中文本地网页与命令行；程序运行时仅使用 Python 标准库。
 
-本目录正在准备 **0.2.2** 源码修复。已发布 **v0.2.1** Windows 便携 ZIP 与单 EXE 仍支持 Cisco、Huawei、H3C 三厂商；锐捷识别、风险合并和新增命令说明需使用当前源码，待新版完成 Windows 构建与验收后随 Release 提供。正式文件见 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest)；各次构建的真实测试范围与校验值见 [仓库交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md)。
+**[v0.2.2 已发布](https://github.com/klwb360/NetAudit/releases/tag/v0.2.2)**。可 [直接下载单 EXE](https://github.com/klwb360/NetAudit/releases/download/v0.2.2/NetAudit-0.2.2-windows-x64-8015ed5ed3d2-onefile.exe) 双击运行，或使用 [便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.2/NetAudit-0.2.2-windows-x64-8015ed5ed3d2-portable.zip)；文件拖入、四厂商识别、风险合并和分步骤命令均随新版提供。真实测试范围与校验值见 [仓库交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md)。旧 v0.2.1 Windows 包仍为三厂商版本。
 
 本项目审计了 [pynipper-ng](https://github.com/syn-4ck/pynipper-ng)，保留并改写其插件基类，重建了三厂商解析、审计规则和报告模块。来源、固定提交和改动见 [NOTICE](NOTICE)；审计详情见 [代码审计报告](docs/UPSTREAM_AUDIT.md)。项目采用 GPL-3.0-only。
 
@@ -10,7 +10,7 @@
 
 Windows 普通用户建议使用便携包：**下载 → 解压 → 双击 `Start-NetAudit.bat` → 导入配置 → 查看与导出**。便携 EXE 包自带 Python 运行库，无需安装 Python、配置开发环境或使用管理员权限。下载方法、关闭与迁移说明见 [Windows 使用说明](docs/WINDOWS.md)。构建方法与实际验收边界见 [便携化记录](docs/PORTABILITY.md)。
 
-当前 v0.2.2 源码可将一份 UTF-8 配置文件拖入左侧文本区域，或使用“导入配置文件”；两种方式都按内容自动识别四厂商，支持没有扩展名的配置文件。信息不足或混合厂商标记时提示手动选择，识别后仍可调整；点击“开始审计”才运行审计。文件最大 2 MiB、30000 行，文件夹与一次多个文件会给出提示。此功能尚未进入已发布 v0.2.1 EXE。
+v0.2.2 可将一份 UTF-8 配置文件拖入左侧文本区域，或使用“导入配置文件”；两种方式都按内容自动识别四厂商，支持没有扩展名的配置文件。信息不足或混合厂商标记时提示手动选择，识别后仍可调整；点击“开始审计”才运行审计。文件最大 2 MiB、30000 行，文件夹与一次多个文件会给出提示。旧版 v0.2.1 EXE 不包含此功能。
 
 源码版 Windows 也可双击 `Start-NetAudit.bat`，需要 Python **3.10 或更新版本**。BAT 会优先运行同目录的 `NetAudit.exe`，否则检测 Python。
 
@@ -37,7 +37,7 @@ python -m netaudit audit examples/huawei.cfg --vendor huawei --format json --out
 # H3C 配置 → Markdown 报告
 python -m netaudit audit examples/h3c.cfg --vendor h3c --format md --out reports/h3c.md
 
-# 锐捷 RGOS 配置 → Markdown 报告（当前源码）
+# 锐捷 RGOS 配置 → Markdown 报告
 python -m netaudit audit examples/ruijie.cfg --vendor ruijie --format md --out reports/ruijie.md
 
 # 达到 high 及以上风险时以退出码 1 返回，方便 CI 使用

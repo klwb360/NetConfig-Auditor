@@ -1,22 +1,22 @@
 # NetAudit · 网络配置审计工具
 
-导入 Cisco、华为或 H3C 的设备配置，完成六个领域的网络架构检查、安全规则审计和本地 CVE / KEV 情报核对；可选使用本机 AI 解释发现，导出 JSON、Markdown 或 HTML 报告。配置处理在本机完成，工具不会连接设备或下发命令。
+拖入或导入 Cisco、华为、H3C 或锐捷 RGOS 的设备配置，完成六个领域的网络架构检查、安全规则审计和本地 CVE / KEV 情报核对；可选使用本机 AI 解释发现，导出 JSON、Markdown 或 HTML 报告。配置处理在本机完成，工具不会连接设备或下发命令。
 
-**[v0.2.1 已发布](https://github.com/klwb360/NetAudit/releases/tag/v0.2.1)**。推荐下载 Windows 便携版，解压后双击启动，即可在中文网页中完成审计和报告导出。
+**[v0.2.2 已发布](https://github.com/klwb360/NetAudit/releases/tag/v0.2.2)**。新增配置文件拖入与厂商自动识别、锐捷 RGOS 支持、同类风险合并和分步骤建议命令。
 
-当前源码正在准备 **v0.2.2**：增加配置文件拖入与厂商自动识别、锐捷 RGOS 支持、同类风险合并和分步骤建议命令。下方 v0.2.1 下载仍为已发布的三厂商版本，不包含这些修复；新版 Windows 包以完成构建、验收后的 Release 为准。
+**[直接下载可运行的单 EXE](https://github.com/klwb360/NetAudit/releases/download/v0.2.2/NetAudit-0.2.2-windows-x64-8015ed5ed3d2-onefile.exe)**：下载后双击，等待本地网页打开即可使用，无需安装 Python。需要 BAT、示例和配套资料时选择 **[便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.2/NetAudit-0.2.2-windows-x64-8015ed5ed3d2-portable.zip)**，解压一次后双击启动。
 
-**[下载推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.1/NetAudit-0.2.1-windows-x64-befb38bbecbb-portable.zip)** · [v0.2.1 发布页](https://github.com/klwb360/NetAudit/releases/tag/v0.2.1) · [使用说明与常见问题](docs/FAQ.md) · [故障排查](docs/TROUBLESHOOTING.md)
+[v0.2.2 发布页](https://github.com/klwb360/NetAudit/releases/tag/v0.2.2) · [使用说明与常见问题](docs/FAQ.md) · [故障排查](docs/TROUBLESHOOTING.md) · [文件校验与实测范围](DELIVERY.md)
 
 [下载与双击](#windows下载后双击使用) · [新版网页怎么用](#新版网页怎么用) · [审计流程](#审计流程) · [命令行](#源码与命令行) · [文档索引](#文档导航)
 
 ## Windows：下载后双击使用
 
-1. **下载**：登录有权访问本私人仓库的 GitHub 账号，点击上方“下载推荐便携 ZIP”。也可在 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest) 的 **Assets** 中选择名称以 `-portable.zip` 结尾的文件。
-2. **解压**：在 Windows 中右键 ZIP →“全部提取”，解压到自己方便找到的文件夹。只需解压一次，然后打开解压后的文件夹；不要在 ZIP 预览窗口中运行程序。
-3. **启动**：双击 `Start-NetAudit.bat` 或 `NetAudit.exe`，默认浏览器会自动打开本地网页。若未打开，复制启动窗口显示的实际 `http://127.0.0.1:端口` 地址到浏览器，并保留启动窗口。
+1. **下载**：登录有权访问本私人仓库的 GitHub 账号，点击上方“直接下载可运行的单 EXE”。也可在 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest) 的 **Assets** 中选择 `-onefile.exe` 或 `-portable.zip`。
+2. **准备**：单 EXE 无需解压。下载 ZIP 时，在 Windows 中右键 →“全部提取”，打开解压后的文件夹；不要在 ZIP 预览窗口中运行。
+3. **启动**：双击下载的 `*-onefile.exe`，或便携文件夹中的 `Start-NetAudit.bat` / `NetAudit.exe`，默认浏览器会自动打开本地网页。若未打开，复制启动窗口显示的实际 `http://127.0.0.1:端口` 地址到浏览器，并保留启动窗口。
 4. **先试示例**：在网页左侧点击“载入示例”，再点击“开始审计”。右侧出现统计和检查结果，即可继续使用自己的配置。
-5. **导入配置**：点击“导入配置文件”，选择一台设备的 UTF-8 `.cfg`、`.conf` 或 `.txt` 文件（最大 2 MiB）；在“设备厂商”中选择 Cisco、Huawei 或 H3C，不确定时保留“自动识别”。也可将配置粘贴到文本框，然后点击“开始审计”。
+5. **拖入配置**：将一台设备的 UTF-8 配置文件拖入左侧配置文本区域，或点击“导入配置文件”；程序按内容自动识别 Cisco、Huawei、H3C 或锐捷 RGOS。支持中文、空格和无扩展名文件名，最大 2 MiB / 30000 行。无法可靠识别时手动选择厂商，再点击“开始审计”；一次只导入一个文件，不支持文件夹。也可粘贴配置。
 6. **查看结果**：切换“安全发现、网络架构、漏洞情报、AI 建议、报告与清单、使用帮助”六个页签。在“安全发现”中按严重度筛选，核对每项发现的行号、配置证据、风险与建议。
 7. **保存报告**：点击结果区顶部的 **JSON、Markdown 或 HTML** 按钮下载报告。HTML 可用浏览器打开，Markdown 便于整理，JSON 便于后续处理；页签和严重度筛选不影响完整报告的导出。
 
@@ -30,13 +30,13 @@
 | `*-onefile.zip` | 单 EXE 及配套资料；启动时使用用户临时目录，可能比便携文件夹版稍慢。 |
 | `*-onefile.exe` | 可独立运行的单 EXE；再次分发时仍需提供许可证、归属说明与对应源码。 |
 
-三个已发布版本的 Release 均只保留以上三种运行附件。仓库保持私人，Release 下载也需要访问权限；源码、校验与验收资料见下方 [源码与命令行](#源码与命令行) 和 [发布档案](docs/releases/README.md)。
+四个已发布版本的 Release 均只保留以上三种运行附件。仓库保持私人，Release 下载也需要访问权限；源码、校验与验收资料见下方 [源码与命令行](#源码与命令行) 和 [发布档案](docs/releases/README.md)。
 
 ## 新版网页怎么用
 
 ![NetAudit 0.2.1 本地审计工作台，使用 Cisco 合成示例](docs/images/workspace.png)
 
-宽屏顶部显示审计概览与入门提示，左侧准备配置，右侧查看统计和结果；窄屏会按顺序堆叠。先选择厂商、导入或粘贴配置，再点击“开始审计”。设备版本与本地情报、本机 AI 设置按需展开，普通审计无需填写。
+宽屏顶部显示审计概览与入门提示，左侧准备配置，右侧查看统计和结果；窄屏会按顺序堆叠。先拖入、导入或粘贴配置，核对自动识别的厂商，再点击“开始审计”。设备版本与本地情报、本机 AI 设置按需展开，普通审计无需填写。
 
 | 结果页签 | 查看内容 |
 |---|---|
@@ -53,14 +53,14 @@
 
 ## 能做什么
 
-以下为当前源码能力；已发布 v0.2.1 的厂商范围仍为 Cisco、Huawei 与 H3C。
+以下为当前 v0.2.2 源码和 Windows 包的能力；旧 v0.2.1 的厂商范围仍为 Cisco、Huawei 与 H3C。
 
 - 解析 Cisco IOS/IOS XE、Huawei VRP、H3C Comware 和锐捷 RGOS 已建模的常见 IPv4 配置。
 - 按 VLAN、STP、OSPF、ACL、NAT、Management Plane 六个领域展示检查覆盖与待复核问题，保留原有 27 条配置规则并增加 8 条 STP / OSPF 规则，共 35 个规则 ID。
 - 展示接口、VLAN、STP、OSPF、路由、ACL、NAT 清单，以及未建模配置行的警告。
 - 随包提供 CISA 官方 KEV 离线快照；输入精确产品 CPE 与本地 NVD CVE 2.0 数据后进行版本适用性核对，无法确认的项保持候选状态。
 - 显式启用本机 Ollama 后提供 AI 解释与整改建议；未设置模型时不调用 AI，失败仍保留审计报告。
-- 提供中文网页、严重度筛选、四厂商合成示例、文件导入及三种报告导出。
+- 提供中文网页、严重度筛选、四厂商合成示例、文件拖入 / 导入时按内容识别及三种报告导出。
 - 同一未见定义的 VLAN 按 VLAN ID 合并，列出所有关联端口与原始证据；其他具有相同整改条件的同类风险也合并，保留涉及处数。
 - 根据厂商提供只读核查命令、已知参数的整改脚本和待填写参数的模板，说明适用前提；未知业务、拓扑、地址或密钥需人工补充。
 - 保留命令行、标准输入、严格模式与严重度退出码，便于本地批量处理。
@@ -113,7 +113,7 @@ python -m netaudit audit examples/cisco.cfg --vendor cisco --format html --out r
 # 华为示例导出 JSON；Markdown 的格式参数为 md
 python -m netaudit audit examples/huawei.cfg --vendor huawei --format json --out reports/huawei.json
 
-# 当前源码：锐捷 RGOS 合成示例导出 Markdown
+# 锐捷 RGOS 合成示例导出 Markdown
 python -m netaudit audit examples/ruijie.cfg --vendor ruijie --format md --out reports/ruijie.md
 
 # 使用精确设备 CPE 与本地 NVD 数据核对 CVE；文件格式见情报说明
@@ -167,11 +167,13 @@ NetAudit/
 
 ## 验证与配置保护
 
-v0.2.1 在 Windows Server 2022 x64 / Python 3.12.10 上通过 **192 项单元测试和 28 项真实进程验收**（源码 10、onedir 9、onefile 9）；Linux Python 3.10/3.12/3.13 检查及 Chromium 的 **65 项网页检查**通过。首次发布的 14 项保护测试与当时全部 9 个附件下载回验通过；本次整理保留原运行文件、源码标签及验收记录，没有重新构建 EXE。
+v0.2.2 在 Windows Server 2022 x64 / Python 3.12.10 / PyInstaller 6.22.3 上通过 **272 项应用测试和 28 项真实进程验收**（源码 10、onedir 9、onefile 9）；Linux Python 3.10/3.12/3.13 CI 全部通过。Linux Chromium 完成 **85 项拖入追加检查**，此前 RGOS 与聚合检查为 **184 项**；浏览器自动化不等于 Windows 人工桌面交互。发布器通过 55 项保护测试，三个运行附件上传后均下载回验，实际源码标签与 Windows 构建提交一致。
+
+历史 v0.2.1 在 Windows Server 2022 x64 上通过 192 项应用测试和 28 项进程验收，Linux Chromium 65 项网页检查、当时的 14 项发布保护测试与 9 附件回验保持原记录。旧版本没有重新构建。
 
 历史 [v0.2.0](https://github.com/klwb360/NetAudit/releases/tag/v0.2.0) 的 192 项测试、28 项进程验收与 24 项网页检查，以及 [v0.1.0](https://github.com/klwb360/NetAudit/releases/tag/v0.1.0) 的 88 项测试与 25 项进程验收保持原记录；旧版本保留下载，文件和 SHA-256 均记录在 [交付记录](DELIVERY.md)。
 
-真实 Ollama 模型推理、真实 NVD 适用记录、普通非管理员账户、物理无 Python 电脑、Windows 真实桌面交互、Windows 10/11 和 ARM64 尚未实测；AI 使用本机协议替身、NVD 使用合成格式用例验证。范围以 [交付记录](DELIVERY.md) 为准。
+Windows 10/11、ARM64、普通非管理员账户、物理上未安装 Python 的独立电脑，以及 Windows Explorer 人工双击、系统默认浏览器可视交互与实际拖入仍未实测。冻结版通过限制 PATH、移除 Python 环境验证随包运行库，构建 runner 本身仍安装 Python。建议命令经[官方参考核对](network-config-auditor/docs/REMEDIATION.md)与离线回归，没有在真实设备执行；真实 Ollama 模型和实际产品 NVD 适用性仍待验证。范围以 [交付记录](DELIVERY.md) 为准。
 
 网页仅监听 `127.0.0.1`，资源随程序提供，上传配置不持久保存。默认不请求外部情报或模型；本机 AI 仅在用户显式选择模型后调用，发送内容与限制见 [AI 说明](network-config-auditor/docs/AI.md)。报告仍含网络结构，自动脱敏也不能覆盖所有自定义字段。真实配置放在项目 `configs/`，报告放在 `reports/`；问题反馈使用合成或人工脱敏的最小样例。
 

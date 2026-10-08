@@ -1,5 +1,47 @@
 # NetAudit Windows 下载与交付检查点
 
+2026-10-08：私人仓库 `klwb360/NetAudit` 已发布 **v0.2.2**，包含文件拖入自动识别、锐捷 RGOS 解析、同类风险合并和分步骤建议命令。v0.2.1、v0.2.0、v0.1.0 的原始运行文件、标签及验收记录继续保留。
+
+**[直接下载单 EXE](https://github.com/klwb360/NetAudit/releases/download/v0.2.2/NetAudit-0.2.2-windows-x64-8015ed5ed3d2-onefile.exe)** · [推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.2/NetAudit-0.2.2-windows-x64-8015ed5ed3d2-portable.zip) · [v0.2.2 Release](https://github.com/klwb360/NetAudit/releases/tag/v0.2.2)（需登录有权限的 GitHub 账号）。Release 恰有三个运行附件；校验、构建清单和三份验收报告永久保存在 [v0.2.2 发布档案](docs/releases/v0.2.2/README.md)。
+
+单 EXE 使用：下载 → 双击 → 等待本地网页打开 → 将一份配置拖入左侧配置文本区域 → 核对厂商 → 开始审计 → 查看与导出。也可点击导入按钮；无法可靠识别时手动选择。只读配置处理在本机完成，程序不会连接设备或执行建议命令。关闭请回到启动窗口按 Ctrl+C。便携 ZIP 解压一次后双击，迁移时复制整个文件夹，包括 `_internal`。
+
+## v0.2.2 实际生成文件
+
+| 文件 | SHA-256 |
+|---|---|
+| `NetAudit-0.2.2-windows-x64-8015ed5ed3d2-portable.zip` | `59d18d31d81e3bdc5e5875d77c5d0d0aa515dd90d0fef6ab7edf1c6b6625f9c2` |
+| `NetAudit-0.2.2-windows-x64-8015ed5ed3d2-onefile.zip` | `f3865ce9012c174c51c99faa7cb0f43d319710f383e4f376fb27d41ff134aa4a` |
+| `NetAudit-0.2.2-windows-x64-8015ed5ed3d2-onefile.exe` | `28fed42ae6243e7364dd51d6ef02c017ee7b0417cf304ac7b23206d90461b58c` |
+| `NetAudit-0.2.2-source-8015ed5ed3d2.zip`（两个运行 ZIP 内） | `e9ce9f944d7c95be0223ea21ceda44f2f22fde3e6023f7ea47eb846e8238fedf` |
+
+源码与 Release 标签指向 [`8015ed5ed3d2abbd6e70e7f10775724c7aafe265`](https://github.com/klwb360/NetAudit/commit/8015ed5ed3d2abbd6e70e7f10775724c7aafe265)。构建时源工作区干净；后续发布元数据和文档提交不改变 EXE 与附件字节。两个运行 ZIP 都提供完整对应源码、GPL-3.0-only LICENSE/NOTICE、第三方运行库许可、示例、网页和官方情报来源。包内文档保留构建时状态，最终发布与验收以本页及固定发布档案为准。
+
+备用下载：[Windows Actions 原始产物](https://github.com/klwb360/NetAudit/actions/runs/37712559596/artifacts/11522815408)，有保留期限；外层 ZIP SHA-256：`e5eedba268a1e28a9f82467ebf923ecf10862e2abb5d1fda09a3eed54ee9c0dc`。Actions 下载先解压外层，再解压便携 ZIP；Release 直接提供内部运行文件。
+
+## v0.2.2 实际验收与发布
+
+| 环境与检查 | 结果与证据 |
+|---|---|
+| Windows Server 2022 10.0.20348 AMD64；Python 3.12.10 x64、PyInstaller 6.22.3；runner image 20261004.326.1 | [构建 37712559596](https://github.com/klwb360/NetAudit/actions/runs/37712559596)：272 项应用测试、28 项真实进程验收通过（源码 10、onedir 9、onefile 9） |
+| Linux CI；Python 3.10 / 3.12 / 3.13 | [运行 37712559568](https://github.com/klwb360/NetAudit/actions/runs/37712559568)：三个版本全部通过 |
+| 本地 Linux Python 3.12.14、Chromium 151.0.7922.173 / Playwright | 272 项应用测试、5 项源码进程检查、85 项拖入追加检查通过；此前 RGOS / 聚合为 184 项网页检查 |
+| 发布器 | [运行 37712979040](https://github.com/klwb360/NetAudit/actions/runs/37712979040)：55 项保护测试、永久工程归档和三个运行附件下载回验通过，再正式发布 |
+
+Windows 三种运行形式覆盖四厂商、JSON / Markdown / HTML 导出、识别接口与模糊时 `needs-manual`、RGOS 批量 VLAN 和同类聚合、完整流程、中文/空格路径、BAT/CLI 返回码与无暂停、端口占用回退、完整网页资源、只读程序目录、默认启动与可观察的浏览器调用、进程和 onefile 临时目录清理。全部 18 份停服记录无剩余进程、无强制清理，端口关闭。冻结版限制 PATH、移除 Python 环境验证运行库；没有从构建机卸载 Python。
+
+Chromium 拖入检查仅使用合成配置，覆盖四厂商按内容识别、中文/空格/无扩展名文件、无效文件和多文件/目录提示、大小与行数边界、读取和检测超时、手动更改、连续导入与旧响应隔离、三种实际报告下载和 1440×1000 / 390×844 布局。无 JavaScript 错误或外部请求，测试服务退出 0，端口关闭。此前 184 项 RGOS 检查另验证全部对象、证据、合并与不同 VLAN、三类命令及前提。真实配置与私有报告没有加入源码、样例或构建包。
+
+下载后独立核对外层 GitHub SHA、九个原始产物及八个顶层校验值、全部 ZIP CRC、onedir 129 / onefile 66 个包内校验值、两个包内源码 ZIP 和独立 EXE 字节一致、AMD64 PE、运行库及许可。117 个源码文件与固定提交一致：28 个逐字节匹配，89 个 UTF-8 文本仅发生 Windows 检出 CRLF 转换；二进制、官方情报和原归档记录保持原字节。直接解析 onefile CArchive 核对三个网页资源、四份情报资料和 `base_library.zip`；三个运行方式实际服务的规范化网页字节一致。Linux 独立核验不执行 Windows EXE，EXE 运行验证由真实 Windows runner 完成。
+
+## v0.2.2 未测边界
+
+Windows 10/11、ARM64、普通非管理员账户、物理上未安装 Python 的独立电脑，以及 Windows Explorer 人工双击、系统默认浏览器可视交互与实际拖入仍未实测。冻结版通过限制 PATH、移除 Python 环境验证随包运行库，构建 runner 本身仍安装 Python。建议命令经[官方参考核对](network-config-auditor/docs/REMEDIATION.md)与离线回归，没有在真实设备执行；真实 Ollama 模型和实际产品 NVD 适用性仍待验证。
+
+以下原样保留三个旧版本交付历史，文件、提交、校验与测试数量仅对应各自版本。当前下载以本页上方 v0.2.2 和其 Release 清单为准。
+
+## v0.2.1 历史交付记录
+
 2026-10-03：私人仓库 `klwb360/NetAudit` 已发布 **v0.2.1 界面优化版**。旧 v0.2.0 与 v0.1.0 的运行文件、对应源码与验收记录继续保留。
 
 [打开 v0.2.1 Release](https://github.com/klwb360/NetAudit/releases/tag/v0.2.1) · **[直接下载推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.1/NetAudit-0.2.1-windows-x64-befb38bbecbb-portable.zip)**（需登录有权限的 GitHub 账号）。当前共 3 个运行附件：便携 ZIP、单 EXE 配套 ZIP、独立 EXE；源码在两个 ZIP 内提供，校验、构建清单与验收报告见 [v0.2.1 发布档案](docs/releases/v0.2.1/README.md)。

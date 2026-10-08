@@ -1,14 +1,26 @@
 # 验证记录
 
+## v0.2.2 Windows 构建与发布验收（2026-10-08）
+
+实际构建源码与 Release 标签为 `8015ed5ed3d2abbd6e70e7f10775724c7aafe265`。[Windows 构建 37712559596](https://github.com/klwb360/NetAudit/actions/runs/37712559596) 在 Windows Server 2022 10.0.20348 AMD64 / Python 3.12.10 x64 / PyInstaller 6.22.3 / runner image 20261004.326.1 通过 **272 项应用测试、28 项真实进程验收**（源码 10、onedir 9、onefile 9）。[Linux CI 37712559568](https://github.com/klwb360/NetAudit/actions/runs/37712559568) 的 Python 3.10 / 3.12 / 3.13 全部通过。
+
+三种运行形式验证四厂商和三格式报告、按内容识别与模糊时 `needs-manual`、RGOS VLAN 范围和同类聚合、完整命令脚本与独立模板、中文/空格路径、BAT/CLI 退出码及无暂停、端口冲突回退、静态资源、默认启动/浏览器调用、只读目录、完整流程及本机 AI 协议替身。18 份停服记录均无剩余进程、无强制清理且端口关闭；onefile 临时目录清理通过。
+
+[发布运行 37712979040](https://github.com/klwb360/NetAudit/actions/runs/37712979040) 通过 55 项保护测试、永久工程归档与三个运行附件上传后的下载回验；[v0.2.2](https://github.com/klwb360/NetAudit/releases/tag/v0.2.2) 正式发布。随后独立核验九个原始产物、全部 ZIP CRC/SHA、包内完整对应源码、运行库、AMD64 PE、许可与情报原字节，并直接提取 onefile CArchive 网页/情报/base_library。117 个源码文件与提交一致，其中 89 个文本仅发生 Windows CRLF 转换；冻结资源与实际 HTTP 服务字节按相同转换核对。
+
+Linux Chromium 的 85 项拖入追加检查使用与本次 EXE 相同的规范化网页和服务端源文件；此前 RGOS / 聚合为 184 项网页检查。浏览器自动化在 Linux 执行，独立产物核验不运行 Windows EXE。真正的 Windows EXE 进程验证由上方 runner 完成。建议命令仅经[官方参考核对](REMEDIATION.md)和离线回归，没有在真实设备执行。Windows 10/11、ARM64、普通账户、物理无 Python 电脑、Explorer 人工双击和实际 Windows 浏览器拖入仍未实测；真实 Ollama 模型与实际 NVD 产品适用性也待验证。详细文件、SHA 和边界见[交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md)。
+
+以下两节保留发布前在 Linux 的分阶段检查记录，当前 Windows 验收以上节为准。
+
 ## v0.2.2 文件拖入与导入识别追加验收（2026-10-08）
 
 在下述 RGOS 修复基础上加入文件拖入和导入时识别。Linux x86_64 / Python 3.12.14 的完整应用测试增至 **272 项，全部通过**；新增 13 项本地识别 API 测试，覆盖四厂商、模糊/混合、大小与行数边界、无配置泄露、会话/来源防护，确认识别不运行审计或 AI。发布说明 27 项针对性回归通过，旧发布策略保持。
 
 Chromium 151.0.7922.173 / Playwright 在 1440×1000、390×844 完成 **85 项追加检查**：拖入与选择文件按内容识别，中文空格及无扩展名文件、多个文件/目录/空文件/非 UTF-8/控制字符/超限提示、恰 30000 行尾部换行、读取与检测超时、手动调整、示例取消、连续导入与旧响应隔离、旧读取不提前解锁新识别、三种实际报告下载和窄屏布局。仅用合成配置，无 JavaScript 错误或外部请求；测试服务退出 0，端口关闭。
 
-扩展后的 **5 项源码进程检查通过**，四厂商识别接口及不明确时 `needs-manual` 已纳入 Windows 共用验收脚本；路径、默认启动、端口回退、静态资源、四厂商报告和正常清理继续通过。`node --check` 和 `git diff --check` 通过。新版 Windows EXE 仍待真实 Windows runner 构建与验收，以上结果均不等于 EXE 验收。
+扩展后的 **5 项源码进程检查通过**，四厂商识别接口及不明确时 `needs-manual` 已纳入 Windows 共用验收脚本；路径、默认启动、端口回退、静态资源、四厂商报告和正常清理继续通过。`node --check` 和 `git diff --check` 通过。当时尚未执行 Windows EXE；这组 Linux 结果本身不等于 EXE 验收，后续真实 Windows 结果见本页首节。
 
-## v0.2.2 源码修复验收，Windows 发布待完成（2026-10-08）
+## v0.2.2 发布前源码修复验收（2026-10-08）
 
 实际环境为 Linux x86_64 / Python 3.12.14。**259 项应用测试通过**，包含原有规则与流程回归，以及 RGOS 识别和 VLAN 范围、同类聚合、完整脚本、参数模板、脱敏和报告兼容性。JavaScript 语法与 `git diff --check` 通过。
 
@@ -18,7 +30,7 @@ Chromium 151.0.7922.173 / Playwright 在 1440×1000、390×844 完成 **85 项�
 
 真实 Chromium headless 在 1440×1000 和 390×844 完成 **184 项网页检查**：第四厂商选项、文件导入、同 VLAN 聚合与不同 VLAN 分开、所有对象和原始证据、三类命令及前提、三种实际下载、严重度筛选不截断导出、HTML 转义与窄屏布局。无 JavaScript pageerror；唯一资源错误为既有 `/favicon.ico` 404，三个网页资源均加载正常。测试服务和诊断线程已退出。截图仅使用合成配置；真实配置与私有报告未加入仓库、构建样例或测试夹具。
 
-建议命令经过离线回归和[官方参考核对](REMEDIATION.md)，未在真实设备上执行。本轮未验证 Windows onedir / onefile、无 Python 目标机、普通 Windows 账户或实际 RGOS 转发行为。既有 Windows 工作流已扩展第四厂商与聚合回归，仍需在实际 runner 构建、验收并记录新产物后发布；已发布 v0.2.1 EXE 不包含本次修复。
+建议命令经过离线回归和[官方参考核对](REMEDIATION.md)，未在真实设备上执行。此阶段未执行 Windows onedir / onefile；之后的实际 runner 验收见本页首节。物理无 Python 目标机、普通 Windows 账户或实际 RGOS 转发行为仍未验证；旧版 v0.2.1 EXE 不包含本次修复。
 
 ## v0.2.1 已发布界面版本验收（2026-10-03）
 

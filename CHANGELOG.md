@@ -2,16 +2,17 @@
 
 应用版本以 `network-config-auditor/pyproject.toml` 为准。构建文件名同时包含源码提交前 12 位；同一应用版本的不同提交具有各自 SHA-256。
 
-## 0.2.2 — 未发布（2026-10-08）
+## 0.2.2 — 2026-10-08
 
 - 新增配置文件拖入与导入时的四厂商识别，复用解析器判定；识别不明确时提示手动选择。支持无扩展名和中文空格文件名，并保护异步导入、手动修改、旧请求与导出快照。
-- 文件拖入追加后，Linux / Python 3.12.14 完整应用测试为 272 项，Chromium 85 项追加检查与 5 项源码进程检查通过；尚未验证新版 Windows EXE。
+- 发布 [v0.2.2](https://github.com/klwb360/NetAudit/releases/tag/v0.2.2)，保留便携 ZIP、单 EXE 配套 ZIP和独立 EXE 三个运行附件；对应源码在两个 ZIP 内提供，工程记录永久归档，原三个版本保留。
 - 增加锐捷 RGOS 厂商选项和可靠版本标记识别，解析已建模的共享语法与逗号、连字符 VLAN 范围声明，避免因遗漏定义而重复提示 VLAN 未定义。
 - 同一缺失 VLAN 按 VLAN ID 汇总关联端口与行号；将整改条件相同的重复风险合并，保留全部对象、证据和涉及处数。不同 VLAN、ACL 顺序、路由及 NAT 映射等独立问题保持分开。
 - 为发现补充厂商对应的只读核查命令、参数已知的整改脚本、需填写参数的模板与前提；不猜测业务地址或凭据，不执行或保存设备配置。
 - 识别已支持 RGOS 语法中的显式 `no spanning-tree`，记录端口 `switchport protected`；端口隔离不能替代 STP 环路防护。
 - 保持原有 35 个规则 ID、原始行号、脱敏、CLI 和 JSON / Markdown / HTML 导出；VLAN 未见定义保持 `needs-review`，不直接认定设备不存在该 VLAN。
-- 源码版在 Linux / Python 3.12.14 通过 259 项应用测试、55 项发布工具测试、5 项真实进程验收与 184 项 Chromium 检查；范围见 [验证记录](network-config-auditor/docs/TESTING.md)。尚未构建、验收或发布 v0.2.2 Windows EXE。
+- Windows Server 2022 x64 通过 272 项应用测试与 28 项真实进程验收（源码 10、onedir 9、onefile 9），四厂商识别、RGOS 聚合和三类命令已覆盖。Linux Python 3.10 / 3.12 / 3.13 CI 通过；本地 Chromium 85 项拖入追加检查与此前 184 项 RGOS 检查通过。
+- 发布器 55 项保护测试和三附件下载回验通过；独立检查核对完整源码、校验、许可证、情报及 onefile 嵌入资源。标签指向实际构建源码 `8015ed5ed3d2abbd6e70e7f10775724c7aafe265`。Windows 人工桌面交互、普通账户、物理无 Python 电脑、真实设备命令执行及模型仍待验证，见 [验证记录](network-config-auditor/docs/TESTING.md)。
 
 ## 0.2.1 — 2026-10-03
 
