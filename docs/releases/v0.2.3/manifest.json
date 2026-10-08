@@ -1,0 +1,2745 @@
+{
+  "schema_version": 1,
+  "application": "NetAudit",
+  "application_version": "0.2.3",
+  "built_at_utc": "2026-10-08T08:28:56.188357+00:00",
+  "source": {
+    "commit": "7900be2b84104fe2f9e75ab186bb21d1d034c7e6",
+    "commit_time": "2026-10-08T16:25:36+08:00",
+    "dirty": false
+  },
+  "environment": {
+    "os": "Windows-2022Server-10.0.20348-SP0",
+    "architecture": "AMD64",
+    "python": "3.12.10",
+    "python_bits": 64,
+    "runner_os": "Windows",
+    "runner_image": "win22",
+    "runner_image_version": "20260927.320.1",
+    "github_run_id": "37749761790",
+    "github_run_attempt": "1"
+  },
+  "build_dependencies": {
+    "pip": "25.1.1",
+    "setuptools": "80.9.0",
+    "altgraph": "0.17.4",
+    "packaging": "25.0",
+    "pefile": "2024.8.26",
+    "pywin32-ctypes": "0.2.3",
+    "pyinstaller-hooks-contrib": "2026.8",
+    "pyinstaller": "6.22.3"
+  },
+  "build_lock_sha256": "39c370325584e6d73b463894f12010b3dd5b48a1637bc735d854b5198a27ac3b",
+  "pip_freeze": "altgraph==0.17.4\npackaging==25.0\npefile==2024.8.26\npip==25.1.1\npyinstaller==6.22.3\npyinstaller-hooks-contrib==2026.8\npywin32-ctypes==0.2.3\nsetuptools==80.9.0",
+  "intelligence_data": [
+    {
+      "file": "netaudit/data/KEV-LICENSE.txt",
+      "size_bytes": 7469,
+      "sha256": "8dfcf2d0cba33bede386eb470daf2ac08caf6540fc2516baab10dd546f90938a"
+    },
+    {
+      "file": "netaudit/data/KEV-NOTICE.txt",
+      "size_bytes": 669,
+      "sha256": "b9b06829de29af9783db403240c4cfb7d1e7dcc49b714ed6232215a9c354769d"
+    },
+    {
+      "file": "netaudit/data/kev-source.json",
+      "size_bytes": 693,
+      "sha256": "f23359e04cf04789e9743b39339286fe4cbef8472f44ca404ffa65bef25e183d"
+    },
+    {
+      "file": "netaudit/data/kev.json",
+      "size_bytes": 1765906,
+      "sha256": "d2c8c6cb23291b46ff2b086197641a6b1fa35e6b746bba714cc280a1778f9e48"
+    }
+  ],
+  "build_method": {
+    "tool": "PyInstaller",
+    "modes_in_order": [
+      "onedir",
+      "onefile"
+    ],
+    "console": true,
+    "upx": false,
+    "runtime_tmpdir": "system default",
+    "data_destination": "netaudit/web",
+    "data_destinations": [
+      "netaudit/web",
+      "netaudit/data"
+    ],
+    "official_docs": [
+      "https://pyinstaller.org/en/v6.22.3/operating-mode.html",
+      "https://pyinstaller.org/en/v6.22.3/runtime-information.html"
+    ]
+  },
+  "verification": {
+    "source": {
+      "schema": 1,
+      "mode": "source",
+      "platform": "Windows-2022Server-10.0.20348-SP0",
+      "machine": "AMD64",
+      "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+      "checks": [
+        {
+          "name": "missing Python gives guidance without pausing",
+          "target": "source-BAT",
+          "runs": [
+            {
+              "arguments": [],
+              "exit_code": 2
+            },
+            {
+              "arguments": [
+                "--help"
+              ],
+              "exit_code": 2
+            }
+          ],
+          "stdin": "DEVNULL",
+          "python_and_py_not_in_path": true,
+          "download_guidance": "verified",
+          "status": "passed",
+          "seconds": 0.063
+        },
+        {
+          "name": "CLI vendors, three exports and exit codes 0/1/2; no pause",
+          "target": "source-python",
+          "runs": [
+            {
+              "vendor": "cisco",
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "vendor": "cisco",
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "vendor": "cisco",
+              "format": "html",
+              "exit_code": 0
+            },
+            {
+              "vendor": "huawei",
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "vendor": "huawei",
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "vendor": "huawei",
+              "format": "html",
+              "exit_code": 0
+            },
+            {
+              "vendor": "h3c",
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "vendor": "h3c",
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "vendor": "h3c",
+              "format": "html",
+              "exit_code": 0
+            },
+            {
+              "vendor": "ruijie",
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "vendor": "ruijie",
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "vendor": "ruijie",
+              "format": "html",
+              "exit_code": 0
+            },
+            {
+              "arguments": [
+                "--fail-on",
+                "high"
+              ],
+              "exit_code": 1
+            },
+            {
+              "arguments": [
+                "--strict"
+              ],
+              "exit_code": 2
+            },
+            {
+              "arguments": [
+                "--vendor",
+                "invalid"
+              ],
+              "exit_code": 2
+            }
+          ],
+          "stdin": "DEVNULL",
+          "timeout_seconds": 90,
+          "external_cwd": true,
+          "unicode_and_spaces_in_paths": true,
+          "status": "passed",
+          "seconds": 3.296
+        },
+        {
+          "name": "occupied default port, resources, audit API and process cleanup",
+          "target": "source-python",
+          "resources_sha256": {
+            "index.html": "f8c9e4f30fa0b5c46c7bf3ea5281fcc97c391e3ec913039e44f1b8b8033027fa",
+            "style.css": "33caaf71d569f1a0a67f0ebb7e5e683ba4b9cabae1dd162001cd17cfc128f5e7",
+            "app.js": "eb3e080a061921b92176eb3190a19b5590a37ef522631b2f7b60440a0f5b5df2"
+          },
+          "vendors_findings": {
+            "cisco": 16,
+            "huawei": 12,
+            "h3c": 11,
+            "ruijie": 3
+          },
+          "file_import_detection": {
+            "vendors": {
+              "cisco": "cisco",
+              "huawei": "huawei",
+              "h3c": "h3c",
+              "ruijie": "ruijie"
+            },
+            "ambiguous": "needs-manual"
+          },
+          "rgos_regression": {
+            "automatic_vendor": "ruijie",
+            "batch_vlans": 5,
+            "false_missing_vlan": 0,
+            "grouped_vty_occurrences": 2,
+            "independent_vty_templates": 2,
+            "command_modes_and_prerequisites": "verified"
+          },
+          "pipeline_integration": {
+            "pipeline": [
+              "parser",
+              "architecture",
+              "security",
+              "intelligence",
+              "ai",
+              "reports"
+            ],
+            "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+            "matched_cve": "CVE-2023-20198",
+            "ai": "disabled; no model requested"
+          },
+          "exports": [
+            "json",
+            "md",
+            "html"
+          ],
+          "session_token": "validated; omitted",
+          "actual_port": 49503,
+          "requested_port": 8765,
+          "no_browser": true,
+          "arguments": [
+            "serve",
+            "--port",
+            "8765",
+            "--no-browser"
+          ],
+          "extraction_directories_observed": [],
+          "shutdown": {
+            "exit_code": 0,
+            "forced_cleanup": false,
+            "signal_error": null,
+            "process_inspection_error": null,
+            "observed_pids": [
+              4644,
+              6808
+            ],
+            "remaining_pids": [],
+            "processes": [
+              {
+                "pid": 6808,
+                "parent_pid": 4940,
+                "image": "python.exe",
+                "created_ticks": 134359216298679757,
+                "alive": false,
+                "exit_code": 0
+              },
+              {
+                "pid": 4644,
+                "parent_pid": 6808,
+                "image": "python.exe",
+                "created_ticks": 134359216298723578,
+                "alive": false,
+                "exit_code": 0
+              }
+            ],
+            "excluded_historical_pid_links": [],
+            "taskkill": [],
+            "port_closed": true,
+            "interrupt_code_accepted_as_native_cmd_status": false
+          },
+          "extraction_cleanup": "verified",
+          "status": "passed",
+          "seconds": 1.563
+        },
+        {
+          "name": "no arguments start web and dispatch browser at actual port",
+          "target": "source-python",
+          "browser_dispatch": "actual subprocess dispatched configured stub; OS default GUI not tested",
+          "resources_sha256": {
+            "index.html": "f8c9e4f30fa0b5c46c7bf3ea5281fcc97c391e3ec913039e44f1b8b8033027fa",
+            "style.css": "33caaf71d569f1a0a67f0ebb7e5e683ba4b9cabae1dd162001cd17cfc128f5e7",
+            "app.js": "eb3e080a061921b92176eb3190a19b5590a37ef522631b2f7b60440a0f5b5df2"
+          },
+          "vendors_findings": {
+            "cisco": 16,
+            "huawei": 12,
+            "h3c": 11,
+            "ruijie": 3
+          },
+          "file_import_detection": {
+            "vendors": {
+              "cisco": "cisco",
+              "huawei": "huawei",
+              "h3c": "h3c",
+              "ruijie": "ruijie"
+            },
+            "ambiguous": "needs-manual"
+          },
+          "rgos_regression": {
+            "automatic_vendor": "ruijie",
+            "batch_vlans": 5,
+            "false_missing_vlan": 0,
+            "grouped_vty_occurrences": 2,
+            "independent_vty_templates": 2,
+            "command_modes_and_prerequisites": "verified"
+          },
+          "pipeline_integration": {
+            "pipeline": [
+              "parser",
+              "architecture",
+              "security",
+              "intelligence",
+              "ai",
+              "reports"
+            ],
+            "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+            "matched_cve": "CVE-2023-20198",
+            "ai": "disabled; no model requested"
+          },
+          "exports": [
+            "json",
+            "md",
+            "html"
+          ],
+          "session_token": "validated; omitted",
+          "actual_port": 49521,
+          "requested_port": 8765,
+          "no_browser": false,
+          "arguments": [],
+          "extraction_directories_observed": [],
+          "shutdown": {
+            "exit_code": 0,
+            "forced_cleanup": false,
+            "signal_error": null,
+            "process_inspection_error": null,
+            "observed_pids": [
+              7320,
+              7324
+            ],
+            "remaining_pids": [],
+            "processes": [
+              {
+                "pid": 7320,
+                "parent_pid": 4940,
+                "image": "python.exe",
+                "created_ticks": 134359216314358282,
+                "alive": false,
+                "exit_code": 0
+              },
+              {
+                "pid": 7324,
+                "parent_pid": 7320,
+                "image": "python.exe",
+                "created_ticks": 134359216314403170,
+                "alive": false,
+                "exit_code": 0
+              }
+            ],
+            "excluded_historical_pid_links": [],
+            "taskkill": [],
+            "port_closed": true,
+            "interrupt_code_accepted_as_native_cmd_status": false
+          },
+          "extraction_cleanup": "verified",
+          "status": "passed",
+          "seconds": 1.859
+        },
+        {
+          "name": "CLI vendors, three exports and exit codes 0/1/2; no pause",
+          "target": "source-BAT",
+          "runs": [
+            {
+              "vendor": "cisco",
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "vendor": "cisco",
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "vendor": "cisco",
+              "format": "html",
+              "exit_code": 0
+            },
+            {
+              "vendor": "huawei",
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "vendor": "huawei",
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "vendor": "huawei",
+              "format": "html",
+              "exit_code": 0
+            },
+            {
+              "vendor": "h3c",
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "vendor": "h3c",
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "vendor": "h3c",
+              "format": "html",
+              "exit_code": 0
+            },
+            {
+              "vendor": "ruijie",
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "vendor": "ruijie",
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "vendor": "ruijie",
+              "format": "html",
+              "exit_code": 0
+            },
+            {
+              "arguments": [
+                "--fail-on",
+                "high"
+              ],
+              "exit_code": 1
+            },
+            {
+              "arguments": [
+                "--strict"
+              ],
+              "exit_code": 2
+            },
+            {
+              "arguments": [
+                "--vendor",
+                "invalid"
+              ],
+              "exit_code": 2
+            }
+          ],
+          "stdin": "DEVNULL",
+          "timeout_seconds": 90,
+          "external_cwd": true,
+          "unicode_and_spaces_in_paths": true,
+          "status": "passed",
+          "seconds": 6.11
+        },
+        {
+          "name": "occupied default port, resources, audit API and process cleanup",
+          "target": "source-BAT",
+          "resources_sha256": {
+            "index.html": "f8c9e4f30fa0b5c46c7bf3ea5281fcc97c391e3ec913039e44f1b8b8033027fa",
+            "style.css": "33caaf71d569f1a0a67f0ebb7e5e683ba4b9cabae1dd162001cd17cfc128f5e7",
+            "app.js": "eb3e080a061921b92176eb3190a19b5590a37ef522631b2f7b60440a0f5b5df2"
+          },
+          "vendors_findings": {
+            "cisco": 16,
+            "huawei": 12,
+            "h3c": 11,
+            "ruijie": 3
+          },
+          "file_import_detection": {
+            "vendors": {
+              "cisco": "cisco",
+              "huawei": "huawei",
+              "h3c": "h3c",
+              "ruijie": "ruijie"
+            },
+            "ambiguous": "needs-manual"
+          },
+          "rgos_regression": {
+            "automatic_vendor": "ruijie",
+            "batch_vlans": 5,
+            "false_missing_vlan": 0,
+            "grouped_vty_occurrences": 2,
+            "independent_vty_templates": 2,
+            "command_modes_and_prerequisites": "verified"
+          },
+          "pipeline_integration": {
+            "pipeline": [
+              "parser",
+              "architecture",
+              "security",
+              "intelligence",
+              "ai",
+              "reports"
+            ],
+            "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+            "matched_cve": "CVE-2023-20198",
+            "ai": "disabled; no model requested"
+          },
+          "exports": [
+            "json",
+            "md",
+            "html"
+          ],
+          "session_token": "validated; omitted",
+          "actual_port": 49540,
+          "requested_port": 8765,
+          "no_browser": true,
+          "arguments": [
+            "serve",
+            "--port",
+            "8765",
+            "--no-browser"
+          ],
+          "extraction_directories_observed": [],
+          "shutdown": {
+            "exit_code": 0,
+            "forced_cleanup": false,
+            "signal_error": null,
+            "process_inspection_error": null,
+            "observed_pids": [
+              1420,
+              5572,
+              7320
+            ],
+            "remaining_pids": [],
+            "processes": [
+              {
+                "pid": 7320,
+                "parent_pid": 4940,
+                "image": "cmd.exe",
+                "created_ticks": 134359216394050383,
+                "alive": false,
+                "exit_code": 0
+              },
+              {
+                "pid": 1420,
+                "parent_pid": 7320,
+                "image": "py.exe",
+                "created_ticks": 134359216394665000,
+                "alive": false,
+                "exit_code": 0
+              },
+              {
+                "pid": 5572,
+                "parent_pid": 1420,
+                "image": "python.exe",
+                "created_ticks": 134359216394770869,
+                "alive": false,
+                "exit_code": 0
+              }
+            ],
+            "excluded_historical_pid_links": [],
+            "taskkill": [],
+            "port_closed": true,
+            "interrupt_code_accepted_as_native_cmd_status": false
+          },
+          "extraction_cleanup": "verified",
+          "status": "passed",
+          "seconds": 1.797
+        },
+        {
+          "name": "no arguments start web and dispatch browser at actual port",
+          "target": "source-BAT",
+          "browser_dispatch": "actual subprocess dispatched configured stub; OS default GUI not tested",
+          "resources_sha256": {
+            "index.html": "f8c9e4f30fa0b5c46c7bf3ea5281fcc97c391e3ec913039e44f1b8b8033027fa",
+            "style.css": "33caaf71d569f1a0a67f0ebb7e5e683ba4b9cabae1dd162001cd17cfc128f5e7",
+            "app.js": "eb3e080a061921b92176eb3190a19b5590a37ef522631b2f7b60440a0f5b5df2"
+          },
+          "vendors_findings": {
+            "cisco": 16,
+            "huawei": 12,
+            "h3c": 11,
+            "ruijie": 3
+          },
+          "file_import_detection": {
+            "vendors": {
+              "cisco": "cisco",
+              "huawei": "huawei",
+              "h3c": "h3c",
+              "ruijie": "ruijie"
+            },
+            "ambiguous": "needs-manual"
+          },
+          "rgos_regression": {
+            "automatic_vendor": "ruijie",
+            "batch_vlans": 5,
+            "false_missing_vlan": 0,
+            "grouped_vty_occurrences": 2,
+            "independent_vty_templates": 2,
+            "command_modes_and_prerequisites": "verified"
+          },
+          "pipeline_integration": {
+            "pipeline": [
+              "parser",
+              "architecture",
+              "security",
+              "intelligence",
+              "ai",
+              "reports"
+            ],
+            "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+            "matched_cve": "CVE-2023-20198",
+            "ai": "disabled; no model requested"
+          },
+          "exports": [
+            "json",
+            "md",
+            "html"
+          ],
+          "session_token": "validated; omitted",
+          "actual_port": 49563,
+          "requested_port": 8765,
+          "no_browser": false,
+          "arguments": [],
+          "extraction_directories_observed": [],
+          "shutdown": {
+            "exit_code": 0,
+            "forced_cleanup": false,
+            "signal_error": null,
+            "process_inspection_error": null,
+            "observed_pids": [
+              1784,
+              5868,
+              5976
+            ],
+            "remaining_pids": [],
+            "processes": [
+              {
+                "pid": 1784,
+                "parent_pid": 4940,
+                "image": "cmd.exe",
+                "created_ticks": 134359216411997494,
+                "alive": false,
+                "exit_code": 0
+              },
+              {
+                "pid": 5976,
+                "parent_pid": 1784,
+                "image": "py.exe",
+                "created_ticks": 134359216449326203,
+                "alive": false,
+                "exit_code": 0
+              },
+              {
+                "pid": 5868,
+                "parent_pid": 5976,
+                "image": "python.exe",
+                "created_ticks": 134359216449435120,
+                "alive": false,
+                "exit_code": 0
+              }
+            ],
+            "excluded_historical_pid_links": [],
+            "taskkill": [],
+            "port_closed": true,
+            "interrupt_code_accepted_as_native_cmd_status": false
+          },
+          "extraction_cleanup": "verified",
+          "status": "passed",
+          "seconds": 5.484
+        },
+        {
+          "name": "pipeline, exact local NVD/KEV, three reports and explicit AI protocol stub",
+          "target": "source-python, source-BAT",
+          "targets": {
+            "source-python": {
+              "runs": [
+                {
+                  "format": "json",
+                  "exit_code": 0
+                },
+                {
+                  "format": "md",
+                  "exit_code": 0
+                },
+                {
+                  "format": "html",
+                  "exit_code": 0
+                }
+              ],
+              "stages": [
+                "parser",
+                "architecture",
+                "security",
+                "intelligence",
+                "ai",
+                "reports"
+              ],
+              "extraction_cleanup": "verified",
+              "matched_cve": "CVE-2023-20198",
+              "nvd_applicability": "synthetic local exact CPE/version fixture",
+              "kev": "real bundled CISA snapshot loaded and enriched the matched CVE",
+              "ai": {
+                "backend": "HTTP protocol stub, not an actual Ollama model",
+                "status": "completed",
+                "rule_findings_unchanged": true,
+                "raw_config_and_asset_not_sent": true,
+                "stub_thread_stopped": true,
+                "stub_port_closed": true
+              }
+            },
+            "source-BAT": {
+              "runs": [
+                {
+                  "format": "json",
+                  "exit_code": 0
+                },
+                {
+                  "format": "md",
+                  "exit_code": 0
+                },
+                {
+                  "format": "html",
+                  "exit_code": 0
+                }
+              ],
+              "stages": [
+                "parser",
+                "architecture",
+                "security",
+                "intelligence",
+                "ai",
+                "reports"
+              ],
+              "extraction_cleanup": "verified",
+              "matched_cve": "CVE-2023-20198",
+              "nvd_applicability": "synthetic local exact CPE/version fixture",
+              "kev": "real bundled CISA snapshot loaded and enriched the matched CVE",
+              "ai": {
+                "backend": "HTTP protocol stub, not an actual Ollama model",
+                "status": "completed",
+                "rule_findings_unchanged": true,
+                "raw_config_and_asset_not_sent": true,
+                "stub_thread_stopped": true,
+                "stub_port_closed": true
+              }
+            }
+          },
+          "status": "passed",
+          "seconds": 4.0
+        },
+        {
+          "name": "read-only application directory with writable user temporary directory",
+          "target": "source-python",
+          "resources_sha256": {
+            "index.html": "f8c9e4f30fa0b5c46c7bf3ea5281fcc97c391e3ec913039e44f1b8b8033027fa",
+            "style.css": "33caaf71d569f1a0a67f0ebb7e5e683ba4b9cabae1dd162001cd17cfc128f5e7",
+            "app.js": "eb3e080a061921b92176eb3190a19b5590a37ef522631b2f7b60440a0f5b5df2"
+          },
+          "vendors_findings": {
+            "cisco": 16,
+            "huawei": 12,
+            "h3c": 11,
+            "ruijie": 3
+          },
+          "file_import_detection": {
+            "vendors": {
+              "cisco": "cisco",
+              "huawei": "huawei",
+              "h3c": "h3c",
+              "ruijie": "ruijie"
+            },
+            "ambiguous": "needs-manual"
+          },
+          "rgos_regression": {
+            "automatic_vendor": "ruijie",
+            "batch_vlans": 5,
+            "false_missing_vlan": 0,
+            "grouped_vty_occurrences": 2,
+            "independent_vty_templates": 2,
+            "command_modes_and_prerequisites": "verified"
+          },
+          "pipeline_integration": {
+            "pipeline": [
+              "parser",
+              "architecture",
+              "security",
+              "intelligence",
+              "ai",
+              "reports"
+            ],
+            "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+            "matched_cve": "CVE-2023-20198",
+            "ai": "disabled; no model requested"
+          },
+          "exports": [
+            "json",
+            "md",
+            "html"
+          ],
+          "session_token": "validated; omitted",
+          "actual_port": 49591,
+          "requested_port": 0,
+          "no_browser": true,
+          "arguments": [
+            "serve",
+            "--port",
+            "0",
+            "--no-browser"
+          ],
+          "extraction_directories_observed": [],
+          "shutdown": {
+            "exit_code": 0,
+            "forced_cleanup": false,
+            "signal_error": null,
+            "process_inspection_error": null,
+            "observed_pids": [
+              4512,
+              5724
+            ],
+            "remaining_pids": [],
+            "processes": [
+              {
+                "pid": 4512,
+                "parent_pid": 4940,
+                "image": "python.exe",
+                "created_ticks": 134359216507270072,
+                "alive": false,
+                "exit_code": 0
+              },
+              {
+                "pid": 5724,
+                "parent_pid": 4512,
+                "image": "python.exe",
+                "created_ticks": 134359216507310113,
+                "alive": false,
+                "exit_code": 0
+              }
+            ],
+            "excluded_historical_pid_links": [],
+            "taskkill": [],
+            "port_closed": true,
+            "interrupt_code_accepted_as_native_cmd_status": false
+          },
+          "extraction_cleanup": "verified",
+          "status": "passed",
+          "seconds": 1.547
+        },
+        {
+          "name": "read-only application directory with writable user temporary directory",
+          "target": "source-BAT",
+          "resources_sha256": {
+            "index.html": "f8c9e4f30fa0b5c46c7bf3ea5281fcc97c391e3ec913039e44f1b8b8033027fa",
+            "style.css": "33caaf71d569f1a0a67f0ebb7e5e683ba4b9cabae1dd162001cd17cfc128f5e7",
+            "app.js": "eb3e080a061921b92176eb3190a19b5590a37ef522631b2f7b60440a0f5b5df2"
+          },
+          "vendors_findings": {
+            "cisco": 16,
+            "huawei": 12,
+            "h3c": 11,
+            "ruijie": 3
+          },
+          "file_import_detection": {
+            "vendors": {
+              "cisco": "cisco",
+              "huawei": "huawei",
+              "h3c": "h3c",
+              "ruijie": "ruijie"
+            },
+            "ambiguous": "needs-manual"
+          },
+          "rgos_regression": {
+            "automatic_vendor": "ruijie",
+            "batch_vlans": 5,
+            "false_missing_vlan": 0,
+            "grouped_vty_occurrences": 2,
+            "independent_vty_templates": 2,
+            "command_modes_and_prerequisites": "verified"
+          },
+          "pipeline_integration": {
+            "pipeline": [
+              "parser",
+              "architecture",
+              "security",
+              "intelligence",
+              "ai",
+              "reports"
+            ],
+            "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+            "matched_cve": "CVE-2023-20198",
+            "ai": "disabled; no model requested"
+          },
+          "exports": [
+            "json",
+            "md",
+            "html"
+          ],
+          "session_token": "validated; omitted",
+          "actual_port": 49610,
+          "requested_port": 0,
+          "no_browser": true,
+          "arguments": [
+            "serve",
+            "--port",
+            "0",
+            "--no-browser"
+          ],
+          "extraction_directories_observed": [],
+          "shutdown": {
+            "exit_code": 0,
+            "forced_cleanup": false,
+            "signal_error": null,
+            "process_inspection_error": null,
+            "observed_pids": [
+              1464,
+              4368,
+              6484
+            ],
+            "remaining_pids": [],
+            "processes": [
+              {
+                "pid": 6484,
+                "parent_pid": 4940,
+                "image": "cmd.exe",
+                "created_ticks": 134359216522789241,
+                "alive": false,
+                "exit_code": 0
+              },
+              {
+                "pid": 4368,
+                "parent_pid": 6484,
+                "image": "py.exe",
+                "created_ticks": 134359216523406828,
+                "alive": false,
+                "exit_code": 0
+              },
+              {
+                "pid": 1464,
+                "parent_pid": 4368,
+                "image": "python.exe",
+                "created_ticks": 134359216523516267,
+                "alive": false,
+                "exit_code": 0
+              }
+            ],
+            "excluded_historical_pid_links": [],
+            "taskkill": [],
+            "port_closed": true,
+            "interrupt_code_accepted_as_native_cmd_status": false
+          },
+          "extraction_cleanup": "verified",
+          "status": "passed",
+          "seconds": 1.687
+        }
+      ],
+      "not_tested": [
+        "Actual OS default-browser GUI launch and interactive file picker/filter/export clicks; real no-argument processes dispatch an observable configured browser stub",
+        "Actual Ollama model inference; AI integration is tested with a local HTTP protocol stub only",
+        "Live NVD applicability for the smoke asset; NVD applicability is a clearly labeled synthetic local exact-CPE fixture",
+        "A separate Windows computer with Python physically absent; subprocess no-Python PATH checks do not uninstall host build Python",
+        "A standard non-administrator Windows account; this runner is administrative, with write-deny ACLs applied during read-only checks"
+      ],
+      "path_case": "application/config/report/runtime locations contain Chinese characters and spaces; external working directory",
+      "windows_process_is_admin": true,
+      "console_allocated_for_process_group_signals": false,
+      "passed": true
+    },
+    "onedir": {
+      "schema": 1,
+      "mode": "onedir",
+      "platform": "Windows-2022Server-10.0.20348-SP0",
+      "machine": "AMD64",
+      "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+      "checks": [
+        {
+          "name": "CLI vendors, three exports and exit codes 0/1/2; no pause",
+          "target": "onedir-EXE-no-Python",
+          "runs": [
+            {
+              "vendor": "cisco",
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "vendor": "cisco",
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "vendor": "cisco",
+              "format": "html",
+              "exit_code": 0
+            },
+            {
+              "vendor": "huawei",
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "vendor": "huawei",
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "vendor": "huawei",
+              "format": "html",
+              "exit_code": 0
+            },
+            {
+              "vendor": "h3c",
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "vendor": "h3c",
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "vendor": "h3c",
+              "format": "html",
+              "exit_code": 0
+            },
+            {
+              "vendor": "ruijie",
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "vendor": "ruijie",
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "vendor": "ruijie",
+              "format": "html",
+              "exit_code": 0
+            },
+            {
+              "arguments": [
+                "--fail-on",
+                "high"
+              ],
+              "exit_code": 1
+            },
+            {
+              "arguments": [
+                "--strict"
+              ],
+              "exit_code": 2
+            },
+            {
+              "arguments": [
+                "--vendor",
+                "invalid"
+              ],
+              "exit_code": 2
+            }
+          ],
+          "stdin": "DEVNULL",
+          "timeout_seconds": 90,
+          "external_cwd": true,
+          "unicode_and_spaces_in_paths": true,
+          "status": "passed",
+          "seconds": 2.734
+        },
+        {
+          "name": "occupied default port, resources, audit API and process cleanup",
+          "target": "onedir-EXE-no-Python",
+          "resources_sha256": {
+            "index.html": "f8c9e4f30fa0b5c46c7bf3ea5281fcc97c391e3ec913039e44f1b8b8033027fa",
+            "style.css": "33caaf71d569f1a0a67f0ebb7e5e683ba4b9cabae1dd162001cd17cfc128f5e7",
+            "app.js": "eb3e080a061921b92176eb3190a19b5590a37ef522631b2f7b60440a0f5b5df2"
+          },
+          "vendors_findings": {
+            "cisco": 16,
+            "huawei": 12,
+            "h3c": 11,
+            "ruijie": 3
+          },
+          "file_import_detection": {
+            "vendors": {
+              "cisco": "cisco",
+              "huawei": "huawei",
+              "h3c": "h3c",
+              "ruijie": "ruijie"
+            },
+            "ambiguous": "needs-manual"
+          },
+          "rgos_regression": {
+            "automatic_vendor": "ruijie",
+            "batch_vlans": 5,
+            "false_missing_vlan": 0,
+            "grouped_vty_occurrences": 2,
+            "independent_vty_templates": 2,
+            "command_modes_and_prerequisites": "verified"
+          },
+          "pipeline_integration": {
+            "pipeline": [
+              "parser",
+              "architecture",
+              "security",
+              "intelligence",
+              "ai",
+              "reports"
+            ],
+            "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+            "matched_cve": "CVE-2023-20198",
+            "ai": "disabled; no model requested"
+          },
+          "exports": [
+            "json",
+            "md",
+            "html"
+          ],
+          "session_token": "validated; omitted",
+          "actual_port": 49633,
+          "requested_port": 8765,
+          "no_browser": true,
+          "arguments": [
+            "serve",
+            "--port",
+            "8765",
+            "--no-browser"
+          ],
+          "extraction_directories_observed": [],
+          "shutdown": {
+            "exit_code": 0,
+            "forced_cleanup": false,
+            "signal_error": null,
+            "process_inspection_error": null,
+            "observed_pids": [
+              2936
+            ],
+            "remaining_pids": [],
+            "processes": [
+              {
+                "pid": 2936,
+                "parent_pid": 5836,
+                "image": "NetAudit.exe",
+                "created_ticks": 134359216639289147,
+                "alive": false,
+                "exit_code": 0
+              }
+            ],
+            "excluded_historical_pid_links": [],
+            "taskkill": [],
+            "port_closed": true,
+            "interrupt_code_accepted_as_native_cmd_status": false
+          },
+          "extraction_cleanup": "verified",
+          "status": "passed",
+          "seconds": 1.594
+        },
+        {
+          "name": "no arguments start web and dispatch browser at actual port",
+          "target": "onedir-EXE-no-Python",
+          "browser_dispatch": "actual subprocess dispatched configured stub; OS default GUI not tested",
+          "resources_sha256": {
+            "index.html": "f8c9e4f30fa0b5c46c7bf3ea5281fcc97c391e3ec913039e44f1b8b8033027fa",
+            "style.css": "33caaf71d569f1a0a67f0ebb7e5e683ba4b9cabae1dd162001cd17cfc128f5e7",
+            "app.js": "eb3e080a061921b92176eb3190a19b5590a37ef522631b2f7b60440a0f5b5df2"
+          },
+          "vendors_findings": {
+            "cisco": 16,
+            "huawei": 12,
+            "h3c": 11,
+            "ruijie": 3
+          },
+          "file_import_detection": {
+            "vendors": {
+              "cisco": "cisco",
+              "huawei": "huawei",
+              "h3c": "h3c",
+              "ruijie": "ruijie"
+            },
+            "ambiguous": "needs-manual"
+          },
+          "rgos_regression": {
+            "automatic_vendor": "ruijie",
+            "batch_vlans": 5,
+            "false_missing_vlan": 0,
+            "grouped_vty_occurrences": 2,
+            "independent_vty_templates": 2,
+            "command_modes_and_prerequisites": "verified"
+          },
+          "pipeline_integration": {
+            "pipeline": [
+              "parser",
+              "architecture",
+              "security",
+              "intelligence",
+              "ai",
+              "reports"
+            ],
+            "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+            "matched_cve": "CVE-2023-20198",
+            "ai": "disabled; no model requested"
+          },
+          "exports": [
+            "json",
+            "md",
+            "html"
+          ],
+          "session_token": "validated; omitted",
+          "actual_port": 49651,
+          "requested_port": 8765,
+          "no_browser": false,
+          "arguments": [],
+          "extraction_directories_observed": [],
+          "shutdown": {
+            "exit_code": 0,
+            "forced_cleanup": false,
+            "signal_error": null,
+            "process_inspection_error": null,
+            "observed_pids": [
+              4124
+            ],
+            "remaining_pids": [],
+            "processes": [
+              {
+                "pid": 4124,
+                "parent_pid": 5836,
+                "image": "NetAudit.exe",
+                "created_ticks": 134359216655028666,
+                "alive": false,
+                "exit_code": 0
+              }
+            ],
+            "excluded_historical_pid_links": [],
+            "taskkill": [],
+            "port_closed": true,
+            "interrupt_code_accepted_as_native_cmd_status": false
+          },
+          "extraction_cleanup": "verified",
+          "status": "passed",
+          "seconds": 1.531
+        },
+        {
+          "name": "CLI vendors, three exports and exit codes 0/1/2; no pause",
+          "target": "onedir-BAT-no-Python",
+          "runs": [
+            {
+              "vendor": "cisco",
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "vendor": "cisco",
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "vendor": "cisco",
+              "format": "html",
+              "exit_code": 0
+            },
+            {
+              "vendor": "huawei",
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "vendor": "huawei",
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "vendor": "huawei",
+              "format": "html",
+              "exit_code": 0
+            },
+            {
+              "vendor": "h3c",
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "vendor": "h3c",
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "vendor": "h3c",
+              "format": "html",
+              "exit_code": 0
+            },
+            {
+              "vendor": "ruijie",
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "vendor": "ruijie",
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "vendor": "ruijie",
+              "format": "html",
+              "exit_code": 0
+            },
+            {
+              "arguments": [
+                "--fail-on",
+                "high"
+              ],
+              "exit_code": 1
+            },
+            {
+              "arguments": [
+                "--strict"
+              ],
+              "exit_code": 2
+            },
+            {
+              "arguments": [
+                "--vendor",
+                "invalid"
+              ],
+              "exit_code": 2
+            }
+          ],
+          "stdin": "DEVNULL",
+          "timeout_seconds": 90,
+          "external_cwd": true,
+          "unicode_and_spaces_in_paths": true,
+          "status": "passed",
+          "seconds": 2.938
+        },
+        {
+          "name": "occupied default port, resources, audit API and process cleanup",
+          "target": "onedir-BAT-no-Python",
+          "resources_sha256": {
+            "index.html": "f8c9e4f30fa0b5c46c7bf3ea5281fcc97c391e3ec913039e44f1b8b8033027fa",
+            "style.css": "33caaf71d569f1a0a67f0ebb7e5e683ba4b9cabae1dd162001cd17cfc128f5e7",
+            "app.js": "eb3e080a061921b92176eb3190a19b5590a37ef522631b2f7b60440a0f5b5df2"
+          },
+          "vendors_findings": {
+            "cisco": 16,
+            "huawei": 12,
+            "h3c": 11,
+            "ruijie": 3
+          },
+          "file_import_detection": {
+            "vendors": {
+              "cisco": "cisco",
+              "huawei": "huawei",
+              "h3c": "h3c",
+              "ruijie": "ruijie"
+            },
+            "ambiguous": "needs-manual"
+          },
+          "rgos_regression": {
+            "automatic_vendor": "ruijie",
+            "batch_vlans": 5,
+            "false_missing_vlan": 0,
+            "grouped_vty_occurrences": 2,
+            "independent_vty_templates": 2,
+            "command_modes_and_prerequisites": "verified"
+          },
+          "pipeline_integration": {
+            "pipeline": [
+              "parser",
+              "architecture",
+              "security",
+              "intelligence",
+              "ai",
+              "reports"
+            ],
+            "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+            "matched_cve": "CVE-2023-20198",
+            "ai": "disabled; no model requested"
+          },
+          "exports": [
+            "json",
+            "md",
+            "html"
+          ],
+          "session_token": "validated; omitted",
+          "actual_port": 49677,
+          "requested_port": 8765,
+          "no_browser": true,
+          "arguments": [
+            "serve",
+            "--port",
+            "8765",
+            "--no-browser"
+          ],
+          "extraction_directories_observed": [],
+          "shutdown": {
+            "exit_code": 0,
+            "forced_cleanup": false,
+            "signal_error": null,
+            "process_inspection_error": null,
+            "observed_pids": [
+              7000,
+              7304
+            ],
+            "remaining_pids": [],
+            "processes": [
+              {
+                "pid": 7304,
+                "parent_pid": 5836,
+                "image": "cmd.exe",
+                "created_ticks": 134359216699710052,
+                "alive": false,
+                "exit_code": 0
+              },
+              {
+                "pid": 7000,
+                "parent_pid": 7304,
+                "image": "NetAudit.exe",
+                "created_ticks": 134359216699895302,
+                "alive": false,
+                "exit_code": 0
+              }
+            ],
+            "excluded_historical_pid_links": [],
+            "taskkill": [],
+            "port_closed": true,
+            "interrupt_code_accepted_as_native_cmd_status": false
+          },
+          "extraction_cleanup": "verified",
+          "status": "passed",
+          "seconds": 1.578
+        },
+        {
+          "name": "no arguments start web and dispatch browser at actual port",
+          "target": "onedir-BAT-no-Python",
+          "browser_dispatch": "actual subprocess dispatched configured stub; OS default GUI not tested",
+          "resources_sha256": {
+            "index.html": "f8c9e4f30fa0b5c46c7bf3ea5281fcc97c391e3ec913039e44f1b8b8033027fa",
+            "style.css": "33caaf71d569f1a0a67f0ebb7e5e683ba4b9cabae1dd162001cd17cfc128f5e7",
+            "app.js": "eb3e080a061921b92176eb3190a19b5590a37ef522631b2f7b60440a0f5b5df2"
+          },
+          "vendors_findings": {
+            "cisco": 16,
+            "huawei": 12,
+            "h3c": 11,
+            "ruijie": 3
+          },
+          "file_import_detection": {
+            "vendors": {
+              "cisco": "cisco",
+              "huawei": "huawei",
+              "h3c": "h3c",
+              "ruijie": "ruijie"
+            },
+            "ambiguous": "needs-manual"
+          },
+          "rgos_regression": {
+            "automatic_vendor": "ruijie",
+            "batch_vlans": 5,
+            "false_missing_vlan": 0,
+            "grouped_vty_occurrences": 2,
+            "independent_vty_templates": 2,
+            "command_modes_and_prerequisites": "verified"
+          },
+          "pipeline_integration": {
+            "pipeline": [
+              "parser",
+              "architecture",
+              "security",
+              "intelligence",
+              "ai",
+              "reports"
+            ],
+            "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+            "matched_cve": "CVE-2023-20198",
+            "ai": "disabled; no model requested"
+          },
+          "exports": [
+            "json",
+            "md",
+            "html"
+          ],
+          "session_token": "validated; omitted",
+          "actual_port": 49695,
+          "requested_port": 8765,
+          "no_browser": false,
+          "arguments": [],
+          "extraction_directories_observed": [],
+          "shutdown": {
+            "exit_code": 0,
+            "forced_cleanup": false,
+            "signal_error": null,
+            "process_inspection_error": null,
+            "observed_pids": [
+              5544,
+              7316
+            ],
+            "remaining_pids": [],
+            "processes": [
+              {
+                "pid": 7316,
+                "parent_pid": 5836,
+                "image": "cmd.exe",
+                "created_ticks": 134359216715544901,
+                "alive": false,
+                "exit_code": 0
+              },
+              {
+                "pid": 5544,
+                "parent_pid": 7316,
+                "image": "NetAudit.exe",
+                "created_ticks": 134359216715794559,
+                "alive": false,
+                "exit_code": 0
+              }
+            ],
+            "excluded_historical_pid_links": [],
+            "taskkill": [],
+            "port_closed": true,
+            "interrupt_code_accepted_as_native_cmd_status": false
+          },
+          "extraction_cleanup": "verified",
+          "status": "passed",
+          "seconds": 1.578
+        },
+        {
+          "name": "pipeline, exact local NVD/KEV, three reports and explicit AI protocol stub",
+          "target": "onedir-EXE-no-Python, onedir-BAT-no-Python",
+          "targets": {
+            "onedir-EXE-no-Python": {
+              "runs": [
+                {
+                  "format": "json",
+                  "exit_code": 0
+                },
+                {
+                  "format": "md",
+                  "exit_code": 0
+                },
+                {
+                  "format": "html",
+                  "exit_code": 0
+                }
+              ],
+              "stages": [
+                "parser",
+                "architecture",
+                "security",
+                "intelligence",
+                "ai",
+                "reports"
+              ],
+              "extraction_cleanup": "verified",
+              "matched_cve": "CVE-2023-20198",
+              "nvd_applicability": "synthetic local exact CPE/version fixture",
+              "kev": "real bundled CISA snapshot loaded and enriched the matched CVE",
+              "ai": {
+                "backend": "HTTP protocol stub, not an actual Ollama model",
+                "status": "completed",
+                "rule_findings_unchanged": true,
+                "raw_config_and_asset_not_sent": true,
+                "stub_thread_stopped": true,
+                "stub_port_closed": true
+              }
+            },
+            "onedir-BAT-no-Python": {
+              "runs": [
+                {
+                  "format": "json",
+                  "exit_code": 0
+                },
+                {
+                  "format": "md",
+                  "exit_code": 0
+                },
+                {
+                  "format": "html",
+                  "exit_code": 0
+                }
+              ],
+              "stages": [
+                "parser",
+                "architecture",
+                "security",
+                "intelligence",
+                "ai",
+                "reports"
+              ],
+              "extraction_cleanup": "verified",
+              "matched_cve": "CVE-2023-20198",
+              "nvd_applicability": "synthetic local exact CPE/version fixture",
+              "kev": "real bundled CISA snapshot loaded and enriched the matched CVE",
+              "ai": {
+                "backend": "HTTP protocol stub, not an actual Ollama model",
+                "status": "completed",
+                "rule_findings_unchanged": true,
+                "raw_config_and_asset_not_sent": true,
+                "stub_thread_stopped": true,
+                "stub_port_closed": true
+              }
+            }
+          },
+          "status": "passed",
+          "seconds": 3.469
+        },
+        {
+          "name": "read-only application directory with writable user temporary directory",
+          "target": "onedir-EXE-no-Python",
+          "resources_sha256": {
+            "index.html": "f8c9e4f30fa0b5c46c7bf3ea5281fcc97c391e3ec913039e44f1b8b8033027fa",
+            "style.css": "33caaf71d569f1a0a67f0ebb7e5e683ba4b9cabae1dd162001cd17cfc128f5e7",
+            "app.js": "eb3e080a061921b92176eb3190a19b5590a37ef522631b2f7b60440a0f5b5df2"
+          },
+          "vendors_findings": {
+            "cisco": 16,
+            "huawei": 12,
+            "h3c": 11,
+            "ruijie": 3
+          },
+          "file_import_detection": {
+            "vendors": {
+              "cisco": "cisco",
+              "huawei": "huawei",
+              "h3c": "h3c",
+              "ruijie": "ruijie"
+            },
+            "ambiguous": "needs-manual"
+          },
+          "rgos_regression": {
+            "automatic_vendor": "ruijie",
+            "batch_vlans": 5,
+            "false_missing_vlan": 0,
+            "grouped_vty_occurrences": 2,
+            "independent_vty_templates": 2,
+            "command_modes_and_prerequisites": "verified"
+          },
+          "pipeline_integration": {
+            "pipeline": [
+              "parser",
+              "architecture",
+              "security",
+              "intelligence",
+              "ai",
+              "reports"
+            ],
+            "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+            "matched_cve": "CVE-2023-20198",
+            "ai": "disabled; no model requested"
+          },
+          "exports": [
+            "json",
+            "md",
+            "html"
+          ],
+          "session_token": "validated; omitted",
+          "actual_port": 49724,
+          "requested_port": 0,
+          "no_browser": true,
+          "arguments": [
+            "serve",
+            "--port",
+            "0",
+            "--no-browser"
+          ],
+          "extraction_directories_observed": [],
+          "shutdown": {
+            "exit_code": 0,
+            "forced_cleanup": false,
+            "signal_error": null,
+            "process_inspection_error": null,
+            "observed_pids": [
+              6440
+            ],
+            "remaining_pids": [],
+            "processes": [
+              {
+                "pid": 6440,
+                "parent_pid": 5836,
+                "image": "NetAudit.exe",
+                "created_ticks": 134359216766785237,
+                "alive": false,
+                "exit_code": 0
+              }
+            ],
+            "excluded_historical_pid_links": [],
+            "taskkill": [],
+            "port_closed": true,
+            "interrupt_code_accepted_as_native_cmd_status": false
+          },
+          "extraction_cleanup": "verified",
+          "status": "passed",
+          "seconds": 1.562
+        },
+        {
+          "name": "read-only application directory with writable user temporary directory",
+          "target": "onedir-BAT-no-Python",
+          "resources_sha256": {
+            "index.html": "f8c9e4f30fa0b5c46c7bf3ea5281fcc97c391e3ec913039e44f1b8b8033027fa",
+            "style.css": "33caaf71d569f1a0a67f0ebb7e5e683ba4b9cabae1dd162001cd17cfc128f5e7",
+            "app.js": "eb3e080a061921b92176eb3190a19b5590a37ef522631b2f7b60440a0f5b5df2"
+          },
+          "vendors_findings": {
+            "cisco": 16,
+            "huawei": 12,
+            "h3c": 11,
+            "ruijie": 3
+          },
+          "file_import_detection": {
+            "vendors": {
+              "cisco": "cisco",
+              "huawei": "huawei",
+              "h3c": "h3c",
+              "ruijie": "ruijie"
+            },
+            "ambiguous": "needs-manual"
+          },
+          "rgos_regression": {
+            "automatic_vendor": "ruijie",
+            "batch_vlans": 5,
+            "false_missing_vlan": 0,
+            "grouped_vty_occurrences": 2,
+            "independent_vty_templates": 2,
+            "command_modes_and_prerequisites": "verified"
+          },
+          "pipeline_integration": {
+            "pipeline": [
+              "parser",
+              "architecture",
+              "security",
+              "intelligence",
+              "ai",
+              "reports"
+            ],
+            "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+            "matched_cve": "CVE-2023-20198",
+            "ai": "disabled; no model requested"
+          },
+          "exports": [
+            "json",
+            "md",
+            "html"
+          ],
+          "session_token": "validated; omitted",
+          "actual_port": 49742,
+          "requested_port": 0,
+          "no_browser": true,
+          "arguments": [
+            "serve",
+            "--port",
+            "0",
+            "--no-browser"
+          ],
+          "extraction_directories_observed": [],
+          "shutdown": {
+            "exit_code": 0,
+            "forced_cleanup": false,
+            "signal_error": null,
+            "process_inspection_error": null,
+            "observed_pids": [
+              2748,
+              6880
+            ],
+            "remaining_pids": [],
+            "processes": [
+              {
+                "pid": 2748,
+                "parent_pid": 5836,
+                "image": "cmd.exe",
+                "created_ticks": 134359216782398153,
+                "alive": false,
+                "exit_code": 0
+              },
+              {
+                "pid": 6880,
+                "parent_pid": 2748,
+                "image": "NetAudit.exe",
+                "created_ticks": 134359216782586226,
+                "alive": false,
+                "exit_code": 0
+              }
+            ],
+            "excluded_historical_pid_links": [],
+            "taskkill": [],
+            "port_closed": true,
+            "interrupt_code_accepted_as_native_cmd_status": false
+          },
+          "extraction_cleanup": "verified",
+          "status": "passed",
+          "seconds": 1.579
+        }
+      ],
+      "not_tested": [
+        "Actual OS default-browser GUI launch and interactive file picker/filter/export clicks; real no-argument processes dispatch an observable configured browser stub",
+        "Actual Ollama model inference; AI integration is tested with a local HTTP protocol stub only",
+        "Live NVD applicability for the smoke asset; NVD applicability is a clearly labeled synthetic local exact-CPE fixture",
+        "A separate Windows computer with Python physically absent; subprocess no-Python PATH checks do not uninstall host build Python",
+        "A standard non-administrator Windows account; this runner is administrative, with write-deny ACLs applied during read-only checks"
+      ],
+      "path_case": "application/config/report/runtime locations contain Chinese characters and spaces; external working directory",
+      "windows_process_is_admin": true,
+      "console_allocated_for_process_group_signals": false,
+      "executable_sha256": "e77a3691c4fad524222f809fbd4a4e7c2b99296d2d739ad0b16743897ab27fbe",
+      "migration_base_libraries_sha256": {
+        "_internal\\base_library.zip": "545a9352e39f71cbfe1f215cb9aeb6ff09c2616557a7ef238dabf50e17e3443e"
+      },
+      "python_independence": "EXE/BAT child PATH excludes Python, py and Python-related environment variables; host still has build Python installed",
+      "passed": true
+    },
+    "onefile": {
+      "schema": 1,
+      "mode": "onefile",
+      "platform": "Windows-2022Server-10.0.20348-SP0",
+      "machine": "AMD64",
+      "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+      "checks": [
+        {
+          "name": "CLI vendors, three exports and exit codes 0/1/2; no pause",
+          "target": "onefile-EXE-no-Python",
+          "runs": [
+            {
+              "vendor": "cisco",
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "vendor": "cisco",
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "vendor": "cisco",
+              "format": "html",
+              "exit_code": 0
+            },
+            {
+              "vendor": "huawei",
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "vendor": "huawei",
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "vendor": "huawei",
+              "format": "html",
+              "exit_code": 0
+            },
+            {
+              "vendor": "h3c",
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "vendor": "h3c",
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "vendor": "h3c",
+              "format": "html",
+              "exit_code": 0
+            },
+            {
+              "vendor": "ruijie",
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "vendor": "ruijie",
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "vendor": "ruijie",
+              "format": "html",
+              "exit_code": 0
+            },
+            {
+              "arguments": [
+                "--fail-on",
+                "high"
+              ],
+              "exit_code": 1
+            },
+            {
+              "arguments": [
+                "--strict"
+              ],
+              "exit_code": 2
+            },
+            {
+              "arguments": [
+                "--vendor",
+                "invalid"
+              ],
+              "exit_code": 2
+            }
+          ],
+          "stdin": "DEVNULL",
+          "timeout_seconds": 90,
+          "external_cwd": true,
+          "unicode_and_spaces_in_paths": true,
+          "status": "passed",
+          "seconds": 12.062
+        },
+        {
+          "name": "occupied default port, resources, audit API and process cleanup",
+          "target": "onefile-EXE-no-Python",
+          "resources_sha256": {
+            "index.html": "f8c9e4f30fa0b5c46c7bf3ea5281fcc97c391e3ec913039e44f1b8b8033027fa",
+            "style.css": "33caaf71d569f1a0a67f0ebb7e5e683ba4b9cabae1dd162001cd17cfc128f5e7",
+            "app.js": "eb3e080a061921b92176eb3190a19b5590a37ef522631b2f7b60440a0f5b5df2"
+          },
+          "vendors_findings": {
+            "cisco": 16,
+            "huawei": 12,
+            "h3c": 11,
+            "ruijie": 3
+          },
+          "file_import_detection": {
+            "vendors": {
+              "cisco": "cisco",
+              "huawei": "huawei",
+              "h3c": "h3c",
+              "ruijie": "ruijie"
+            },
+            "ambiguous": "needs-manual"
+          },
+          "rgos_regression": {
+            "automatic_vendor": "ruijie",
+            "batch_vlans": 5,
+            "false_missing_vlan": 0,
+            "grouped_vty_occurrences": 2,
+            "independent_vty_templates": 2,
+            "command_modes_and_prerequisites": "verified"
+          },
+          "pipeline_integration": {
+            "pipeline": [
+              "parser",
+              "architecture",
+              "security",
+              "intelligence",
+              "ai",
+              "reports"
+            ],
+            "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+            "matched_cve": "CVE-2023-20198",
+            "ai": "disabled; no model requested"
+          },
+          "exports": [
+            "json",
+            "md",
+            "html"
+          ],
+          "session_token": "validated; omitted",
+          "actual_port": 49767,
+          "requested_port": 8765,
+          "no_browser": true,
+          "arguments": [
+            "serve",
+            "--port",
+            "8765",
+            "--no-browser"
+          ],
+          "extraction_directories_observed": [
+            "_MEI000013e82"
+          ],
+          "shutdown": {
+            "exit_code": 0,
+            "forced_cleanup": false,
+            "signal_error": null,
+            "process_inspection_error": null,
+            "observed_pids": [
+              1756,
+              5096
+            ],
+            "remaining_pids": [],
+            "processes": [
+              {
+                "pid": 5096,
+                "parent_pid": 1832,
+                "image": "NetAudit.exe",
+                "created_ticks": 134359217005118062,
+                "alive": false,
+                "exit_code": 0
+              },
+              {
+                "pid": 1756,
+                "parent_pid": 5096,
+                "image": "NetAudit.exe",
+                "created_ticks": 134359217006615833,
+                "alive": false,
+                "exit_code": 0
+              }
+            ],
+            "excluded_historical_pid_links": [],
+            "taskkill": [],
+            "port_closed": true,
+            "interrupt_code_accepted_as_native_cmd_status": false
+          },
+          "extraction_cleanup": "verified",
+          "status": "passed",
+          "seconds": 2.188
+        },
+        {
+          "name": "no arguments start web and dispatch browser at actual port",
+          "target": "onefile-EXE-no-Python",
+          "browser_dispatch": "actual subprocess dispatched configured stub; OS default GUI not tested",
+          "resources_sha256": {
+            "index.html": "f8c9e4f30fa0b5c46c7bf3ea5281fcc97c391e3ec913039e44f1b8b8033027fa",
+            "style.css": "33caaf71d569f1a0a67f0ebb7e5e683ba4b9cabae1dd162001cd17cfc128f5e7",
+            "app.js": "eb3e080a061921b92176eb3190a19b5590a37ef522631b2f7b60440a0f5b5df2"
+          },
+          "vendors_findings": {
+            "cisco": 16,
+            "huawei": 12,
+            "h3c": 11,
+            "ruijie": 3
+          },
+          "file_import_detection": {
+            "vendors": {
+              "cisco": "cisco",
+              "huawei": "huawei",
+              "h3c": "h3c",
+              "ruijie": "ruijie"
+            },
+            "ambiguous": "needs-manual"
+          },
+          "rgos_regression": {
+            "automatic_vendor": "ruijie",
+            "batch_vlans": 5,
+            "false_missing_vlan": 0,
+            "grouped_vty_occurrences": 2,
+            "independent_vty_templates": 2,
+            "command_modes_and_prerequisites": "verified"
+          },
+          "pipeline_integration": {
+            "pipeline": [
+              "parser",
+              "architecture",
+              "security",
+              "intelligence",
+              "ai",
+              "reports"
+            ],
+            "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+            "matched_cve": "CVE-2023-20198",
+            "ai": "disabled; no model requested"
+          },
+          "exports": [
+            "json",
+            "md",
+            "html"
+          ],
+          "session_token": "validated; omitted",
+          "actual_port": 49785,
+          "requested_port": 8765,
+          "no_browser": false,
+          "arguments": [],
+          "extraction_directories_observed": [
+            "_MEI000012a02"
+          ],
+          "shutdown": {
+            "exit_code": 0,
+            "forced_cleanup": false,
+            "signal_error": null,
+            "process_inspection_error": null,
+            "observed_pids": [
+              2608,
+              4768
+            ],
+            "remaining_pids": [],
+            "processes": [
+              {
+                "pid": 4768,
+                "parent_pid": 1832,
+                "image": "NetAudit.exe",
+                "created_ticks": 134359217027011648,
+                "alive": false,
+                "exit_code": 0
+              },
+              {
+                "pid": 2608,
+                "parent_pid": 4768,
+                "image": "NetAudit.exe",
+                "created_ticks": 134359217028502679,
+                "alive": false,
+                "exit_code": 0
+              }
+            ],
+            "excluded_historical_pid_links": [],
+            "taskkill": [],
+            "port_closed": true,
+            "interrupt_code_accepted_as_native_cmd_status": false
+          },
+          "extraction_cleanup": "verified",
+          "status": "passed",
+          "seconds": 2.218
+        },
+        {
+          "name": "CLI vendors, three exports and exit codes 0/1/2; no pause",
+          "target": "onefile-BAT-no-Python",
+          "runs": [
+            {
+              "vendor": "cisco",
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "vendor": "cisco",
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "vendor": "cisco",
+              "format": "html",
+              "exit_code": 0
+            },
+            {
+              "vendor": "huawei",
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "vendor": "huawei",
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "vendor": "huawei",
+              "format": "html",
+              "exit_code": 0
+            },
+            {
+              "vendor": "h3c",
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "vendor": "h3c",
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "vendor": "h3c",
+              "format": "html",
+              "exit_code": 0
+            },
+            {
+              "vendor": "ruijie",
+              "format": "json",
+              "exit_code": 0
+            },
+            {
+              "vendor": "ruijie",
+              "format": "md",
+              "exit_code": 0
+            },
+            {
+              "vendor": "ruijie",
+              "format": "html",
+              "exit_code": 0
+            },
+            {
+              "arguments": [
+                "--fail-on",
+                "high"
+              ],
+              "exit_code": 1
+            },
+            {
+              "arguments": [
+                "--strict"
+              ],
+              "exit_code": 2
+            },
+            {
+              "arguments": [
+                "--vendor",
+                "invalid"
+              ],
+              "exit_code": 2
+            }
+          ],
+          "stdin": "DEVNULL",
+          "timeout_seconds": 90,
+          "external_cwd": true,
+          "unicode_and_spaces_in_paths": true,
+          "status": "passed",
+          "seconds": 12.61
+        },
+        {
+          "name": "occupied default port, resources, audit API and process cleanup",
+          "target": "onefile-BAT-no-Python",
+          "resources_sha256": {
+            "index.html": "f8c9e4f30fa0b5c46c7bf3ea5281fcc97c391e3ec913039e44f1b8b8033027fa",
+            "style.css": "33caaf71d569f1a0a67f0ebb7e5e683ba4b9cabae1dd162001cd17cfc128f5e7",
+            "app.js": "eb3e080a061921b92176eb3190a19b5590a37ef522631b2f7b60440a0f5b5df2"
+          },
+          "vendors_findings": {
+            "cisco": 16,
+            "huawei": 12,
+            "h3c": 11,
+            "ruijie": 3
+          },
+          "file_import_detection": {
+            "vendors": {
+              "cisco": "cisco",
+              "huawei": "huawei",
+              "h3c": "h3c",
+              "ruijie": "ruijie"
+            },
+            "ambiguous": "needs-manual"
+          },
+          "rgos_regression": {
+            "automatic_vendor": "ruijie",
+            "batch_vlans": 5,
+            "false_missing_vlan": 0,
+            "grouped_vty_occurrences": 2,
+            "independent_vty_templates": 2,
+            "command_modes_and_prerequisites": "verified"
+          },
+          "pipeline_integration": {
+            "pipeline": [
+              "parser",
+              "architecture",
+              "security",
+              "intelligence",
+              "ai",
+              "reports"
+            ],
+            "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+            "matched_cve": "CVE-2023-20198",
+            "ai": "disabled; no model requested"
+          },
+          "exports": [
+            "json",
+            "md",
+            "html"
+          ],
+          "session_token": "validated; omitted",
+          "actual_port": 49809,
+          "requested_port": 8765,
+          "no_browser": true,
+          "arguments": [
+            "serve",
+            "--port",
+            "8765",
+            "--no-browser"
+          ],
+          "extraction_directories_observed": [
+            "_MEI000002b82"
+          ],
+          "shutdown": {
+            "exit_code": 0,
+            "forced_cleanup": false,
+            "signal_error": null,
+            "process_inspection_error": null,
+            "observed_pids": [
+              696,
+              5464,
+              7868
+            ],
+            "remaining_pids": [],
+            "processes": [
+              {
+                "pid": 5464,
+                "parent_pid": 1832,
+                "image": "cmd.exe",
+                "created_ticks": 134359217175313496,
+                "alive": false,
+                "exit_code": 0
+              },
+              {
+                "pid": 696,
+                "parent_pid": 5464,
+                "image": "NetAudit.exe",
+                "created_ticks": 134359217175501426,
+                "alive": false,
+                "exit_code": 0
+              },
+              {
+                "pid": 7868,
+                "parent_pid": 696,
+                "image": "NetAudit.exe",
+                "created_ticks": 134359217177003209,
+                "alive": false,
+                "exit_code": 0
+              }
+            ],
+            "excluded_historical_pid_links": [],
+            "taskkill": [],
+            "port_closed": true,
+            "interrupt_code_accepted_as_native_cmd_status": false
+          },
+          "extraction_cleanup": "verified",
+          "status": "passed",
+          "seconds": 2.187
+        },
+        {
+          "name": "no arguments start web and dispatch browser at actual port",
+          "target": "onefile-BAT-no-Python",
+          "browser_dispatch": "actual subprocess dispatched configured stub; OS default GUI not tested",
+          "resources_sha256": {
+            "index.html": "f8c9e4f30fa0b5c46c7bf3ea5281fcc97c391e3ec913039e44f1b8b8033027fa",
+            "style.css": "33caaf71d569f1a0a67f0ebb7e5e683ba4b9cabae1dd162001cd17cfc128f5e7",
+            "app.js": "eb3e080a061921b92176eb3190a19b5590a37ef522631b2f7b60440a0f5b5df2"
+          },
+          "vendors_findings": {
+            "cisco": 16,
+            "huawei": 12,
+            "h3c": 11,
+            "ruijie": 3
+          },
+          "file_import_detection": {
+            "vendors": {
+              "cisco": "cisco",
+              "huawei": "huawei",
+              "h3c": "h3c",
+              "ruijie": "ruijie"
+            },
+            "ambiguous": "needs-manual"
+          },
+          "rgos_regression": {
+            "automatic_vendor": "ruijie",
+            "batch_vlans": 5,
+            "false_missing_vlan": 0,
+            "grouped_vty_occurrences": 2,
+            "independent_vty_templates": 2,
+            "command_modes_and_prerequisites": "verified"
+          },
+          "pipeline_integration": {
+            "pipeline": [
+              "parser",
+              "architecture",
+              "security",
+              "intelligence",
+              "ai",
+              "reports"
+            ],
+            "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+            "matched_cve": "CVE-2023-20198",
+            "ai": "disabled; no model requested"
+          },
+          "exports": [
+            "json",
+            "md",
+            "html"
+          ],
+          "session_token": "validated; omitted",
+          "actual_port": 49832,
+          "requested_port": 8765,
+          "no_browser": false,
+          "arguments": [],
+          "extraction_directories_observed": [
+            "_MEI00001eb82"
+          ],
+          "shutdown": {
+            "exit_code": 0,
+            "forced_cleanup": false,
+            "signal_error": null,
+            "process_inspection_error": null,
+            "observed_pids": [
+              3820,
+              6140,
+              7864
+            ],
+            "remaining_pids": [],
+            "processes": [
+              {
+                "pid": 6140,
+                "parent_pid": 1832,
+                "image": "cmd.exe",
+                "created_ticks": 134359217197121697,
+                "alive": false,
+                "exit_code": 0
+              },
+              {
+                "pid": 7864,
+                "parent_pid": 6140,
+                "image": "NetAudit.exe",
+                "created_ticks": 134359217197376195,
+                "alive": false,
+                "exit_code": 0
+              },
+              {
+                "pid": 3820,
+                "parent_pid": 7864,
+                "image": "NetAudit.exe",
+                "created_ticks": 134359217198937967,
+                "alive": false,
+                "exit_code": 0
+              }
+            ],
+            "excluded_historical_pid_links": [],
+            "taskkill": [],
+            "port_closed": true,
+            "interrupt_code_accepted_as_native_cmd_status": false
+          },
+          "extraction_cleanup": "verified",
+          "status": "passed",
+          "seconds": 2.313
+        },
+        {
+          "name": "pipeline, exact local NVD/KEV, three reports and explicit AI protocol stub",
+          "target": "onefile-EXE-no-Python, onefile-BAT-no-Python",
+          "targets": {
+            "onefile-EXE-no-Python": {
+              "runs": [
+                {
+                  "format": "json",
+                  "exit_code": 0
+                },
+                {
+                  "format": "md",
+                  "exit_code": 0
+                },
+                {
+                  "format": "html",
+                  "exit_code": 0
+                }
+              ],
+              "stages": [
+                "parser",
+                "architecture",
+                "security",
+                "intelligence",
+                "ai",
+                "reports"
+              ],
+              "extraction_cleanup": "verified",
+              "matched_cve": "CVE-2023-20198",
+              "nvd_applicability": "synthetic local exact CPE/version fixture",
+              "kev": "real bundled CISA snapshot loaded and enriched the matched CVE",
+              "ai": {
+                "backend": "HTTP protocol stub, not an actual Ollama model",
+                "status": "completed",
+                "rule_findings_unchanged": true,
+                "raw_config_and_asset_not_sent": true,
+                "stub_thread_stopped": true,
+                "stub_port_closed": true
+              }
+            },
+            "onefile-BAT-no-Python": {
+              "runs": [
+                {
+                  "format": "json",
+                  "exit_code": 0
+                },
+                {
+                  "format": "md",
+                  "exit_code": 0
+                },
+                {
+                  "format": "html",
+                  "exit_code": 0
+                }
+              ],
+              "stages": [
+                "parser",
+                "architecture",
+                "security",
+                "intelligence",
+                "ai",
+                "reports"
+              ],
+              "extraction_cleanup": "verified",
+              "matched_cve": "CVE-2023-20198",
+              "nvd_applicability": "synthetic local exact CPE/version fixture",
+              "kev": "real bundled CISA snapshot loaded and enriched the matched CVE",
+              "ai": {
+                "backend": "HTTP protocol stub, not an actual Ollama model",
+                "status": "completed",
+                "rule_findings_unchanged": true,
+                "raw_config_and_asset_not_sent": true,
+                "stub_thread_stopped": true,
+                "stub_port_closed": true
+              }
+            }
+          },
+          "status": "passed",
+          "seconds": 7.797
+        },
+        {
+          "name": "read-only application directory with writable user temporary directory",
+          "target": "onefile-EXE-no-Python",
+          "resources_sha256": {
+            "index.html": "f8c9e4f30fa0b5c46c7bf3ea5281fcc97c391e3ec913039e44f1b8b8033027fa",
+            "style.css": "33caaf71d569f1a0a67f0ebb7e5e683ba4b9cabae1dd162001cd17cfc128f5e7",
+            "app.js": "eb3e080a061921b92176eb3190a19b5590a37ef522631b2f7b60440a0f5b5df2"
+          },
+          "vendors_findings": {
+            "cisco": 16,
+            "huawei": 12,
+            "h3c": 11,
+            "ruijie": 3
+          },
+          "file_import_detection": {
+            "vendors": {
+              "cisco": "cisco",
+              "huawei": "huawei",
+              "h3c": "h3c",
+              "ruijie": "ruijie"
+            },
+            "ambiguous": "needs-manual"
+          },
+          "rgos_regression": {
+            "automatic_vendor": "ruijie",
+            "batch_vlans": 5,
+            "false_missing_vlan": 0,
+            "grouped_vty_occurrences": 2,
+            "independent_vty_templates": 2,
+            "command_modes_and_prerequisites": "verified"
+          },
+          "pipeline_integration": {
+            "pipeline": [
+              "parser",
+              "architecture",
+              "security",
+              "intelligence",
+              "ai",
+              "reports"
+            ],
+            "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+            "matched_cve": "CVE-2023-20198",
+            "ai": "disabled; no model requested"
+          },
+          "exports": [
+            "json",
+            "md",
+            "html"
+          ],
+          "session_token": "validated; omitted",
+          "actual_port": 49857,
+          "requested_port": 0,
+          "no_browser": true,
+          "arguments": [
+            "serve",
+            "--port",
+            "0",
+            "--no-browser"
+          ],
+          "extraction_directories_observed": [
+            "_MEI0000114c2"
+          ],
+          "shutdown": {
+            "exit_code": 0,
+            "forced_cleanup": false,
+            "signal_error": null,
+            "process_inspection_error": null,
+            "observed_pids": [
+              4428,
+              5248
+            ],
+            "remaining_pids": [],
+            "processes": [
+              {
+                "pid": 4428,
+                "parent_pid": 1832,
+                "image": "NetAudit.exe",
+                "created_ticks": 134359217298561559,
+                "alive": false,
+                "exit_code": 0
+              },
+              {
+                "pid": 5248,
+                "parent_pid": 4428,
+                "image": "NetAudit.exe",
+                "created_ticks": 134359217300167455,
+                "alive": false,
+                "exit_code": 0
+              }
+            ],
+            "excluded_historical_pid_links": [],
+            "taskkill": [],
+            "port_closed": true,
+            "interrupt_code_accepted_as_native_cmd_status": false
+          },
+          "extraction_cleanup": "verified",
+          "status": "passed",
+          "seconds": 2.375
+        },
+        {
+          "name": "read-only application directory with writable user temporary directory",
+          "target": "onefile-BAT-no-Python",
+          "resources_sha256": {
+            "index.html": "f8c9e4f30fa0b5c46c7bf3ea5281fcc97c391e3ec913039e44f1b8b8033027fa",
+            "style.css": "33caaf71d569f1a0a67f0ebb7e5e683ba4b9cabae1dd162001cd17cfc128f5e7",
+            "app.js": "eb3e080a061921b92176eb3190a19b5590a37ef522631b2f7b60440a0f5b5df2"
+          },
+          "vendors_findings": {
+            "cisco": 16,
+            "huawei": 12,
+            "h3c": 11,
+            "ruijie": 3
+          },
+          "file_import_detection": {
+            "vendors": {
+              "cisco": "cisco",
+              "huawei": "huawei",
+              "h3c": "h3c",
+              "ruijie": "ruijie"
+            },
+            "ambiguous": "needs-manual"
+          },
+          "rgos_regression": {
+            "automatic_vendor": "ruijie",
+            "batch_vlans": 5,
+            "false_missing_vlan": 0,
+            "grouped_vty_occurrences": 2,
+            "independent_vty_templates": 2,
+            "command_modes_and_prerequisites": "verified"
+          },
+          "pipeline_integration": {
+            "pipeline": [
+              "parser",
+              "architecture",
+              "security",
+              "intelligence",
+              "ai",
+              "reports"
+            ],
+            "nvd_applicability": "synthetic local exact CPE/version fixture; real bundled CISA KEV enrichment",
+            "matched_cve": "CVE-2023-20198",
+            "ai": "disabled; no model requested"
+          },
+          "exports": [
+            "json",
+            "md",
+            "html"
+          ],
+          "session_token": "validated; omitted",
+          "actual_port": 49875,
+          "requested_port": 0,
+          "no_browser": true,
+          "arguments": [
+            "serve",
+            "--port",
+            "0",
+            "--no-browser"
+          ],
+          "extraction_directories_observed": [
+            "_MEI00000bdc2"
+          ],
+          "shutdown": {
+            "exit_code": 0,
+            "forced_cleanup": false,
+            "signal_error": null,
+            "process_inspection_error": null,
+            "observed_pids": [
+              1428,
+              3036,
+              7384
+            ],
+            "remaining_pids": [],
+            "processes": [
+              {
+                "pid": 1428,
+                "parent_pid": 1832,
+                "image": "cmd.exe",
+                "created_ticks": 134359217322332604,
+                "alive": false,
+                "exit_code": 0
+              },
+              {
+                "pid": 3036,
+                "parent_pid": 1428,
+                "image": "NetAudit.exe",
+                "created_ticks": 134359217322861820,
+                "alive": false,
+                "exit_code": 0
+              },
+              {
+                "pid": 7384,
+                "parent_pid": 3036,
+                "image": "NetAudit.exe",
+                "created_ticks": 134359217325260272,
+                "alive": false,
+                "exit_code": 0
+              }
+            ],
+            "excluded_historical_pid_links": [],
+            "taskkill": [],
+            "port_closed": true,
+            "interrupt_code_accepted_as_native_cmd_status": false
+          },
+          "extraction_cleanup": "verified",
+          "status": "passed",
+          "seconds": 3.14
+        }
+      ],
+      "not_tested": [
+        "Actual OS default-browser GUI launch and interactive file picker/filter/export clicks; real no-argument processes dispatch an observable configured browser stub",
+        "Actual Ollama model inference; AI integration is tested with a local HTTP protocol stub only",
+        "Live NVD applicability for the smoke asset; NVD applicability is a clearly labeled synthetic local exact-CPE fixture",
+        "A separate Windows computer with Python physically absent; subprocess no-Python PATH checks do not uninstall host build Python",
+        "A standard non-administrator Windows account; this runner is administrative, with write-deny ACLs applied during read-only checks"
+      ],
+      "path_case": "application/config/report/runtime locations contain Chinese characters and spaces; external working directory",
+      "windows_process_is_admin": true,
+      "console_allocated_for_process_group_signals": false,
+      "executable_sha256": "33542174e6e653531455d0356ce960e612b564ba884c3d63c8dfaeca7cd774ba",
+      "python_independence": "EXE/BAT child PATH excludes Python, py and Python-related environment variables; host still has build Python installed",
+      "passed": true
+    }
+  },
+  "limitations": [
+    "Automated Windows runner verification; human Explorer double-click and visual browser rendering need a desktop check.",
+    "Windows x64 only. Other Windows versions and CPU architectures are not claimed as tested.",
+    "Closing a browser tab does not stop the local server; use Ctrl+C or close its console window."
+  ],
+  "artifacts": [
+    {
+      "file": "NetAudit-0.2.3-windows-x64-7900be2b8410-portable.zip",
+      "size_bytes": 10312674,
+      "sha256": "157417b75ec71aafe782d338c4d14e298c96011b5acf0e67f6753945b8807325"
+    },
+    {
+      "file": "NetAudit-0.2.3-windows-x64-7900be2b8410-onefile.zip",
+      "size_bytes": 10208794,
+      "sha256": "98be1ba058d3adee585d806d1b4ad8451ac1e2a41ea3e4dd0d4a83c087c8c2b4"
+    },
+    {
+      "file": "NetAudit-0.2.3-windows-x64-7900be2b8410-onefile.exe",
+      "size_bytes": 9303919,
+      "sha256": "33542174e6e653531455d0356ce960e612b564ba884c3d63c8dfaeca7cd774ba"
+    },
+    {
+      "file": "NetAudit-0.2.3-source-7900be2b8410.zip",
+      "size_bytes": 773936,
+      "sha256": "876f966b83dd6e096f97685a4fcc65a580507ef7d69ba7fc5f64347d98324dbc"
+    }
+  ]
+}
