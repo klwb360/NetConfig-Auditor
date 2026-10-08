@@ -160,6 +160,8 @@ def markdown(report: dict) -> str:
     lines = ["# 网络配置审计报告", "", f"设备：{_md(d['hostname'])} · 厂商：{d['vendor']}", "",
              f"发现 {s['total']} 项；识别 {s['recognized_lines']}/{s['relevant_lines']} 行，未建模 {s['unsupported_lines']} 行。", "",
              report["limitations"], "", "| 严重度 | 数量 |", "|---|---:|"]
+    if s.get("merged_count", 0):
+        lines[4:4] = [f"同类问题已合并：{s['total']} 类发现，涉及 {s['occurrences_total']} 处；完整对象与证据仍保留。", ""]
     lines.extend(f"| {k} | {v} |" for k, v in s["severity"].items())
     lines.extend(_architecture_markdown(report))
     for i, f in enumerate(report["findings"], 1):
@@ -168,11 +170,19 @@ def markdown(report: dict) -> str:
                       "**配置问题：** " + _md(f["problem"]), "",
                       "**安全风险：** " + _md(f["risk"]), "",
                       "**修改建议：** " + _md(f["recommendation"]), ""])
+        if f.get("occurrences", 1) > 1 or f.get("affected_objects"):
+            lines.extend(["**影响范围：** " + str(f.get("occurrences", 1)) + " 处；"
+                          + _md("、".join(f.get("affected_objects", []))), ""])
         for e in f["evidence"]:
             lines.append(f"- L{e['line']}: <code>{_md(e['text'])}</code>")
-        if f["commands"]:
-            lines.extend(["", "建议命令（核对设备版本与业务后使用）：", ""])
-            lines.extend("- <code>" + _md(cmd) + "</code>" for cmd in f["commands"])
+        if f.get("command_notes"):
+            lines.extend(["", "**命令前提：** " + _md(f["command_notes"]), ""])
+        for key, label in (("verification_commands", "检查与验证命令（只读）"),
+                           ("commands", "建议整改命令（核对设备版本与业务后使用）"),
+                           ("command_templates", "命令模板（填写参数并核对后使用）")):
+            if f.get(key):
+                lines.extend(["", "**" + label + "：**", ""])
+                lines.extend("<pre><code>" + html.escape(cmd) + "</code></pre>" for cmd in f[key])
     lines.extend(_enrichment_markdown(report))
     inv = report["inventory"]
     lines.extend(["", "## 配置清单", "", f"接口 {len(inv['interfaces'])} · VLAN {len(inv['vlans'])} · 静态路由 {len(inv['routes'])} · ACL {len(inv['acls'])} · NAT {len(inv['nat'])}", "",
@@ -186,9 +196,19 @@ def html_report(report: dict) -> str:
     cards = []
     for f in report["findings"]:
         evidence = "\n".join(f"L{e['line']}: {e['text']}" for e in f["evidence"])
+        scope = ("<p><strong>影响范围：</strong>" + str(f.get("occurrences", 1)) + " 处；"
+                 + esc("、".join(f.get("affected_objects", []))) + "</p>"
+                 if f.get("occurrences", 1) > 1 or f.get("affected_objects") else "")
+        commands = ("<p><strong>命令前提：</strong>" + esc(f["command_notes"]) + "</p>"
+                    if f.get("command_notes") else "")
+        for key, label in (("verification_commands", "检查与验证命令（只读）"),
+                           ("commands", "建议整改命令（核对设备版本与业务后使用）"),
+                           ("command_templates", "命令模板（填写参数并核对后使用）")):
+            if f.get(key):
+                commands += "<h3>" + label + "</h3>" + "".join("<pre>" + esc(cmd) + "</pre>" for cmd in f[key])
         cards.append(f"<article><span>{esc(f['severity'].upper())} · {esc(f['rule_id'])} · {esc(f['confidence'])}</span><h2>{esc(f['title'])}</h2>"
                      + "".join(f"<p><strong>{label}</strong>{esc(f[key])}</p>" for label, key in (("配置问题：", "problem"), ("安全风险：", "risk"), ("修改建议：", "recommendation")))
-                     + f"<pre>{esc(evidence)}</pre>" + ("<h3>建议命令（需核对平台与管理回退）</h3><pre>" + esc("\n".join(f["commands"])) + "</pre>" if f["commands"] else "") + "</article>")
+                     + scope + f"<pre>{esc(evidence)}</pre>" + commands + "</article>")
     inv = esc(json.dumps(report["inventory"], ensure_ascii=False, indent=2))
     s = report["summary"]
     return ("<!doctype html><html lang='zh-CN'><meta charset='utf-8'><meta name='viewport' content='width=device-width'>"
@@ -196,6 +216,7 @@ def html_report(report: dict) -> str:
             "<title>网络配置审计报告</title><style>body{font:16px/1.7 system-ui;background:#f3f6fa;color:#17293c;max-width:1000px;margin:40px auto;padding:20px}article,section{background:white;border:1px solid #dce4ed;padding:24px;margin:20px 0;border-radius:12px}span{color:#627388;font-size:13px}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#eef3f8;padding:16px}h1{font-size:30px}h2{font-size:21px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{border:1px solid #dce4ed;padding:8px;text-align:left;vertical-align:top;overflow-wrap:anywhere}p,li,a{overflow-wrap:anywhere}</style>"
             f"<h1>网络配置审计报告</h1><p>{esc(report['device']['hostname'])} · {esc(report['device']['vendor'])}</p>"
             f"<p>发现 {s['total']} 项 · 识别 {s['recognized_lines']}/{s['relevant_lines']} 行 · 未建模 {s['unsupported_lines']} 行</p>"
+            + (f"<p>同类问题已合并：{s['total']} 类发现，涉及 {s['occurrences_total']} 处；完整对象与证据仍保留。</p>" if s.get("merged_count", 0) else "")
             + "<p>" + esc(report["limitations"]) + "</p>" + _pipeline_html(report) + "".join(cards) + _pipeline_html(report, enrichment=True)
             + "<details><summary>查看完整配置清单与未建模行</summary><pre>" + inv + "</pre></details></html>")
 

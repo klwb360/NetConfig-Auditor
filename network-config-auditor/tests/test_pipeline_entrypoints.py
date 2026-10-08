@@ -9,6 +9,7 @@ import unittest
 from unittest.mock import patch
 
 from netaudit.cli import main
+from netaudit import __version__
 from netaudit.pipeline import audit_configuration
 from netaudit.server import LocalServer, make_handler
 
@@ -19,7 +20,7 @@ class PipelineTests(unittest.TestCase):
         with redirect_stdout(output), self.assertRaises(SystemExit) as exited:
             main(["--version"])
         self.assertEqual(exited.exception.code, 0)
-        self.assertEqual(output.getvalue().strip(), "NetAudit 0.2.1")
+        self.assertEqual(output.getvalue().strip(), "NetAudit 0.2.2")
 
     def test_default_pipeline_is_local_and_honest_about_missing_inputs(self):
         with patch("urllib.request.OpenerDirector.open", side_effect=AssertionError("Unexpected network request")):
@@ -27,6 +28,7 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual([s["stage"] for s in report["pipeline"]],
                          ["parser", "architecture", "security", "intelligence", "ai", "reports"])
         self.assertEqual(len(report["architecture"]["domains"]), 6)
+        self.assertEqual(report["tool_version"], __version__)
         self.assertEqual(report["intelligence"]["status"], "not-configured")
         self.assertEqual(report["intelligence"]["sources"][0]["origin"], "bundled-official-snapshot")
         self.assertEqual(report["ai"]["status"], "disabled")

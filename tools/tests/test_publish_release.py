@@ -359,3 +359,55 @@ class PublicationGuards(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Archived build identity mismatch"):
                 p.prepare_delivery(api, api.config, TAG, COMMIT, "123")
             recover.assert_not_called()
+
+
+class ReleaseNotesTests(unittest.TestCase):
+    def manifest(self, version):
+        def add_environment(manifest, reports):
+            manifest["environment"].update({"os": "Windows-2022", "python": "3.12.10"})
+            manifest["build_dependencies"] = {"pyinstaller": "6.12.0"}
+        archive = bundle(add_environment, version=version,
+                         counts=(("source", 10), ("onedir", 9), ("onefile", 9)))
+        return p.verify_bundle(archive, COMMIT, "123", 1, p.digest(archive))[1]
+
+    def test_legacy_notes_keep_original_vendor_and_feature_scope(self):
+        for version in ("0.1.0", "0.2.0", "0.2.1"):
+            with self.subTest(version=version):
+                text = p.notes("owner/repo", "v" + version, self.manifest(version), "123")
+                self.assertIn("选择 Cisco、华为或 H3C", text)
+                self.assertIn("三厂商及三种报告", text)
+                self.assertNotIn("锐捷", text)
+                self.assertNotIn("四厂商", text)
+                self.assertNotIn("配置解析与整改修复", text)
+                self.assertEqual("### 本版升级" in text, version != "0.1.0")
+                self.assertEqual("### 界面与使用体验" in text, version == "0.2.1")
+
+    def test_current_and_future_notes_describe_rgos_grouping_and_command_limits(self):
+        for version in ("0.2.2", "0.2.3", "0.3.0"):
+            with self.subTest(version=version):
+                text = p.notes("owner/repo", "v" + version, self.manifest(version), "123")
+                for expected in ("选择 Cisco、华为、H3C 或锐捷 RGOS", "四厂商及三种报告",
+                                 "`vlan range`", "单编号 VTY", "`no spanning-tree`",
+                                 "同一缺失 VLAN 按 VLAN ID 合并", "全部相关端口", "完整配置证据",
+                                 "发生次数", "不同风险等级", "只读核查命令", "整改脚本",
+                                 "候选模板", "执行前提", "完整模式进入与退出", "不连接设备或自动执行整改"):
+                    self.assertIn(expected, text)
+                self.assertNotIn("三厂商及三种报告", text)
+
+    def test_new_notes_preserve_three_runtime_downloads_and_permanent_records(self):
+        manifest = self.manifest("0.2.2")
+        original = json.dumps(manifest, sort_keys=True)
+        text = p.notes("owner/repo", "v0.2.2", manifest, "123", RECORDS_COMMIT)
+        rows = [line for line in text.splitlines() if line.startswith("| `NetAudit-")]
+        self.assertEqual(len(rows), 3)
+        for artifact in manifest["artifacts"]:
+            if artifact["file"].endswith(("-portable.zip", "-onefile.zip", "-onefile.exe")):
+                self.assertIn(f"| `{artifact['file']}` | `{artifact['sha256']}` |", rows)
+            else:
+                self.assertNotIn(artifact["file"], text)
+        self.assertIn("https://github.com/owner/repo/tree/" + RECORDS_COMMIT + "/docs/releases/v0.2.2", text)
+        self.assertIn("https://github.com/owner/repo/tree/v0.2.2", text)
+        self.assertIn("原始 `SHA256SUMS.txt` 保留完整九文件交付时其余八个文件的校验值", text)
+        self.assertIn("GPL-3.0-only", text)
+        self.assertIn("两个分发 ZIP 内保留对应源码 ZIP、许可证与来源说明", text)
+        self.assertEqual(json.dumps(manifest, sort_keys=True), original)

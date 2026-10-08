@@ -52,7 +52,7 @@ def main(argv=None):
     # `NetAudit.exe --no-browser` form without changing audit arguments.
     if not argv or argv[0] in ("--no-browser", "--port") or argv[0].startswith("--port="):
         argv.insert(0, "serve")
-    p = argparse.ArgumentParser(description="华为/Cisco/H3C 离线网络配置审计；无参数时打开本地网页")
+    p = argparse.ArgumentParser(description="华为/Cisco/H3C/锐捷 RGOS 离线网络配置审计；无参数时打开本地网页")
     p.add_argument("--version", action="version", version=f"NetAudit {__version__}")
     sub = p.add_subparsers(dest="command", required=True)
     a = sub.add_parser("audit", help="审计配置文件或标准输入")

@@ -166,6 +166,10 @@ def validate_run(run, repository, commit):
 
 def notes(repository, tag, manifest, run_id, records_commit="main"):
     version = manifest["application_version"]
+    version_parts = tuple(map(int, version.split(".")))
+    has_rgos_remediation = version_parts >= (0, 2, 2)
+    vendor_choices = "Cisco、华为、H3C 或锐捷 RGOS" if has_rgos_remediation else "Cisco、华为或 H3C"
+    vendor_coverage = "四厂商" if has_rgos_remediation else "三厂商"
     commit = manifest["source"]["commit"]
     portable = next(a["file"] for a in manifest["artifacts"] if a["file"].endswith("-portable.zip"))
     base = f"https://github.com/{repository}"
@@ -186,12 +190,21 @@ def notes(repository, tag, manifest, run_id, records_commit="main"):
 - 网页保留文件导入、厂商选择、示例、严重度筛选和三种导出，并增加流程、架构、情报和 AI 状态。
 
 """
-    ui_features = "" if tuple(map(int, version.split("."))) < (0, 2, 1) else """
+    ui_features = "" if version_parts < (0, 2, 1) else """
 ### 界面与使用体验
 
 - 顶部概览与简短使用提示，左侧配置输入，右侧按安全发现、网络架构、漏洞情报、AI 建议、报告与清单、使用帮助分区。
 - 保留可见的审计操作与状态，页签支持键盘切换，窄屏自动堆叠。
 - 修改配置或情报/模型设置后需重新审计；旧报告不可继续导出，进行中的旧输入结果也不会覆盖当前状态。
+
+"""
+    remediation_features = "" if not has_rgos_remediation else """
+### 配置解析与整改修复
+
+- 可将单个配置文件拖入文本区域，或使用导入按钮，按内容自动识别厂商；无法可靠识别时提示手动选择，点击“开始审计”才运行审计。
+- 新增锐捷 RGOS 识别与 `vlan range` 批量 VLAN 定义，支持单编号 VTY 与全局 `no spanning-tree` 解析。
+- 同一缺失 VLAN 按 VLAN ID 合并，列出全部相关端口与引用角色；等价的同类风险合并展示，保留完整配置证据、严重度、确认程度和发生次数，不混合不同缺失 VLAN 或不同风险等级。
+- 提供只读核查命令、已知参数的整改脚本，以及需填写参数或人工确认的候选模板；显示设备版本、业务、认证与备用管理路径等执行前提。命令保留完整模式进入与退出，工具不连接设备或自动执行整改。
 
 """
     return f"""下载后即可使用的 Windows x64 便携版，配置处理在本机完成。
@@ -200,20 +213,20 @@ def notes(repository, tag, manifest, run_id, records_commit="main"):
 
 1. 使用有权访问本私人仓库的 GitHub 账号下载便携 ZIP。
 2. 解压一次，双击文件夹中的 `Start-NetAudit.bat` 或 `NetAudit.exe`。
-3. 浏览器打开后导入 UTF-8 配置，选择 Cisco、华为或 H3C，点击“开始审计”；也可先载入示例。
+3. 浏览器打开后导入 UTF-8 配置，选择 {vendor_choices}，点击“开始审计”；也可先载入示例。
 4. 查看发现与严重度，导出 JSON、Markdown 或 HTML 报告。
 
 关闭：回到启动窗口按 Ctrl+C；关闭浏览器标签页不会停止服务。迁移：复制整个文件夹（包括 `_internal`）到另一台电脑。EXE 自带 Python 运行库，普通使用设计为无需安装 Python、无需管理员权限。端口占用时以启动窗口显示的实际地址为准。
 
 `-onefile.zip` 提供单 EXE 与配套说明、示例、许可证和源码；`-onefile.exe` 可独立启动。再次分发仍需保留 GPL-3.0-only 许可证、归属说明与对应源码。普通用户无需下载 GitHub 自动生成的 “Source code”。
 
-{features}{ui_features}
+{features}{ui_features}{remediation_features}
 
 ### 验证与来源
 
 - 源码提交：[`{commit}`]({base}/commit/{commit})；标签指向该构建提交。
 - [实际 Windows 构建与回归测试]({base}/actions/runs/{run_id})：{env['os']} / {env['architecture']}，Python {env['python']}，PyInstaller {manifest['build_dependencies']['pyinstaller']}。
-- 源码、onedir、onefile 共 {check_count} 项真实进程检查通过：中文及空格路径、端口回退、完整网页资源、三厂商及三种报告、退出码、无暂停与服务清理。EXE 子进程 PATH 排除 Python；构建主机仍安装构建 Python。
+- 源码、onedir、onefile 共 {check_count} 项真实进程检查通过：中文及空格路径、端口回退、完整网页资源、{vendor_coverage}及三种报告、退出码、无暂停与服务清理。EXE 子进程 PATH 排除 Python；构建主机仍安装构建 Python。
 - 尚未人工验收资源管理器双击及默认浏览器界面、独立未安装 Python 的电脑、普通非管理员账户，也未实测 Windows 10/11 或其他架构。详细范围见[永久归档的构建与验收记录]({archive})中的 `manifest.json` 和三份 `smoke-*.json`。
 - 发布复用已验收原始文件，下载回验通过后才公开 Release；没有重新构建或替换 EXE。
 

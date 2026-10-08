@@ -2,6 +2,12 @@
 const $ = id => document.getElementById(id);
 let exports_ = null, report_ = null;
 let inputRevision = 0, auditRunning = false, configSource = "输入文本";
+let fileLoading = false, fileLoadId = 0, importAbort = null;
+function refreshRunState() { $("run").disabled=auditRunning||fileLoading; }
+function cancelConfigImport() {
+  fileLoadId++;fileLoading=false;
+  if(importAbort)importAbort.abort();importAbort=null;refreshRunState();
+}
 const resultTitles = {findings:"安全发现",architecture:"网络架构检查",intelligence:"CVE / KEV 情报",ai:"AI 解释与整改建议",inventory:"报告与配置清单",help:"使用帮助"};
 const resultTabs = [...document.querySelectorAll("[data-result-tab]")];
 function selectResultTab(name, focus=false) {
@@ -33,7 +39,12 @@ function allowExports(available) {
 }
 function updateConfigMeta() {
   const text=$("config").value,bytes=new TextEncoder().encode(text).length;
-  $("config-meta").textContent=text?`${configSource} · ${text.split(/\r?\n/).length} 行 · ${(bytes/1024).toFixed(1)} KiB`:"尚未导入配置";
+  $("config-meta").textContent=text?`${configSource} · ${configLineCount(text)} 行 · ${(bytes/1024).toFixed(1)} KiB`:"尚未导入配置";
+}
+function configLineCount(text) {
+  if(!text)return 0;
+  const lines=text.split(/\r\n|[\n\r\u0085\u2028\u2029]/);
+  return lines.length-(lines[lines.length-1]===""?1:0);
 }
 function clearResults(message="导入配置或载入示例，开始一次本地审计。") {
   exports_=null;report_=null;allowExports(false);
@@ -115,10 +126,18 @@ function renderFindings() {
   for(const f of items) {
     const card=node("article"),meta=node("div",undefined,"meta");
     meta.append(node("span",labels[f.severity],"badge "+f.severity),node("span",f.rule_id),node("span",f.confidence==="needs-review"?"需核对场景":"配置已确认"));
+    if((f.occurrences||1)>1)meta.append(node("span",`已合并 ${f.occurrences} 处`));
     card.append(meta,node("h3",f.title));
     for(const [label,key] of [["配置问题","problem"],["安全风险","risk"],["修改建议","recommendation"]]) {const p=node("p");p.append(node("strong",label+"："),document.createTextNode(f[key]));card.append(p);}
-    if(f.evidence.length) card.append(node("pre",f.evidence.map(e=>`L${e.line}: ${e.text}`).join("\n"),"evidence"));
-    if(f.commands.length) {card.append(node("p","建议命令 · 需核对平台版本与管理回退", "confidence"),node("pre",f.commands.join("\n")));}
+    if(f.affected_objects?.length)field(card,"影响对象",f.affected_objects.join("、"));
+    if(f.evidence.length) {
+      const evidence=node("pre",f.evidence.map(e=>`L${e.line}: ${e.text}`).join("\n"),"evidence");
+      if(f.evidence.length>8){const details=node("details");details.append(node("summary",`查看完整证据（${f.evidence.length} 行）`),evidence);card.append(details);}else card.append(evidence);
+    }
+    if(f.command_notes)field(card,"命令前提",f.command_notes);
+    for(const [key,label] of [["verification_commands","检查与验证命令 · 只读"],["commands","建议整改命令 · 满足前提后人工执行"],["command_templates","命令模板 · 先填写参数并核对"]]) {
+      if(f[key]?.length){card.append(node("p",label,"confidence"));for(const script of f[key])card.append(node("pre",script));}
+    }
     root.append(card);
   }
 }
@@ -142,7 +161,7 @@ $("run").addEventListener("click", async () => {
     report_=value.report;exports_=value.exports;const s=report_.summary;
     const nums=$("summary").querySelectorAll("strong");nums[0].textContent=s.severity.critical+s.severity.high;nums[1].textContent=s.severity.medium+s.severity.low;nums[2].textContent=s.unsupported_lines;
     $("status").textContent=`审计完成 · ${report_.device.vendor} · ${report_.device.hostname} · 识别 ${s.recognized_lines}/${s.relevant_lines} 行`;
-    $("result-context").textContent=`当前结果 · ${report_.device.vendor} · ${report_.device.hostname} · ${s.total} 项发现`;
+    $("result-context").textContent=`当前结果 · ${report_.device.vendor} · ${report_.device.hostname} · ${s.total} 类发现`+(s.merged_count?` · 涉及 ${s.occurrences_total} 处（同类已合并）`:"");
     document.querySelectorAll(".panel-empty-placeholder").forEach(item=>item.hidden=true);
     allowExports(true);$("inventory").hidden=false;$("inventory").querySelector("pre").textContent=JSON.stringify(report_.inventory,null,2);renderPipeline(report_.pipeline);renderArchitecture();renderIntelligence();renderAI();renderFindings();
   } catch(e) {
@@ -150,24 +169,88 @@ $("run").addEventListener("click", async () => {
     clearResults("审计未完成，请检查配置、厂商与可选设置后重试。");
     $("status").textContent="审计失败："+e.message;
   }
-  finally {auditRunning=false;$("run").disabled=false;$("example").disabled=false;document.querySelector(".results").setAttribute("aria-busy","false");}
+  finally {auditRunning=false;refreshRunState();$("example").disabled=false;document.querySelector(".results").setAttribute("aria-busy","false");}
 });
-for(const id of ["config","cpe","cve-ids","ai-model"])$(id).addEventListener("input",()=>{if(id==="config"){configSource="手动编辑";updateConfigMeta();}invalidateResults();});
-$("vendor").addEventListener("change",invalidateResults);
+for(const id of ["config","cpe","cve-ids","ai-model"])$(id).addEventListener("input",()=>{if(id==="config"){cancelConfigImport();configSource="手动编辑";updateConfigMeta();$("vendor-detection").textContent="配置已编辑，可手动选择厂商或在审计时自动识别。";}invalidateResults();});
+$("vendor").addEventListener("change",()=>{cancelConfigImport();invalidateResults();$("vendor-detection").textContent=$("vendor").value==="auto"?"审计时按配置内容自动识别。":"已手动选择："+$("vendor").selectedOptions[0].textContent;});
 $("ai-enabled").addEventListener("change",()=>{$("ai-model").disabled=!$("ai-enabled").checked;invalidateResults();});
 for(const kind of ["kev","nvd"]){$("clear-"+kind).addEventListener("click",()=>{$(kind+"-file").value="";invalidateResults();});$(kind+"-file").addEventListener("change",()=>{invalidateResults();const file=$(kind+"-file").files[0];if(file&&file.size>16*1024*1024){$(kind+"-file").value="";$("status").textContent=kind.toUpperCase()+" 文件超过 16 MiB 限制，请选择较小的官方 JSON 文件。";}});}
 $("severity").addEventListener("change",()=>{if(report_)renderFindings();});
-$("file").addEventListener("change", async () => {
-  const file=$("file").files[0];if(!file)return;
-  const revision=invalidateResults();
+async function readConfigBuffer(file) {
+  let timer;
+  try {
+    return await Promise.race([file.arrayBuffer(),new Promise((_,reject)=>{
+      timer=setTimeout(()=>reject(new Error("读取文件超时，请重新拖入或选择文件。")),10000);
+    })]);
+  } finally {clearTimeout(timer);}
+}
+async function loadConfigFile(file) {
+  cancelConfigImport();const loadId=fileLoadId;
+  let revision=invalidateResults(),timer=null;
+  $("file").value="";
   if(file.size>2*1024*1024){$("status").textContent="文件超过 2 MiB 限制";return;}
-  try {const text=new TextDecoder("utf-8",{fatal:true}).decode(await file.arrayBuffer());if(revision!==inputRevision)return;invalidateResults();$("config").value=text;configSource=file.name;updateConfigMeta();$("status").textContent=auditRunning?"文件已载入，当前请求结束后请重新审计。":"文件已载入，点击开始审计。";}
-  catch(e){if(revision===inputRevision)$("status").textContent="文件必须为 UTF-8 文本。";}
+  fileLoading=true;refreshRunState();$("status").textContent="正在读取配置文件…";
+  try {
+    const buffer=await readConfigBuffer(file);let text;
+    try{text=new TextDecoder("utf-8",{fatal:true}).decode(buffer);}
+    catch(e){throw new Error("文件必须为 UTF-8 文本。");}
+    if(revision!==inputRevision)return;
+    if(!text.trim())throw new Error("文件为空，请导入设备配置。");
+    if(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(text))throw new Error("文件含非文本控制字符，请导入 UTF-8 配置文本。");
+    if(configLineCount(text)>30000)throw new Error("配置超过 30000 行限制。");
+    revision=invalidateResults();$("config").value=text;$("vendor").value="auto";
+    configSource=file.name;updateConfigMeta();$("vendor-detection").textContent="正在按配置内容识别厂商…";
+    $("status").textContent="文件已载入，正在识别厂商…";
+    const controller=new AbortController();importAbort=controller;
+    timer=setTimeout(()=>controller.abort(),5000);
+    try {
+      const sessionResponse=await fetch("/api/session",{cache:"no-store",signal:controller.signal});
+      if(!sessionResponse.ok)throw new Error("无法建立本地会话");
+      const session=await sessionResponse.json();if(revision!==inputRevision)return;
+      const response=await fetch("/api/detect",{method:"POST",headers:{"Content-Type":"application/json","X-NetAudit-Token":session.token},body:JSON.stringify({config:text}),signal:controller.signal});
+      const value=await response.json();if(revision!==inputRevision)return;
+      if(!response.ok)throw new Error("自动识别暂不可用");
+      if(value.status==="detected"&&["cisco","huawei","h3c","ruijie"].includes(value.vendor)) {
+        $("vendor").value=value.vendor;
+        $("vendor-detection").textContent="已自动识别："+$("vendor").selectedOptions[0].textContent+"；可手动调整。";
+        $("status").textContent="文件已载入，"+$("vendor-detection").textContent+"点击开始审计。";
+      } else {
+        $("vendor-detection").textContent="无法可靠识别，请手动选择设备厂商。";
+        $("status").textContent="文件已载入，"+$("vendor-detection").textContent;
+      }
+    } catch(e) {
+      if(revision!==inputRevision)return;
+      $("vendor-detection").textContent="自动识别暂不可用，可手动选择设备厂商。";
+      $("status").textContent="文件已载入，"+$("vendor-detection").textContent;
+    }
+  } catch(e) {if(revision===inputRevision)$("status").textContent=e.message;}
+  finally {
+    if(timer!==null)clearTimeout(timer);
+    if(loadId===fileLoadId){fileLoading=false;importAbort=null;refreshRunState();}
+  }
+}
+$("file").addEventListener("change",()=>{const file=$("file").files[0];if(file)void loadConfigFile(file);});
+const dropZone=$("config-drop-zone");let dragDepth=0;
+const hasFiles=event=>Array.from(event.dataTransfer?.types||[]).includes("Files");
+function resetDragState(){dragDepth=0;dropZone.classList.remove("drag-over");}
+dropZone.addEventListener("dragenter",event=>{if(hasFiles(event)){event.preventDefault();dragDepth++;dropZone.classList.add("drag-over");}});
+dropZone.addEventListener("dragover",event=>{if(hasFiles(event)){event.preventDefault();event.dataTransfer.dropEffect="copy";}});
+dropZone.addEventListener("dragleave",event=>{if(hasFiles(event)){dragDepth=Math.max(0,dragDepth-1);if(!dragDepth)resetDragState();}});
+dropZone.addEventListener("drop",event=>{
+  if(!hasFiles(event))return;
+  event.preventDefault();event.stopPropagation();resetDragState();
+  const files=Array.from(event.dataTransfer.files);
+  const directory=Array.from(event.dataTransfer.items||[]).some(item=>item.webkitGetAsEntry?.()?.isDirectory);
+  if(directory){$("status").textContent="请拖入配置文件，不支持文件夹。";return;}
+  if(files.length!==1){$("status").textContent="每次请拖入一份设备配置文件。";return;}
+  void loadConfigFile(files[0]);
 });
+window.addEventListener("dragover",event=>{if(hasFiles(event)){event.preventDefault();if(!dropZone.contains(event.target))event.dataTransfer.dropEffect="none";}});
+window.addEventListener("drop",event=>{if(hasFiles(event)){event.preventDefault();resetDragState();$("status").textContent="请将配置文件拖入左侧配置文本区域。";}});
 document.querySelectorAll("[data-format]").forEach(button=>button.addEventListener("click",()=>{
   if(!exports_)return;const f=button.dataset.format;const blob=new Blob([exports_[f]],{type:{json:"application/json",md:"text/markdown",html:"text/html"}[f]+";charset=utf-8"});const url=URL.createObjectURL(blob);const a=node("a");a.href=url;a.download="network-audit."+f;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }));
-$("example").addEventListener("click",()=>{invalidateResults();$("vendor").value="cisco";$("config").value=`hostname LAB-SW
+$("example").addEventListener("click",()=>{cancelConfigImport();invalidateResults();$("vendor").value="cisco";$("vendor-detection").textContent="Cisco 合成示例；可导入自己的配置自动识别厂商。";$("config").value=`hostname LAB-SW
 spanning-tree mode rapid-pvst
 vlan 10
  name OFFICE

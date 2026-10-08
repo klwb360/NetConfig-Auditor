@@ -519,8 +519,17 @@ def exercise_web(port: int, reference: Path, examples: Path) -> dict:
     headers = {"Origin": f"http://127.0.0.1:{port}", "X-NetAudit-Token": token,
                "Content-Type": "application/json"}
     totals = {}
-    for vendor in ("cisco", "huawei", "h3c"):
-        body = json.dumps({"vendor": vendor, "config": (examples / f"{vendor}.cfg").read_text(encoding="utf-8")})
+    rgos = {}
+    detections = {}
+    for vendor in ("cisco", "huawei", "h3c", "ruijie"):
+        config = (examples / f"{vendor}.cfg").read_text(encoding="utf-8")
+        detection = json.loads(request(port, "POST", "/api/detect", json.dumps({"config": config}), headers)[0])
+        require(detection.get("status") == "detected" and detection.get("vendor") == vendor,
+                f"File-import vendor detection failed for {vendor}")
+        require(set(detection) == {"status", "vendor", "detection"}, "Detection API returned device content")
+        detections[vendor] = detection["vendor"]
+        body = json.dumps({"vendor": "auto" if vendor == "ruijie" else vendor,
+                           "config": config})
         value = json.loads(request(port, "POST", "/api/audit", body, headers)[0])
         require(value["report"]["device"]["vendor"] == vendor, "Audit API selected wrong vendor")
         require(set(value["exports"]) == {"json", "md", "html"}, "Audit API missing exports")
@@ -528,7 +537,30 @@ def exercise_web(port: int, reference: Path, examples: Path) -> dict:
             validate_report(text, format_, vendor)
         require(json.loads(value["exports"]["json"]) == value["report"], "JSON export differs from API report")
         totals[vendor] = value["report"]["summary"]["total"]
+        if vendor == "ruijie":
+            report = value["report"]
+            require(len(report["inventory"]["vlans"]) == 5, "RGOS batch VLAN declaration was lost")
+            require(not any(f["rule_id"] == "VLAN-UNDEFINED" for f in report["findings"]),
+                    "Defined RGOS VLAN incorrectly reported missing")
+            grouped = [f for f in report["findings"] if f["rule_id"] == "MGMT-VTY-SOURCE"]
+            require(len(grouped) == 1 and grouped[0]["occurrences"] == 2,
+                    "RGOS identical VTY source risks were not grouped")
+            require(len(grouped[0]["affected_objects"]) == 2 and len(grouped[0]["command_templates"]) == 2,
+                    "RGOS grouping lost VTY objects or independent scripts")
+            ssh = next((f for f in report["findings"] if f["rule_id"] == "MGMT-SSHV1"), {})
+            require(ssh.get("commands") == ["configure terminal\nip ssh version 2\nend"],
+                    "RGOS SSH suggestion lost explicit configuration modes")
+            require(all(f.get("verification_commands") and f.get("command_notes") for f in report["findings"]),
+                    "RGOS findings are missing checks or command prerequisites")
+            rgos = {"automatic_vendor": "ruijie", "batch_vlans": 5, "false_missing_vlan": 0,
+                    "grouped_vty_occurrences": 2, "independent_vty_templates": 2,
+                    "command_modes_and_prerequisites": "verified"}
+    ambiguous = json.loads(request(port, "POST", "/api/detect", json.dumps({"config": "sysname LAB"}), headers)[0])
+    require(ambiguous.get("status") == "needs-manual" and ambiguous.get("vendor") == "auto",
+            "Ambiguous file import guessed a vendor")
     return {"resources_sha256": resources, "vendors_findings": totals,
+            "file_import_detection": {"vendors": detections, "ambiguous": "needs-manual"},
+            "rgos_regression": rgos,
             "pipeline_integration": exercise_pipeline_web(port, headers),
             "exports": ["json", "md", "html"], "session_token": "validated; omitted"}
 
@@ -632,7 +664,7 @@ class Harness:
         output_dir = self.results / target.name
         output_dir.mkdir()
         runs = []
-        for vendor in ("cisco", "huawei", "h3c"):
+        for vendor in ("cisco", "huawei", "h3c", "ruijie"):
             cfg = output_dir / f"设备 配置 {vendor}.cfg"
             shutil.copyfile(self.install / "examples" / f"{vendor}.cfg", cfg)
             for format_ in ("json", "md", "html"):

@@ -11,7 +11,8 @@ MAX_LINES = 30000
 MAX_INTERFACES = 512
 MAX_ACL_RULES = 256
 MAX_TOTAL_RULES = 2048
-VENDORS = ("auto", "cisco", "huawei", "h3c")
+VENDORS = ("auto", "cisco", "huawei", "h3c", "ruijie")
+IOS_VENDORS = ("cisco", "ruijie")
 ALL_VLANS = set(range(1, 4095))
 
 
@@ -47,6 +48,13 @@ def detect_vendor(text: str) -> tuple[str, str]:
     }
     for vendor, pattern in markers.items():
         scores[vendor] = len(re.findall(pattern, text))
+    # RGOS deliberately shares hostname/switchport/ACL syntax with IOS. Its
+    # version header identifies the vendor; those shared commands are not
+    # evidence of a mixed Cisco/Ruijie configuration.
+    if re.search(r"(?im)^\s*version\s+\S*RGOS(?:\s|$)", text):
+        if scores["huawei"] or scores["h3c"]:
+            raise ValueError("无法可靠识别厂商，或包含混合厂商配置；请用 --vendor 指定，并每次输入一台设备的完整配置")
+        return "ruijie", "auto: RGOS version marker"
     best = max(scores, key=scores.get)
     others = [v for v in scores if scores[v] and v != best]
     if not scores[best] or others:
@@ -102,7 +110,7 @@ def _acl_rule(text: str, vendor: str, kind: str, seq: int, evidence: Evidence) -
         raise ValueError("未知 ACL 动作")
     protocol = "ip" if kind == "standard" else t.pop(0)
     rule = ACLRule(seq, action, protocol, evidence=evidence)
-    if vendor == "cisco":
+    if vendor in IOS_VENDORS:
         rule.source, pos = _address(t, 0)
         rule.source_port, pos = _port(t, pos)
         if kind != "standard":
@@ -232,9 +240,10 @@ def _stp_command(s: str, cfg: Config, interface: Interface | None) -> bool:
         elif re.fullmatch(r"stp edged-port(?: (enable|disable))?", command):
             field_name = "stp_edge"
             value = None if inverse else not command.endswith(" disable")
-        elif re.fullmatch(r"spanning-tree bpdu(guard|filter) (enable|disable)", command):
+        elif (re.fullmatch(r"spanning-tree bpdu(guard|filter) (enable|disable)", command)
+              or (cfg.vendor == "ruijie" and re.fullmatch(r"spanning-tree bpdufilter (enabled|disabled)", command))):
             field_name = "bpdu_guard" if "bpduguard" in command else "bpdu_filter"
-            value = None if inverse else command.endswith(" enable")
+            value = None if inverse else command.split()[-1] in ("enable", "enabled")
         elif re.fullmatch(r"stp bpdu-filter(?: (enable|disable))?", command):
             field_name = "bpdu_filter"
             value = None if inverse else not command.endswith(" disable")
@@ -245,6 +254,9 @@ def _stp_command(s: str, cfg: Config, interface: Interface | None) -> bool:
     if command in ("stp enable", "stp disable"):
         target["enabled"] = (False if inverse and command == "stp enable"
                              else None if inverse else command == "stp enable")
+        return True
+    if cfg.vendor == "ruijie" and command == "spanning-tree":
+        target["enabled"] = not inverse
         return True
     mode = re.fullmatch(r"(?:spanning-tree mode (pvst|rapid-pvst|mst)|stp mode (stp|rstp|mstp))", command)
     if mode:
@@ -417,7 +429,7 @@ def _ospf_interface(s: str, interface: Interface, e: Evidence) -> bool:
 
 def _parse_config(text: str, vendor: str = "auto") -> Config:
     if vendor not in VENDORS:
-        raise ValueError("厂商必须为 auto / cisco / huawei / h3c")
+        raise ValueError("厂商必须为 auto / cisco / huawei / h3c / ruijie")
     if len(text.encode("utf-8")) > MAX_BYTES:
         raise ValueError("配置超过 2 MiB 限制")
     if any(ord(c) < 32 and c not in "\n\r\t" for c in text):
@@ -466,12 +478,12 @@ def _parse_config(text: str, vendor: str = "auto") -> Config:
             continue
         cfg.relevant_lines += 1
         e = Evidence(num, _architecture_redact(s))
-        if vendor == "cisco" and not raw[:1].isspace():
+        if vendor in IOS_VENDORS and not raw[:1].isspace():
             context = None
         try:
             inverse = s[3:] if s.startswith("no ") else s[5:] if s.startswith("undo ") else None
             stp_command = inverse or s
-            if stp_command.startswith(("stp ", "spanning-tree ")):
+            if stp_command == "spanning-tree" or stp_command.startswith(("stp ", "spanning-tree ")):
                 interface = context[1] if context and context[0] == "interface" else None
                 evidence = interface.stp_evidence if interface is not None else cfg.stp["evidence"]
                 evidence.append(e)
@@ -484,6 +496,13 @@ def _parse_config(text: str, vendor: str = "auto") -> Config:
                     cfg.recognized_lines += 1
                 else:
                     warn(e, "STP 变体未建模；未据此推断启停状态或拓扑")
+                continue
+            if inverse and inverse.startswith("vlan "):
+                context = None
+                value = re.sub(r"^vlan (?:batch |range )?", "", inverse)
+                for vid in vlan_ids(value):
+                    cfg.vlans.pop(vid, None)
+                cfg.recognized_lines += 1
                 continue
             if (inverse and re.match(r"^(?:router ospf(?:\s+\d+|$)|ospf(?:\s+\d+|\s+(?:router-id|vpn-instance)\b|$))", inverse)
                     and not (context and context[0] == "interface")):
@@ -550,8 +569,9 @@ def _parse_config(text: str, vendor: str = "auto") -> Config:
                 vty = ManagementLine(s, num, evidence=[e])
                 cfg.management_lines.append(vty)
                 context = ("vty", vty)
-            elif s.startswith(("vlan ", "vlan batch ")):
-                value = s[11:] if s.startswith("vlan batch ") else s[5:]
+            elif s.startswith("vlan "):
+                context = None
+                value = re.sub(r"^vlan (?:batch |range )?", "", s)
                 ids = vlan_ids(value)
                 for vid in ids:
                     cfg.vlans[vid] = {"name": "", "evidence": e}
@@ -602,13 +622,15 @@ def _parse_config(text: str, vendor: str = "auto") -> Config:
                     it.mode = s.split()[-1]
                 elif s == "no switchport":
                     it.mode = "routed"
+                elif s in ("switchport protected", "no switchport protected", "undo switchport protected"):
+                    it.protected = s == "switchport protected"
                 elif s.startswith(("switchport access vlan ", "port default vlan ", "port access vlan ")):
                     it.access_vlan = next(iter(vlan_ids(s.split()[-1])))
                 elif s.startswith(("switchport trunk native vlan ", "port trunk pvid vlan ")):
                     it.native_vlan = next(iter(vlan_ids(s.split()[-1])))
                 elif s.startswith(("switchport trunk allowed vlan ", "port trunk allow-pass vlan ", "port trunk permit vlan ", "undo port trunk allow-pass vlan ", "undo port trunk permit vlan ")):
                     value = s.split("vlan ", 1)[1]
-                    mode = "replace" if vendor == "cisco" else "add"
+                    mode = "replace" if vendor in IOS_VENDORS else "add"
                     if s.startswith("undo "):
                         mode = "remove"
                     if value.split()[0] in ("add", "remove", "except"):
@@ -617,7 +639,7 @@ def _parse_config(text: str, vendor: str = "auto") -> Config:
                     if mode == "except":
                         values = ALL_VLANS - values
                     elif mode in ("add", "remove"):
-                        default = ALL_VLANS if vendor == "cisco" else {1}
+                        default = ALL_VLANS if vendor in IOS_VENDORS else {1}
                         current = set(it.allowed_vlans) if it.allowed_vlans is not None else default
                         values = current | values if mode == "add" else current - values
                     it.allowed_vlans = sorted(values)

@@ -139,6 +139,73 @@ class RuleTests(unittest.TestCase):
         c = parse_config("hostname X\nip http server", "cisco")
         self.assertEqual(audit(c), audit(c))
 
+    def test_missing_vlan_group_keeps_all_ports_roles_and_evidence(self):
+        text = ("hostname X\ninterface Gi0/1\n switchport access vlan 20\n"
+                " switchport trunk native vlan 20\n!\ninterface Gi0/2\n"
+                " switchport access vlan 20")
+        fs = findings(text, rule="VLAN-UNDEFINED")
+        self.assertEqual(len(fs), 1)
+        self.assertEqual(fs[0]["occurrences"], 2)
+        self.assertEqual(fs[0]["affected_objects"], ["Gi0/1", "Gi0/2"])
+        self.assertIn("VLAN 20", fs[0]["problem"])
+        self.assertIn("Gi0/1（Access、native/PVID）", fs[0]["problem"])
+        self.assertIn("Gi0/2（Access）", fs[0]["problem"])
+        self.assertEqual({e["line"] for e in fs[0]["evidence"]}, {2, 3, 4, 6, 7})
+
+    def test_defined_vlan_not_reported_across_multiple_ports(self):
+        text = ("hostname X\nvlan 20\n name USERS\n!\ninterface Gi0/1\n"
+                " switchport access vlan 20\n!\ninterface Gi0/2\n switchport access vlan 20")
+        self.assertEqual(findings(text, rule="VLAN-UNDEFINED"), [])
+
+    def test_distinct_missing_vlan_ids_remain_distinct(self):
+        text = ("hostname X\ninterface Gi0/1\n switchport access vlan 20\n"
+                " switchport trunk native vlan 30\n!\ninterface Gi0/2\n"
+                " switchport access vlan 20")
+        fs = findings(text, rule="VLAN-UNDEFINED")
+        self.assertEqual(len(fs), 2)
+        self.assertEqual([f["occurrences"] for f in fs], [2, 1])
+        self.assertIn("VLAN 20", fs[0]["problem"])
+        self.assertIn("VLAN 30", fs[1]["problem"])
+
+    def test_grouped_report_counters_preserve_original_occurrences(self):
+        text = ("hostname X\ninterface Gi0/1\n switchport access vlan 20\n!\n"
+                "interface Gi0/2\n switchport access vlan 20")
+        result = audit(parse_config(text, "cisco"))
+        self.assertEqual(result["summary"]["total"], 1)
+        self.assertEqual(result["summary"]["severity"]["medium"], 1)
+        self.assertEqual(result["summary"]["occurrences_total"], 2)
+        self.assertEqual(result["summary"]["merged_count"], 1)
+
+    def test_vty_unknown_and_source_groups_preserve_every_range(self):
+        text = "hostname X\nline vty 0 4\n!\nline vty 5 15"
+        result = audit(parse_config(text, "cisco"))
+        for rule in ("MGMT-VTY-UNKNOWN", "MGMT-VTY-SOURCE"):
+            rows = [f for f in result["findings"] if f["rule_id"] == rule]
+            self.assertEqual(len(rows), 1)
+            self.assertEqual(rows[0]["occurrences"], 2)
+            self.assertEqual(rows[0]["affected_objects"], ["line vty 0 4", "line vty 5 15"])
+            self.assertEqual({e["line"] for e in rows[0]["evidence"]}, {2, 4})
+            self.assertEqual(rows[0]["confidence"], "needs-review")
+            self.assertIn("line vty 0 4", rows[0]["problem"])
+            self.assertIn("line vty 5 15", rows[0]["problem"])
+
+    def test_grouped_credentials_keep_all_accounts_and_redacted_lines(self):
+        text = ("hostname X\nusername alice password 0 PrivateAliceSecret\n"
+                "username bob password 7 PrivateBobSecret")
+        fs = findings(text, rule="MGMT-CREDENTIAL")
+        self.assertEqual(len(fs), 1)
+        self.assertEqual(fs[0]["occurrences"], 2)
+        self.assertEqual(fs[0]["affected_objects"], ["账号 alice", "账号 bob"])
+        self.assertEqual({e["line"] for e in fs[0]["evidence"]}, {2, 3})
+        self.assertNotIn("PrivateAliceSecret", json.dumps(fs))
+        self.assertNotIn("PrivateBobSecret", json.dumps(fs))
+
+    def test_snmp_read_and_write_severity_do_not_merge(self):
+        fs = findings("hostname X\nsnmp-server community ReadOnlySecret RO\n"
+                      "snmp-server community ReadWriteSecret RW", rule="MGMT-SNMP-COMMUNITY")
+        self.assertEqual(len(fs), 2)
+        self.assertEqual({f["severity"] for f in fs}, {"high", "medium"})
+
 
 if __name__ == "__main__":
     unittest.main()

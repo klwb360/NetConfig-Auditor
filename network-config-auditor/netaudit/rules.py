@@ -10,8 +10,10 @@ from collections import Counter
 import ipaddress
 import re
 
-from .model import ACLRule, Config, Evidence, Finding
+from .model import ACLRule, Config, Evidence, Finding, Interface
 from .architecture import architecture_summary, check_architecture
+from .grouping import group_findings, populate_affected_objects, unique_evidence
+from .remediation import enrich_findings
 
 SEVERITIES = {"critical": 4, "high": 3, "medium": 2, "low": 1, "info": 0}
 
@@ -31,9 +33,13 @@ class GenericPlugin(ABC):
         pass
 
     def add(self, rule_id, severity, category, title, problem, risk, advice,
-            evidence, confidence="confirmed-config", commands=None):
-        self.add_issue(Finding(rule_id, severity, category, title, problem,
-                               risk, advice, evidence, confidence, commands or []))
+            evidence, confidence="confirmed-config", commands=None,
+            affected_objects=None, occurrences=1):
+        issue = Finding(rule_id, severity, category, title, problem,
+                        risk, advice, evidence, confidence, commands or [])
+        issue.affected_objects = affected_objects or []
+        issue.occurrences = occurrences
+        self.add_issue(issue)
 
 
 class ManagementChecks(GenericPlugin):
@@ -53,7 +59,7 @@ class ManagementChecks(GenericPlugin):
                 telnet_state = (True, e)
             elif s in ("undo telnet server enable", "undo telnet server"):
                 telnet_state = (False, e)
-            if re.search(r"\b(?:password|secret) (?:0 |7 |plain |simple )?\[redacted\]", s):
+            if re.search(r"\b(?:password|secret) (?:(?:level \d+|role \S+) )?(?:0 |7 |plain |simple )?\[redacted\]", s):
                 if "cipher [redacted]" in s or "secret 5 " in s or "secret 8 " in s or "secret 9 " in s:
                     continue
                 self.add("MGMT-CREDENTIAL", "high", "management", "明文或弱保护凭据",
@@ -81,11 +87,12 @@ class ManagementChecks(GenericPlugin):
                          "显式指定 SSHv1。", "SSH 版本 1 存在协议层安全缺陷。",
                          "验证客户端兼容后使用 SSHv2。", [e], commands=["ip ssh version 2"])
         if http_state and http_state[0]:
-            command = {"cisco": "no ip http server", "huawei": "undo http server enable", "h3c": "undo http server enable"}[c.vendor]
+            command = {"cisco": "no ip http server", "ruijie": "no ip http server",
+                       "huawei": "undo http server enable", "h3c": "undo http server enable"}.get(c.vendor)
             self.add("MGMT-HTTP", "high", "management", "HTTP 管理服务开启",
                      "配置显式开启明文 HTTP 管理。", "可达网络上的通信可能泄露登录信息。",
                      "确认管理路径后关闭 HTTP，使用 HTTPS/SSH 并限制管理来源；命令需核对设备版本。",
-                     [http_state[1]], commands=[command])
+                     [http_state[1]], commands=[command] if command else [])
         if telnet_state and telnet_state[0]:
             self.add("MGMT-TELNET-SERVER", "high", "management", "Telnet 服务开启",
                      "配置显式开启 Telnet 服务器。", "可达网络上的登录凭据与命令可能被窃听。",
@@ -96,24 +103,29 @@ class ManagementChecks(GenericPlugin):
                 self.add("MGMT-VTY-TELNET", "high", "management", "VTY 允许 Telnet",
                          f"{v.name} 的入站协议包含 Telnet/all。", "此 VTY 段允许明文远程管理协议。",
                          "先验证 SSH、AAA 与备用管理路径，再将该 VTY 段限制为 SSH。", v.evidence,
-                         commands=[v.name, "transport input ssh" if c.vendor == "cisco" else "protocol inbound ssh"])
+                         commands=[v.name, "transport input ssh" if c.vendor in ("cisco", "ruijie") else "protocol inbound ssh"],
+                         affected_objects=[v.name])
             elif v.transport is None:
                 self.add("MGMT-VTY-UNKNOWN", "info", "management", "VTY 协议未显式给出",
                          f"{v.name} 没有已识别的入站协议。", "设备默认值因平台/版本而异，不能静态确认。",
-                         "核对设备版本、完整配置和实际服务状态，明确 SSH 管理基线。", [v.evidence[0]], "needs-review")
+                         "核对设备版本、完整配置和实际服务状态，明确 SSH 管理基线。", [v.evidence[0]], "needs-review",
+                         affected_objects=[v.name])
             if v.authentication in ("no login", "authentication-mode none"):
                 self.add("MGMT-VTY-NOAUTH", "critical", "management", "VTY 未要求认证",
                          f"{v.name} 显式配置不认证。", "在可达且有可用入站协议时，未认证人员可能获得会话。",
-                         "检查 AAA/本地账号与控制台回退，恢复身份认证。", v.evidence)
+                         "检查 AAA/本地账号与控制台回退，恢复身份认证。", v.evidence,
+                         affected_objects=[v.name])
             if v.idle_seconds == 0 or (v.idle_seconds is not None and v.idle_seconds > 900):
                 self.add("MGMT-VTY-TIMEOUT", "medium", "management", "VTY 会话超时过宽",
                          f"{v.name} 的空闲超时为 {v.idle_seconds} 秒（0 表示不自动超时）。",
                          "遗留管理会话可能被其他人员接管。", "按运维基线设为 5–15 分钟并确认长任务需求。", v.evidence,
-                         commands=[v.name, "exec-timeout 10 0" if c.vendor == "cisco" else "idle-timeout 10 0"])
+                         commands=[v.name, "exec-timeout 10 0" if c.vendor in ("cisco", "ruijie") else "idle-timeout 10 0"],
+                         affected_objects=[v.name])
             if not v.acl_bindings and v.transport != ["none"]:
                 self.add("MGMT-VTY-SOURCE", "low", "management", "VTY 未见来源 ACL",
                          f"{v.name} 未配置已识别的来源 ACL。", "缺少设备侧来源限制；外部防火墙或管理 VRF 可能已提供隔离。",
-                         "结合管理 VRF/防火墙确认可达性，按管理员网段设置来源 ACL。", [v.evidence[0]], "needs-review")
+                         "结合管理 VRF/防火墙确认可达性，按管理员网段设置来源 ACL。", [v.evidence[0]], "needs-review",
+                         affected_objects=[v.name])
 
 
 def _covers(a: str, b: str) -> bool:
@@ -183,14 +195,15 @@ class ACLChecks(GenericPlugin):
 class NetworkChecks(GenericPlugin):
     def analyze(self, c: Config) -> None:
         address_owners: dict[tuple[str, str], list] = {}
+        missing_vlans: dict[int, dict[str, tuple[Interface, list[str]]]] = {}
         for it in c.interfaces.values():
             for addr in it.addresses:
                 address_owners.setdefault((it.vrf, str(ipaddress.IPv4Interface(addr).ip)), []).append(it)
-            for vid in (it.access_vlan, it.native_vlan):
+            for role, vid in (("Access", it.access_vlan), ("native/PVID", it.native_vlan)):
                 if vid and vid != 1 and vid not in c.vlans:
-                    self.add("VLAN-UNDEFINED", "medium", "vlan", "接口引用未见定义的 VLAN",
-                             f"{it.name} 引用 VLAN {vid}，输入中未见 vlan 定义。", "可能导致业务 VLAN 未创建或无法转发。",
-                             "确认输入完整、动态 VLAN 与平台隐式创建行为，再补全 VLAN。", it.evidence, "needs-review")
+                    references = missing_vlans.setdefault(vid, {})
+                    _, roles = references.setdefault(it.name, (it, []))
+                    roles.append(role)
             if it.mode == "trunk" and it.allowed_vlans is not None and len(it.allowed_vlans) == 4094:
                 self.add("VLAN-TRUNK-ALL", "low", "vlan", "Trunk 允许所有 VLAN",
                          f"{it.name} 显式允许 VLAN 1–4094。", "可能扩大二层广播域暴露；网络用途可能要求全量透传。",
@@ -203,6 +216,19 @@ class NetworkChecks(GenericPlugin):
                 self.add("VLAN-PVID-NOT-ALLOWED", "info", "vlan", "PVID 未包含在允许列表",
                          f"{it.name} 的 PVID/native VLAN {it.native_vlan} 不在显式允许 VLAN 中。", "不同平台对未标记报文行为不同，可能造成连接异常，也可能是预期隔离。",
                          "核对平台行为和链路两端配置。", it.evidence, "needs-review")
+        # One issue describes one missing VLAN, with every referring port and
+        # role preserved. A port carrying the same access/native VID counts once.
+        for vid, references in sorted(missing_vlans.items()):
+            details = "；".join(f"{name}（{'、'.join(roles)}）"
+                               for name, (_, roles) in references.items())
+            evidence = unique_evidence(e for interface, _ in references.values()
+                                       for e in interface.evidence)
+            self.add("VLAN-UNDEFINED", "medium", "vlan", "接口引用未见定义的 VLAN",
+                     f"VLAN {vid} 在输入中未见 vlan 定义；相关接口：{details}。",
+                     "可能导致业务 VLAN 未创建或无法转发。",
+                     "先核对完整配置、批量 VLAN 定义、动态 VLAN 与平台隐式创建行为；设备确认缺失且业务需要该 VLAN 后再创建，引用错误时按实际规划修正端口。",
+                     evidence, "needs-review", affected_objects=list(references),
+                     occurrences=len(references))
         for (vrf, address), owners in address_owners.items():
             if len(owners) > 1:
                 self.add("IF-DUPLICATE-IP", "high", "interface", "同一 VRF 内重复接口地址",
@@ -239,17 +265,24 @@ PLUGINS = (ManagementChecks, ACLChecks, NetworkChecks)
 
 
 def audit(config: Config) -> dict:
+    from . import __version__
     findings = check_architecture(config)
     for plugin_type in PLUGINS:
         plugin = plugin_type()
         plugin.analyze(config)
         findings.extend(plugin.get_issues())
+    populate_affected_objects(findings, config)
+    enrich_findings(findings, config)
+    findings = group_findings(findings)
     findings.sort(key=lambda f: (-SEVERITIES[f.severity], f.rule_id, f.evidence[0].line if f.evidence else 0))
     counts = Counter(f.severity for f in findings)
+    occurrences_total = sum(f.occurrences for f in findings)
     return {
-        "schema_version": "1.1", "tool_version": "0.2.0",
+        "schema_version": "1.1", "tool_version": __version__,
         "device": {"vendor": config.vendor, "hostname": config.hostname, "detection": config.detection},
         "summary": {"total": len(findings), "severity": {s: counts[s] for s in SEVERITIES},
+                    "occurrences_total": occurrences_total,
+                    "merged_count": occurrences_total - len(findings),
                     "recognized_lines": config.recognized_lines, "relevant_lines": config.relevant_lines,
                     "unsupported_lines": config.unsupported_count},
         "limitations": "本地静态配置审计；仅支持所列 IPv4、STP 与 OSPF 语法。未确认邻居与转发状态、完整拓扑、公网可达性或完整基准合规。CVE 判断需产品与版本证据；KEV 记录不能证明本机已被入侵。AI 仅提供待核对的解释，整改需核对平台版本、业务与管理回退。",

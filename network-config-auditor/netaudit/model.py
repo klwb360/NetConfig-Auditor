@@ -33,6 +33,8 @@ class Interface:
     ospf_authentication: str | None = None
     ospf_evidence: list[Evidence] = field(default_factory=list)
     evidence: list[Evidence] = field(default_factory=list)
+    # Protected ports provide isolation; this does not establish STP protection.
+    protected: bool | None = None
 
 
 @dataclass
@@ -146,6 +148,11 @@ class Finding:
     evidence: list[Evidence]
     confidence: str = "confirmed-config"
     commands: list[str] = field(default_factory=list)
+    verification_commands: list[str] = field(default_factory=list)
+    command_templates: list[str] = field(default_factory=list)
+    command_notes: str = ""
+    affected_objects: list[str] = field(default_factory=list)
+    occurrences: int = 1
 
     def to_dict(self) -> dict:
         return asdict(self)

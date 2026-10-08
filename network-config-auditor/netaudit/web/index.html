@@ -18,11 +18,11 @@
       <span class="eyebrow">CONFIGURATION REVIEW</span>
       <h1>配置审计工作台</h1>
       <p>从一份设备配置出发，核对架构、安全风险与整改依据。</p>
-      <div class="supported-vendors" aria-label="支持的厂商"><span>Cisco</span><span>Huawei</span><span>H3C</span><span class="scope-note">六类架构 · 本地情报 · 可选 AI</span></div>
+      <div class="supported-vendors" aria-label="支持的厂商"><span>Cisco</span><span>Huawei</span><span>H3C</span><span>Ruijie RGOS</span><span class="scope-note">六类架构 · 本地情报 · 可选 AI</span></div>
     </div>
     <aside class="quick-start" aria-label="新手使用提示">
       <div class="quick-start-head"><h2>三步完成一次审计</h2><span>无需管理员权限</span></div>
-      <ol><li><b>1</b><div><strong>导入配置</strong><span>选择文件或粘贴文本</span></div></li><li><b>2</b><div><strong>开始审计</strong><span>核对发现与配置证据</span></div></li><li><b>3</b><div><strong>导出报告</strong><span>Markdown / HTML / JSON</span></div></li></ol>
+      <ol><li><b>1</b><div><strong>导入配置</strong><span>拖入文件或粘贴文本</span></div></li><li><b>2</b><div><strong>开始审计</strong><span>核对发现与配置证据</span></div></li><li><b>3</b><div><strong>导出报告</strong><span>Markdown / HTML / JSON</span></div></li></ol>
     </aside>
   </section>
 
@@ -38,9 +38,13 @@
   <div id="workspace" class="layout">
     <section class="panel input" aria-labelledby="input-title">
       <div class="panel-head"><div><span class="section-kicker">CONFIGURATION</span><h2 id="input-title">输入配置</h2></div><span class="panel-note">每次一台设备</span></div>
-      <div class="vendor-field"><label for="vendor">设备厂商</label><select id="vendor"><option value="auto">自动识别</option><option value="cisco">Cisco IOS / IOS XE</option><option value="huawei">Huawei VRP</option><option value="h3c">H3C Comware</option></select></div>
+      <div class="vendor-field"><label for="vendor">设备厂商</label><select id="vendor"><option value="auto">自动识别</option><option value="cisco">Cisco IOS / IOS XE</option><option value="huawei">Huawei VRP</option><option value="h3c">H3C Comware</option><option value="ruijie">Ruijie RGOS（已建模语法）</option></select></div>
+      <p id="vendor-detection" class="hint" aria-live="polite">导入文件后按配置内容识别厂商，也可手动选择。</p>
       <div class="row config-label-row"><label for="config">完整配置文本</label><label class="file-label" for="file"><span>导入配置文件</span><input type="file" id="file" accept=".cfg,.conf,.txt"></label></div>
-      <textarea id="config" spellcheck="false" aria-describedby="config-meta config-hint" placeholder="粘贴 show running-config 或 display current-configuration 输出…"></textarea>
+      <div id="config-drop-zone" class="config-drop-zone" role="group" aria-label="配置文件拖入区">
+        <p id="drop-hint" class="drop-hint">将一份配置文件拖到这里，自动读取并识别厂商</p>
+        <textarea id="config" spellcheck="false" aria-describedby="config-meta config-hint drop-hint" placeholder="也可粘贴 show running-config 或 display current-configuration 输出…"></textarea>
+      </div>
       <div id="config-meta" class="config-meta">尚未导入配置</div>
       <p id="config-hint" class="hint config-hint">每次输入一台设备的 UTF-8 配置，最大 2 MiB。凭据在结果中自动隐藏。</p>
 

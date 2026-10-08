@@ -4,6 +4,8 @@
 
 **[v0.2.1 已发布](https://github.com/klwb360/NetAudit/releases/tag/v0.2.1)**。推荐下载 Windows 便携版，解压后双击启动，即可在中文网页中完成审计和报告导出。
 
+当前源码正在准备 **v0.2.2**：增加配置文件拖入与厂商自动识别、锐捷 RGOS 支持、同类风险合并和分步骤建议命令。下方 v0.2.1 下载仍为已发布的三厂商版本，不包含这些修复；新版 Windows 包以完成构建、验收后的 Release 为准。
+
 **[下载推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.1/NetAudit-0.2.1-windows-x64-befb38bbecbb-portable.zip)** · [v0.2.1 发布页](https://github.com/klwb360/NetAudit/releases/tag/v0.2.1) · [使用说明与常见问题](docs/FAQ.md) · [故障排查](docs/TROUBLESHOOTING.md)
 
 [下载与双击](#windows下载后双击使用) · [新版网页怎么用](#新版网页怎么用) · [审计流程](#审计流程) · [命令行](#源码与命令行) · [文档索引](#文档导航)
@@ -51,12 +53,16 @@
 
 ## 能做什么
 
-- 解析 Cisco IOS/IOS XE、Huawei VRP、H3C Comware 的常见 IPv4 配置。
+以下为当前源码能力；已发布 v0.2.1 的厂商范围仍为 Cisco、Huawei 与 H3C。
+
+- 解析 Cisco IOS/IOS XE、Huawei VRP、H3C Comware 和锐捷 RGOS 已建模的常见 IPv4 配置。
 - 按 VLAN、STP、OSPF、ACL、NAT、Management Plane 六个领域展示检查覆盖与待复核问题，保留原有 27 条配置规则并增加 8 条 STP / OSPF 规则，共 35 个规则 ID。
 - 展示接口、VLAN、STP、OSPF、路由、ACL、NAT 清单，以及未建模配置行的警告。
 - 随包提供 CISA 官方 KEV 离线快照；输入精确产品 CPE 与本地 NVD CVE 2.0 数据后进行版本适用性核对，无法确认的项保持候选状态。
 - 显式启用本机 Ollama 后提供 AI 解释与整改建议；未设置模型时不调用 AI，失败仍保留审计报告。
-- 提供中文网页、严重度筛选、三厂商示例、文件导入及三种报告导出。
+- 提供中文网页、严重度筛选、四厂商合成示例、文件导入及三种报告导出。
+- 同一未见定义的 VLAN 按 VLAN ID 合并，列出所有关联端口与原始证据；其他具有相同整改条件的同类风险也合并，保留涉及处数。
+- 根据厂商提供只读核查命令、已知参数的整改脚本和待填写参数的模板，说明适用前提；未知业务、拓扑、地址或密钥需人工补充。
 - 保留命令行、标准输入、严格模式与严重度退出码，便于本地批量处理。
 
 审计仅覆盖已建模语法。Cisco ASA/NX-OS、IPv6、复杂策略及完整动态路由语义等尚未完整覆盖。没有告警不能视为配置已安全；建议命令需结合设备版本、拓扑和业务人工核对。完整 [支持范围](network-config-auditor/README.md#支持范围) 与 [规则说明](network-config-auditor/docs/RULES.md) 可供查阅。KEV 记录表示相关漏洞曾在现实中被利用，不能证明当前设备受影响或已被入侵。
@@ -107,6 +113,9 @@ python -m netaudit audit examples/cisco.cfg --vendor cisco --format html --out r
 # 华为示例导出 JSON；Markdown 的格式参数为 md
 python -m netaudit audit examples/huawei.cfg --vendor huawei --format json --out reports/huawei.json
 
+# 当前源码：锐捷 RGOS 合成示例导出 Markdown
+python -m netaudit audit examples/ruijie.cfg --vendor ruijie --format md --out reports/ruijie.md
+
 # 使用精确设备 CPE 与本地 NVD 数据核对 CVE；文件格式见情报说明
 python -m netaudit audit device.cfg --asset-info asset.json --nvd-file nvd-subset.json --format html --out reports/device.html
 
@@ -147,7 +156,7 @@ NetAudit/
 ├── tools/                    已验收产物的 Release 发布与校验
 ├── network-config-auditor/
 │   ├── netaudit/             解析、规则、报告、CLI、本地服务与网页
-│   ├── examples/             三厂商合成配置
+│   ├── examples/             四厂商合成配置
 │   ├── tests/                单元和集成测试
 │   ├── tools/                上游复现、Windows 构建与进程验收
 │   └── docs/                 规则、Windows 使用与验收说明

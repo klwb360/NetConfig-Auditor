@@ -1,6 +1,6 @@
 """Offline, evidence-based network configuration auditing."""
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 
 from .parser import parse_config
 from .rules import audit

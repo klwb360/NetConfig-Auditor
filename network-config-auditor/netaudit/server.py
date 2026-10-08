@@ -9,13 +9,36 @@ import signal
 import threading
 import webbrowser
 
-from .parser import MAX_BYTES
+from .parser import MAX_BYTES, MAX_LINES, detect_vendor
 from .reports import render
 from .pipeline import audit_configuration
 
 _SLOTS = threading.BoundedSemaphore(4)
 WEB_DIR = Path(__file__).resolve().parent / "web"
 MAX_REQUEST_BYTES = 36 * 1024 * 1024
+
+
+def _detect_configuration(text: str) -> dict[str, str]:
+    # Match parser limits without parsing the device or running the audit/AI
+    # pipeline. Only fixed status information leaves this endpoint.
+    try:
+        size = len(text.encode("utf-8"))
+    except UnicodeError:
+        raise ValueError("配置文本须为有效 UTF-8") from None
+    if size > MAX_BYTES:
+        raise ValueError("配置超过 2 MiB 限制")
+    if any(ord(c) < 32 and c not in "\n\r\t" for c in text):
+        raise ValueError("配置含控制字符，请先移除终端转义序列")
+    if len(text.splitlines()) > MAX_LINES:
+        raise ValueError("配置超过 30000 行限制")
+    if not text.strip():
+        raise ValueError("配置为空")
+    try:
+        vendor, reason = detect_vendor(text)
+    except ValueError:
+        return {"status": "needs-manual", "vendor": "auto",
+                "message": "无法可靠自动识别厂商；请手动选择，并每次导入一台设备的完整配置。"}
+    return {"status": "detected", "vendor": vendor, "detection": reason}
 
 
 class LocalServer(ThreadingHTTPServer):
@@ -78,7 +101,7 @@ def make_handler(token: str):
             expected_origins = (f"http://127.0.0.1:{self.server.server_port}", f"http://localhost:{self.server.server_port}")
             if origin not in expected_origins or self.headers.get("X-NetAudit-Token") != token:
                 return self._error(403, "请求来源或会话令牌不允许")
-            if self.path != "/api/audit":
+            if self.path not in ("/api/audit", "/api/detect"):
                 return self._error(404, "路径不存在")
             if self.headers.get_content_type() != "application/json" or self.headers.get("Transfer-Encoding"):
                 return self._error(415, "仅接受带 Content-Length 的 JSON")
@@ -96,7 +119,12 @@ def make_handler(token: str):
                 if len(data) != length:
                     return self._error(400, "请求内容不完整")
                 value = json.loads(data.decode("utf-8"))
-                if not isinstance(value, dict) or not isinstance(value.get("config"), str) or not isinstance(value.get("vendor", "auto"), str):
+                if not isinstance(value, dict) or not isinstance(value.get("config"), str):
+                    return self._error(400, "config/vendor 类型不合法")
+                if self.path == "/api/detect":
+                    result = _detect_configuration(value["config"])
+                    return self._send(200, json.dumps(result, ensure_ascii=False))
+                if not isinstance(value.get("vendor", "auto"), str):
                     return self._error(400, "config/vendor 类型不合法")
                 result = audit_configuration(
                     value["config"], value.get("vendor", "auto"), asset=value.get("asset"),
