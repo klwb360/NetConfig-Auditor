@@ -1,6 +1,24 @@
 "use strict";
 const $ = id => document.getElementById(id);
+const themeValues = new Set(["system", "light", "dark"]);
+const themeStorageKey = "netaudit.theme";
+function applyTheme(value) {
+  const theme = themeValues.has(value) ? value : "system";
+  document.documentElement.dataset.theme = theme;
+  $("theme-select").value = theme;
+}
+let savedTheme = "system";
+try { savedTheme = localStorage.getItem(themeStorageKey); } catch(e) { /* Theme remains usable when browser storage is unavailable. */ }
+applyTheme(savedTheme);
+$("theme-select").addEventListener("change", event => {
+  applyTheme(event.target.value);
+  try { localStorage.setItem(themeStorageKey, document.documentElement.dataset.theme); } catch(e) { /* Keep the current session choice. */ }
+});
+window.addEventListener("storage", event => {
+  if(event.key === themeStorageKey || event.key === null) applyTheme(event.key === null ? "system" : event.newValue);
+});
 let exports_ = null, report_ = null;
+const findingGroupOpen = new Map();
 let inputRevision = 0, auditRunning = false, configSource = "输入文本";
 let fileLoading = false, fileLoadId = 0, importAbort = null;
 function refreshRunState() { $("run").disabled=auditRunning||fileLoading; }
@@ -48,6 +66,7 @@ function configLineCount(text) {
 }
 function clearResults(message="导入配置或载入示例，开始一次本地审计。") {
   exports_=null;report_=null;allowExports(false);
+  findingGroupOpen.clear();
   $("summary").querySelectorAll("strong").forEach(item=>item.textContent="—");
   for(const id of ["architecture","intelligence","ai-result","inventory"])$(id).hidden=true;
   $("inventory").querySelector("pre").textContent="";
@@ -119,12 +138,25 @@ async function auditPayload(){
   const payload={vendor:$("vendor").value,config,asset,ai:enabled?{enabled:true,provider:"ollama",endpoint:"http://127.0.0.1:11434",model,timeout:30}:{enabled:false}};
   const [kev,nvd]=await Promise.all([readIntelligenceFile("kev-file","KEV"),readIntelligenceFile("nvd-file","NVD")]);if(kev!==undefined)payload.kev=kev;if(nvd!==undefined)payload.nvd=nvd;return payload;
 }
-function renderFindings() {
-  const root = $("findings"); root.replaceChildren(); root.className = "";
-  const items = report_.findings.filter(f => $("severity").value === "all" || f.severity === $("severity").value);
-  if(!items.length) {root.className="empty";root.append(node("h3","没有符合筛选条件的发现"),node("p","请同时检查配置清单、未建模行与报告适用范围。"));return;}
-  for(const f of items) {
-    const card=node("article"),meta=node("div",undefined,"meta");
+function findingOccurrences(finding) {
+  return Number.isSafeInteger(finding.occurrences) && finding.occurrences > 0 ? finding.occurrences : 1;
+}
+function groupFindingsForDisplay(findings) {
+  // Display groups retain the original finding objects. Distinct VLANs, ACL
+  // orderings and remediation contexts are never combined into a new finding.
+  const groups = new Map();
+  for(const finding of findings) {
+    const key = JSON.stringify([finding.rule_id, finding.severity, finding.category, finding.confidence, finding.title]);
+    if(!groups.has(key)) groups.set(key, {key, items:[], occurrences:0});
+    const group = groups.get(key);
+    group.items.push(finding);
+    group.occurrences += findingOccurrences(finding);
+  }
+  return [...groups.values()];
+}
+function findingCard(f) {
+    const card=node("article",undefined,"finding-item"),meta=node("div",undefined,"meta");
+    card.dataset.ruleId=f.rule_id;
     meta.append(node("span",labels[f.severity],"badge "+f.severity),node("span",f.rule_id),node("span",f.confidence==="needs-review"?"需核对场景":"配置已确认"));
     if((f.occurrences||1)>1)meta.append(node("span",`已合并 ${f.occurrences} 处`));
     card.append(meta,node("h3",f.title));
@@ -138,8 +170,53 @@ function renderFindings() {
     for(const [key,label] of [["verification_commands","检查与验证命令 · 只读"],["commands","建议整改命令 · 满足前提后人工执行"],["command_templates","命令模板 · 先填写参数并核对"]]) {
       if(f[key]?.length){card.append(node("p",label,"confidence"));for(const script of f[key])card.append(node("pre",script));}
     }
-    root.append(card);
+    return card;
+}
+function renderFindings() {
+  const root = $("findings"); root.replaceChildren(); root.className = "";
+  const items = report_.findings.filter(f => $("severity").value === "all" || f.severity === $("severity").value);
+  if(!items.length) {root.className="empty";root.append(node("h3","没有符合筛选条件的发现"),node("p","请同时检查配置清单、未建模行与报告适用范围。"));return;}
+  const groups=groupFindingsForDisplay(items),collapsible=[];
+  const controls=node("div",undefined,"finding-controls");
+  const total=groups.reduce((sum,group)=>sum+group.occurrences,0);
+  const summary=node("p",`显示 ${groups.length} 组 · ${items.length} 项发现 · 涉及 ${total} 处`,"finding-list-summary");
+  summary.id="finding-list-summary";summary.setAttribute("role","status");
+  controls.append(summary);
+  const expand=node("button","展开全部","secondary"),collapse=node("button","收起全部","secondary");
+  expand.type=collapse.type="button";expand.id="expand-findings";collapse.id="collapse-findings";
+  const syncControls=()=>{
+    expand.disabled=collapsible.every(detail=>detail.open);
+    collapse.disabled=collapsible.every(detail=>!detail.open);
+  };
+  const setAll=open=>{
+    for(const detail of collapsible) {detail.open=open;findingGroupOpen.set(detail.dataset.groupKey,open);}
+    syncControls();
+  };
+  expand.addEventListener("click",()=>setAll(true));collapse.addEventListener("click",()=>setAll(false));
+  root.append(controls);
+  for(const group of groups) {
+    if(group.items.length===1 && group.occurrences===1) {root.append(findingCard(group.items[0]));continue;}
+    const first=group.items[0],detail=node("details",undefined,"finding-group"),heading=node("summary",undefined,"finding-group-summary");
+    detail.dataset.ruleId=first.rule_id;detail.dataset.groupKey=group.key;
+    detail.open=findingGroupOpen.get(group.key)||false;
+    heading.append(node("span",labels[first.severity],"badge "+first.severity),node("strong",first.title,"finding-group-title"),node("span",`${group.items.length} 项发现 · ${group.occurrences} 处`,"finding-count"));
+    heading.append(node("span",`${first.rule_id} · ${first.confidence==="needs-review"?"需核对场景":"配置已确认"}`,"finding-scope"));
+    const objects=[...new Set(group.items.flatMap(f=>f.affected_objects||[]))];
+    if(objects.length) {
+      let preview=objects.slice(0,3).join("、");
+      if(preview.length>100)preview=preview.slice(0,100)+"…";
+      heading.append(node("span",`影响对象：${preview}${objects.length>3?` 等 ${objects.length} 个对象`:""}`,"finding-scope"));
+    }
+    const body=node("div",undefined,"finding-group-body");
+    for(const finding of group.items)body.append(findingCard(finding));
+    detail.append(heading,body);root.append(detail);collapsible.push(detail);
+    detail.addEventListener("toggle",()=>{
+      if(!detail.isConnected)return;
+      findingGroupOpen.set(group.key,detail.open);syncControls();
+    });
   }
+  if(collapsible.length)controls.append(expand,collapse);
+  syncControls();
 }
 $("run").addEventListener("click", async () => {
   const revision=inputRevision;auditRunning=true;
@@ -161,7 +238,7 @@ $("run").addEventListener("click", async () => {
     report_=value.report;exports_=value.exports;const s=report_.summary;
     const nums=$("summary").querySelectorAll("strong");nums[0].textContent=s.severity.critical+s.severity.high;nums[1].textContent=s.severity.medium+s.severity.low;nums[2].textContent=s.unsupported_lines;
     $("status").textContent=`审计完成 · ${report_.device.vendor} · ${report_.device.hostname} · 识别 ${s.recognized_lines}/${s.relevant_lines} 行`;
-    $("result-context").textContent=`当前结果 · ${report_.device.vendor} · ${report_.device.hostname} · ${s.total} 类发现`+(s.merged_count?` · 涉及 ${s.occurrences_total} 处（同类已合并）`:"");
+    $("result-context").textContent=`当前结果 · ${report_.device.vendor} · ${report_.device.hostname} · ${s.total} 项发现`+(s.merged_count?` · 涉及 ${s.occurrences_total} 处（同类已合并）`:"");
     document.querySelectorAll(".panel-empty-placeholder").forEach(item=>item.hidden=true);
     allowExports(true);$("inventory").hidden=false;$("inventory").querySelector("pre").textContent=JSON.stringify(report_.inventory,null,2);renderPipeline(report_.pipeline);renderArchitecture();renderIntelligence();renderAI();renderFindings();
   } catch(e) {

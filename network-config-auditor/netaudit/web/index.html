@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
   <title>NetAudit · 网络配置审计</title>
   <link rel="stylesheet" href="/style.css">
   <script src="/app.js" defer></script>
@@ -10,7 +11,10 @@
 <body>
 <header class="app-header">
   <a class="brand" href="#workspace" aria-label="NetAudit 配置审计工作台"><b aria-hidden="true">N</b><span>NetAudit<small>网络配置审计</small></span></a>
-  <span class="local"><i aria-hidden="true"></i> 本地运行<span class="local-detail"> · 配置不出本机</span></span>
+  <div class="header-tools">
+    <label class="theme-control" for="theme-select"><span>外观</span><select id="theme-select"><option value="system">跟随系统</option><option value="light">明亮风格</option><option value="dark">暗黑风格</option></select></label>
+    <span class="local"><i aria-hidden="true"></i> 本地运行<span class="local-detail"> · 配置不出本机</span></span>
+  </div>
 </header>
 <main>
   <section class="overview" aria-label="工作台概览">

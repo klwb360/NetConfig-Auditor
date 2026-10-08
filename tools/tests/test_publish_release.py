@@ -394,6 +394,29 @@ class ReleaseNotesTests(unittest.TestCase):
                     self.assertIn(expected, text)
                 self.assertNotIn("三厂商及三种报告", text)
 
+    def test_theme_notes_only_apply_to_supported_versions(self):
+        for version in ("0.1.0", "0.2.0", "0.2.1", "0.2.2"):
+            with self.subTest(version=version):
+                text = p.notes("owner/repo", "v" + version, self.manifest(version), "123")
+                self.assertNotIn("主题切换与重复风险折叠", text)
+                self.assertNotIn("跟随系统", text)
+
+    def test_theme_notes_describe_display_only_grouping_and_complete_reports(self):
+        for version in ("0.2.3", "0.3.0"):
+            with self.subTest(version=version):
+                manifest = self.manifest(version)
+                original = json.dumps(manifest, sort_keys=True)
+                text = p.notes("owner/repo", "v" + version, manifest, "123")
+                for expected in ("主题切换与重复风险折叠", "明亮", "暗黑", "跟随系统",
+                                 "浏览器记住主题偏好", "配置内容不会随主题偏好保存",
+                                 "涉及处数", "每项对象、证据和整改建议", "一键展开或收起",
+                                 "折叠仅调整网页展示", "严重度筛选", "审计统计",
+                                 "JSON / Markdown / HTML 完整报告"):
+                    self.assertIn(expected, text)
+                rows = [line for line in text.splitlines() if line.startswith("| `NetAudit-")]
+                self.assertEqual(len(rows), 3)
+                self.assertEqual(json.dumps(manifest, sort_keys=True), original)
+
     def test_new_notes_preserve_three_runtime_downloads_and_permanent_records(self):
         manifest = self.manifest("0.2.2")
         original = json.dumps(manifest, sort_keys=True)

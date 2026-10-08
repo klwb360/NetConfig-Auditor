@@ -207,6 +207,14 @@ def notes(repository, tag, manifest, run_id, records_commit="main"):
 - 提供只读核查命令、已知参数的整改脚本，以及需填写参数或人工确认的候选模板；显示设备版本、业务、认证与备用管理路径等执行前提。命令保留完整模式进入与退出，工具不连接设备或自动执行整改。
 
 """
+    theme_features = "" if version_parts < (0, 2, 3) else """
+### 主题切换与重复风险折叠
+
+- 顶部可切换“明亮”“暗黑”或“跟随系统”，浏览器记住主题偏好；默认跟随系统配色。配置内容不会随主题偏好保存。
+- 安全发现按规则、严重度、分类、确认程度与标题集中为可展开的项目，显示项数与涉及处数；重复项目默认折叠，单项单处直接显示。展开后查看每项对象、证据和整改建议，也可一键展开或收起；不同 VLAN 等独立发现保留各自建议命令。
+- 折叠仅调整网页展示，严重度筛选、审计统计和 JSON / Markdown / HTML 完整报告仍保留原有发现与证据。
+
+"""
     return f"""下载后即可使用的 Windows x64 便携版，配置处理在本机完成。
 
 **推荐下载：[便携 ZIP]({base}/releases/download/{tag}/{portable})**（下方 Assets 中名称以 `-portable.zip` 结尾的文件）。
@@ -220,7 +228,7 @@ def notes(repository, tag, manifest, run_id, records_commit="main"):
 
 `-onefile.zip` 提供单 EXE 与配套说明、示例、许可证和源码；`-onefile.exe` 可独立启动。再次分发仍需保留 GPL-3.0-only 许可证、归属说明与对应源码。普通用户无需下载 GitHub 自动生成的 “Source code”。
 
-{features}{ui_features}{remediation_features}
+{features}{ui_features}{remediation_features}{theme_features}
 
 ### 验证与来源
 
