@@ -1,16 +1,24 @@
 # 常见问题
 
-面向 Windows 便携版用户。当前正式版本为 v0.2.2；旧版 v0.2.1、v0.2.0 与 v0.1.0 保留。下载入口是 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest)；文件、校验值与实测范围见 [下载与交付记录](../DELIVERY.md)。
+面向 Windows 便携版用户。当前正式版本为 v0.2.3；旧版 v0.2.2、v0.2.1、v0.2.0 与 v0.1.0 保留。下载入口是 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest)；文件、校验值与实测范围见 [下载与交付记录](../DELIVERY.md)。
 
 ## 如何下载并开始使用？
 
-使用有访问权限的 GitHub 账号登录，点击 [v0.2.2 单 EXE](https://github.com/klwb360/NetAudit/releases/download/v0.2.2/NetAudit-0.2.2-windows-x64-8015ed5ed3d2-onefile.exe)，下载后双击即可打开本地网页。需要配套资料时下载 [便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.2/NetAudit-0.2.2-windows-x64-8015ed5ed3d2-portable.zip)，解压一次，进入文件夹双击 `Start-NetAudit.bat` 或 `NetAudit.exe`；不要在 ZIP 预览窗口内运行。在网页左侧拖入一份配置，核对识别的厂商并点击“开始审计”。
+使用有访问权限的 GitHub 账号登录，点击 [v0.2.3 单 EXE](https://github.com/klwb360/NetAudit/releases/download/v0.2.3/NetAudit-0.2.3-windows-x64-7900be2b8410-onefile.exe)，下载后双击即可打开本地网页。需要配套资料时下载 [便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.3/NetAudit-0.2.3-windows-x64-7900be2b8410-portable.zip)，解压一次，进入文件夹双击 `Start-NetAudit.bat` 或 `NetAudit.exe`；不要在 ZIP 预览窗口内运行。在网页左侧拖入一份配置，核对识别的厂商并点击“开始审计”。
 
 普通使用无需下载 GitHub 自动生成的 “Source code”。两个运行 ZIP 内的 `*-source-*.zip` 是分发所对应的完整源码，供查阅、修改与重建；Release 已移除重复的独立源码附件，版本标签仍固定到构建提交。
 
 ## 为什么 Release 只剩三个运行附件？
 
-v0.2.2、v0.2.1、v0.2.0、v0.1.0 均保留 `portable.zip`、`onefile.zip` 和 `onefile.exe`，运行文件与原版本标签不变。校验文件 `SHA256SUMS.txt`、构建清单 `manifest.json` 和三份 `smoke-*.json` 验收报告永久保存在仓库 [发布档案](releases/README.md)，可按版本查看。原校验文件仍覆盖完整九文件构建产物，其中独立源码 ZIP 可从运行 ZIP 内取得。GitHub 自动生成的 “Source code” ZIP/tar.gz 无法单独隐藏。
+v0.2.3、v0.2.2、v0.2.1、v0.2.0、v0.1.0 均保留 `portable.zip`、`onefile.zip` 和 `onefile.exe`，运行文件与原版本标签不变。校验文件 `SHA256SUMS.txt`、构建清单 `manifest.json` 和三份 `smoke-*.json` 验收报告永久保存在仓库 [发布档案](releases/README.md)，可按版本查看。原校验文件仍覆盖完整九文件构建产物，其中独立源码 ZIP 可从运行 ZIP 内取得。GitHub 自动生成的 “Source code” ZIP/tar.gz 无法单独隐藏。
+
+## 如何切换暗黑风格？
+
+在网页顶部的主题选项选择“暗黑风格”，也可选择“明亮风格”或“跟随系统”。默认跟随系统，浏览器仅记住主题偏好，不保存配置。主题偏好属于当前浏览器的站点数据；端口变化或清除网站数据后可能需重新选择，浏览器禁用存储时仍可切换当前页面的主题。
+
+## 重复风险为什么折叠起来，报告会少内容吗？
+
+v0.2.3 将规则、严重度、分类、确认程度与标题相同的发现集中展示，显示项数与涉及处数；重复项目默认折叠，单项单处直接显示。点击项目，或使用“展开全部”，即可核对每项对象、证据和建议；不同 VLAN 保留各自命令。折叠只改变网页显示，审计统计与三种完整报告不减少。v0.2.2 原有后端同类风险合并继续保留，本次没有改写其判断结果。
 
 ## 新版网页如何查看结果？
 
@@ -35,7 +43,7 @@ v0.2.2、v0.2.1、v0.2.0、v0.1.0 均保留 `portable.zip`、`onefile.zip` 和 `
 
 便携 EXE 自带 Python 运行库；源码版 BAT 需要 Python 3.10 或更新版本。普通使用设计为无需管理员权限，报告请选择自己有写入权限的位置。
 
-v0.2.2 在 Windows Server 2022 x64 完成 272 项应用测试与 28 项真实进程验收；Linux Chromium 85 项拖入追加检查通过（此前 RGOS 184 项），Linux Python 3.10 / 3.12 / 3.13 CI 通过。Windows 10/11、ARM64、普通非管理员账户、物理上未安装 Python 的独立电脑及 Windows 真实浏览器交互尚未实测；详见 [交付记录](../DELIVERY.md)。旧版 v0.2.0 的 192 项测试、28 项进程验收和 24 项网页检查保持历史记录。
+v0.2.3 在 Windows Server 2022 x64 完成 272 项应用测试与 28 项真实进程验收；Linux Chromium 112 项主题、风险折叠与拖入 / 导出检查通过，Linux Python 3.10 / 3.12 / 3.13 CI 通过。Windows 10/11、ARM64、普通非管理员账户、物理上未安装 Python 的独立电脑及 Windows 真实浏览器交互尚未实测；详见 [交付记录](../DELIVERY.md)。旧版 v0.2.0 的 192 项测试、28 项进程验收和 24 项网页检查保持历史记录。
 
 ## 配置文件如何准备，支持哪些设备？
 

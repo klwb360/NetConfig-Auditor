@@ -2,7 +2,7 @@
 
 输入一台 Cisco、华为、H3C 或锐捷 RGOS 交换机/路由器的完整配置，依次进行 **配置解析 → 六域架构检查 → 安全规则 → CVE / KEV 情报 → 可选本机 AI 解释 → 报告输出**。保留带原始行号的配置问题、风险、建议和结构化清单，提供中文本地网页与命令行；程序运行时仅使用 Python 标准库。
 
-**[v0.2.2 已发布](https://github.com/klwb360/NetAudit/releases/tag/v0.2.2)**。可 [直接下载单 EXE](https://github.com/klwb360/NetAudit/releases/download/v0.2.2/NetAudit-0.2.2-windows-x64-8015ed5ed3d2-onefile.exe) 双击运行，或使用 [便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.2/NetAudit-0.2.2-windows-x64-8015ed5ed3d2-portable.zip)；文件拖入、四厂商识别、风险合并和分步骤命令均随新版提供。真实测试范围与校验值见 [仓库交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md)。旧 v0.2.1 Windows 包仍为三厂商版本。
+**[v0.2.3 已发布](https://github.com/klwb360/NetAudit/releases/tag/v0.2.3)**。可 [直接下载单 EXE](https://github.com/klwb360/NetAudit/releases/download/v0.2.3/NetAudit-0.2.3-windows-x64-7900be2b8410-onefile.exe) 双击运行，或使用 [便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.3/NetAudit-0.2.3-windows-x64-7900be2b8410-portable.zip)；新版提供主题切换和重复风险折叠，保留文件拖入、四厂商识别、风险合并与分步骤命令。真实测试范围与校验值见 [仓库交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md)。旧 v0.2.1 Windows 包仍为三厂商版本。
 
 本项目审计了 [pynipper-ng](https://github.com/syn-4ck/pynipper-ng)，保留并改写其插件基类，重建了三厂商解析、审计规则和报告模块。来源、固定提交和改动见 [NOTICE](NOTICE)；审计详情见 [代码审计报告](docs/UPSTREAM_AUDIT.md)。项目采用 GPL-3.0-only。
 
@@ -12,7 +12,7 @@ Windows 普通用户建议使用便携包：**下载 → 解压 → 双击 `Star
 
 v0.2.2 可将一份 UTF-8 配置文件拖入左侧文本区域，或使用“导入配置文件”；两种方式都按内容自动识别四厂商，支持没有扩展名的配置文件。信息不足或混合厂商标记时提示手动选择，识别后仍可调整；点击“开始审计”才运行审计。文件最大 2 MiB、30000 行，文件夹与一次多个文件会给出提示。旧版 v0.2.1 EXE 不包含此功能。
 
-当前 **v0.2.3 源码**在顶部增加“明亮”“暗黑”和“跟随系统”主题选项，默认跟随系统，浏览器记住主题偏好。审计后，同类风险集中展示项数与涉及处数；重复项目默认折叠，单项单处直接显示。点击项目查看完整对象、证据与整改建议，也可“展开全部”或“收起全部”。不同 VLAN 等独立发现保留各自命令；折叠只调整展示，统计和三种报告保留完整发现。已发布的 v0.2.2 EXE 不包含这两项新功能；新版 Windows 包尚待构建验收。
+**v0.2.3** 在顶部提供“明亮风格”“暗黑风格”和“跟随系统”主题选项，默认跟随系统，浏览器记住主题偏好。审计后，同类风险集中展示项数与涉及处数；重复项目默认折叠，单项单处直接显示。点击项目查看完整对象、证据与整改建议，也可“展开全部”或“收起全部”。不同 VLAN 等独立发现保留各自命令；折叠只调整展示，统计和三种报告保留完整发现。本页上方 v0.2.3 Windows 包已包含这两项功能；旧 v0.2.2 EXE 不包含。
 
 源码版 Windows 也可双击 `Start-NetAudit.bat`，需要 Python **3.10 或更新版本**。BAT 会优先运行同目录的 `NetAudit.exe`，否则检测 Python。
 
