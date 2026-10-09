@@ -2,11 +2,11 @@
 
 导入 Cisco、华为、H3C 或锐捷 RGOS 的配置备份，用中文描述一个具体目标，或在模拟命令行逐条练习；先查看命令的前提、理由与配置差异，确认后应用到练习副本，需要时再运行原有审计。配置处理在本机完成，工具不会连接设备或下发命令。
 
-**[v1.0.0 已发布](https://github.com/klwb360/NetAudit/releases/tag/v1.0.0)**：默认进入配置练习，支持中文目标、模拟命令行、预览与明确应用，练习后可按需审计。四厂商解析、主题切换、重复风险折叠及完整报告继续保留；旧版本可在 [发布档案](docs/releases/README.md) 查阅。
+**[v1.0.1 已发布](https://github.com/klwb360/NetAudit/releases/tag/v1.0.1)**：新增厂商指令底色高亮，Cisco 蓝、华为橙、H3C 紫、锐捷绿；共享语法显示候选厂商，未知行保持中性。底色只表示语法归属，不代表安全、可执行或真实设备支持。中文目标、模拟练习、按需审计与完整报告继续保留；旧版本可在 [发布档案](docs/releases/README.md) 查阅。
 
-**[直接下载可运行的单 EXE](https://github.com/klwb360/NetAudit/releases/download/v1.0.0/NetAudit-1.0.0-windows-x64-e2b4efecdc26-onefile.exe)**：下载后双击，等待本地网页打开即可使用，无需安装 Python。需要 BAT、示例和配套资料时选择 **[便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v1.0.0/NetAudit-1.0.0-windows-x64-e2b4efecdc26-portable.zip)**，解压一次后双击启动。
+**[直接下载可运行的单 EXE](https://github.com/klwb360/NetAudit/releases/download/v1.0.1/NetAudit-1.0.1-windows-x64-fb5a64016f45-onefile.exe)**：下载后双击，等待本地网页打开即可使用，无需安装 Python。需要 BAT、示例和配套资料时选择 **[便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v1.0.1/NetAudit-1.0.1-windows-x64-fb5a64016f45-portable.zip)**，解压一次后双击启动。
 
-[v1.0.0 发布页](https://github.com/klwb360/NetAudit/releases/tag/v1.0.0) · [使用说明与常见问题](docs/FAQ.md) · [故障排查](docs/TROUBLESHOOTING.md) · [文件校验与实测范围](DELIVERY.md)
+[v1.0.1 发布页](https://github.com/klwb360/NetAudit/releases/tag/v1.0.1) · [使用说明与常见问题](docs/FAQ.md) · [故障排查](docs/TROUBLESHOOTING.md) · [文件校验与实测范围](DELIVERY.md)
 
 [下载与双击](#windows下载后双击使用) · [模拟练习步骤](#新版网页怎么用) · [练习范围](network-config-auditor/docs/SIMULATOR.md) · [命令行](#源码与命令行) · [文档索引](#文档导航)
 
@@ -19,6 +19,8 @@
 5. **开始练习**：点击“载入模拟”，输入一个目标，例如 `创建 VLAN 20`，点击“生成命令草案”，阅读每步理由后点击“将草案放入命令区”。也可直接输入设备命令，每行一条。
 6. **预览并应用**：点击“预览运行”，查看每条命令能否运行、原因和配置差异；确认后点击“应用本次预览”。这只改变当前练习副本，原始备份保留。需要时撤销、重置或“导出模拟配置 .cfg”。
 7. **按需审查与导出**：点击“审查当前模拟配置”；若只想检查备份，未载入模拟时直接点击“开始审计”。查看安全发现、网络架构、漏洞情报等页签，按严重度筛选，展开重复风险，点击 **JSON、Markdown 或 HTML** 下载完整报告。
+
+**识别指令底色**：Cisco 蓝、华为橙、H3C 紫、锐捷绿；共享语法显示候选厂商，未知行保持中性。底色只表示语法归属，不代表安全、可执行或真实设备支持。点击某行可查看归属理由；长行横向滚动。
 
 **切换风格**：在网页顶部选择“明亮风格”“暗黑风格”或“跟随系统”，浏览器记住主题偏好；默认跟随系统。配置内容不会随主题设置保存。
 
@@ -36,9 +38,11 @@ Release 只保留以上三种运行附件。仓库保持私人，Release 下载�
 
 ## 新版网页怎么用
 
-![NetAudit v1.0.0 配置练习工作台，使用合成配置示例](docs/images/simulator.png)
+![NetAudit v1.0.1 厂商指令底色高亮，使用合成配置示例](docs/images/simulator.png)
 
-v1.0.0 默认进入“配置练习”。左侧保存原始备份，右侧维护独立练习副本；窄屏依次堆叠。生成草案、放入命令区、预览和应用是四个独立操作，只有“应用本次预览”才改变练习副本。一批命令中有任何一条失败，整批配置和命令行视图都回滚。
+原始备份与模拟命令区会按已识别的厂商语法显示底色，配有文字图例与光标行说明。自动模式下共享语法保持中性；指定兼容厂商时显示该厂商底色并注明“上下文 / 共享语法”。其他厂商的明确语法仍显示自身颜色，普通注释、Banner 正文与无法确认的行保持中性。长命令可横向滚动，编辑、选择、复制和导出保留原文；颜色不会写入配置或报告，也不改变模拟及审计判断。
+
+v1.0.1 默认进入“配置练习”。左侧保存原始备份，右侧维护独立练习副本；窄屏依次堆叠。生成草案、放入命令区、预览和应用是四个独立操作，只有“应用本次预览”才改变练习副本。一批命令中有任何一条失败，整批配置和命令行视图都回滚。
 
 “可修改”表示本工具支持该语法且当前配置前提满足；“当前不能运行”会解释缺少的 VLAN、模式或其他依赖；“尚不支持”表示本工具没有实现，不能据此判断真实设备不允许执行。命令区下方可查看当前视图支持的命令。它不模拟 ping、数据包转发、链路通断、STP 收敛或 OSPF 邻居，也不保证型号、固件或真实登录条件兼容。
 
@@ -61,7 +65,7 @@ v1.0.0 默认进入“配置练习”。左侧保存原始备份，右侧维护�
 
 ## 能做什么
 
-v1.0.0 在保留原有审计能力的基础上增加离线练习；发布包与实测范围以 [交付记录](DELIVERY.md) 为准。
+v1.0.1 在离线练习与原有审计能力上增加厂商语法高亮；发布包与实测范围以 [交付记录](DELIVERY.md) 为准。
 
 - 解析 Cisco IOS/IOS XE、Huawei VRP、H3C Comware 和锐捷 RGOS 已建模的常见 IPv4 配置。
 - 练习基础 VLAN、已有接口、默认 VRF 静态路由、基础 ACL 与部分管理面 / STP 命令；说明当前模式、依赖和拒绝原因，预览差异后明确应用，支持撤销、重置和导出配置。练习支持范围小于解析范围。
@@ -69,7 +73,7 @@ v1.0.0 在保留原有审计能力的基础上增加离线练习；发布包与�
 - 展示接口、VLAN、STP、OSPF、路由、ACL、NAT 清单，以及未建模配置行的警告。
 - 随包提供 CISA 官方 KEV 离线快照；输入精确产品 CPE 与本地 NVD CVE 2.0 数据后进行版本适用性核对，无法确认的项保持候选状态。
 - 显式启用本机 Ollama 后提供 AI 解释与整改建议；未设置模型时不调用 AI，失败仍保留审计报告。
-- 提供中文网页、明亮 / 暗黑 / 跟随系统主题、重复风险折叠、严重度筛选、四厂商合成示例、文件拖入 / 导入时按内容识别及三种报告导出。
+- 提供厂商语法底色与文字图例、中文网页、明亮 / 暗黑 / 跟随系统主题、重复风险折叠、严重度筛选、四厂商合成示例、文件拖入 / 导入时按内容识别及三种报告导出。
 - 同一未见定义的 VLAN 按 VLAN ID 合并，列出所有关联端口与原始证据；其他具有相同整改条件的同类风险也合并，保留涉及处数。
 - 根据厂商提供只读核查命令、已知参数的整改脚本和待填写参数的模板，说明适用前提；未知业务、拓扑、地址或密钥需人工补充。
 - 保留命令行、标准输入、严格模式与严重度退出码，便于本地批量处理。
@@ -143,7 +147,7 @@ python -m netaudit intel-update --out reports/kev.json
 python -m netaudit audit device.cfg --ai-model YOUR_INSTALLED_MODEL --format md --out reports/device.md
 ```
 
-Windows 可使用 `py -3`，Linux 常用 `python3`。v1.0.0 便携版可以用 `NetAudit.exe` 或 `Start-NetAudit.bat` 传递相同参数。`plan` / `simulate` 向本机标准输出写 JSON；`simulate` 的 `config` 包含未脱敏原文，不宜将输出放入公开日志。命令文件用 `--commands commands.txt`，续练视图用 `--context context.json`（保存上次结果中的 `context` 对象）。模拟失败整批回滚、退出码 2，且不写 `--out`；成功导出保留原有行尾。
+Windows 可使用 `py -3`，Linux 常用 `python3`。便携版可以用 `NetAudit.exe` 或 `Start-NetAudit.bat` 传递相同参数。`plan` / `simulate` 向本机标准输出写 JSON；`simulate` 的 `config` 包含未脱敏原文，不宜将输出放入公开日志。命令文件用 `--commands commands.txt`，续练视图用 `--context context.json`（保存上次结果中的 `context` 对象）。模拟失败整批回滚、退出码 2，且不写 `--out`；成功导出保留原有行尾。
 
 退出码：0 调用成功；审计 1 表示达到 `--fail-on` 指定严重度；2 表示参数、输入或文件错误、`--strict` 检出未建模行、模拟批次失败或目标草案尚未就绪。详细用法见 [项目说明](network-config-auditor/README.md)。
 
@@ -186,6 +190,10 @@ NetAudit/
 ```
 
 ## 验证与配置保护
+
+v1.0.1 的 [Windows 构建](https://github.com/klwb360/NetAudit/actions/runs/37980042815)通过 **396 项应用测试、27 组指令分类测试和 28 项真实进程验收**（源码 10、onedir 9、onefile 9）。[Linux Python 3.10 / 3.12 / 3.13 CI](https://github.com/klwb360/NetAudit/actions/runs/37980042931) 全部通过；本地 Linux Chromium 完成 **185 项网页检查**，另有 5 项源码进程验收。[发布器](https://github.com/klwb360/NetAudit/actions/runs/37980621937)通过 **66 项保护测试**、永久归档与三个运行附件下载回验。六个网页资源在源码、onedir、onefile 中均核对完整；全部服务正常退出。
+
+实际 Windows 环境为 `Windows-2022Server-10.0.20348-SP0` / AMD64 / Python 3.12.10 / PyInstaller 6.22.3 / runner image 20261004.326.1。EXE 与标签固定到 [`fb5a64016f4502666b1394ef57238f1518d8799b`](https://github.com/klwb360/NetAudit/commit/fb5a64016f4502666b1394ef57238f1518d8799b)；源码、包内校验、AMD64 PE、运行库、许可证与 onefile 嵌入资源独立核验通过。高亮检查覆盖四厂商、共享语法、主题、原生编辑与复制、30,000 行滚动、2 MiB 边界、原文导出和模拟练习回归。详细 SHA-256 与未测项目见 [交付记录](DELIVERY.md)。以下保留旧版验证历史。
 
 v1.0.0 在 [37895686338 Windows 构建](https://github.com/klwb360/NetAudit/actions/runs/37895686338)中通过 **396 项应用测试和 28 项真实进程验收**（源码 10、onedir 9、onefile 9）。实际环境为 Windows Server 2022 10.0.20348 AMD64 / Python 3.12.10 x64 / PyInstaller 6.22.3 / runner image 20261004.326.1；[Linux Python 3.10 / 3.12 / 3.13 CI](https://github.com/klwb360/NetAudit/actions/runs/37895686403) 全部通过。Linux Chromium 完成 **128 项实际网页检查**，另通过 5 项源码进程验收；[发布器](https://github.com/klwb360/NetAudit/actions/runs/37896235786)通过 **62 项保护测试**、永久归档与三个运行附件上传后的下载回验。四个网页资源、模拟批次回滚、配置原文 / CRLF 保留及真实 CLI 已在三种运行形式验证；全部服务正常退出。
 

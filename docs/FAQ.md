@@ -1,12 +1,18 @@
 # 常见问题
 
-面向 Windows 便携版用户。当前正式版本为 v1.0.0，默认提供“中文目标 + 模拟命令行”学习流程，保留按需审计；旧版继续保留。文件、校验值与实测范围见 [下载与交付记录](../DELIVERY.md)。
+面向 Windows 便携版用户。当前正式版本为 v1.0.1，增加厂商语法底色，保留“中文目标 + 模拟命令行”学习流程与按需审计；旧版继续保留。文件、校验值与实测范围见 [下载与交付记录](../DELIVERY.md)。
 
 ## 如何下载并开始使用？
 
-使用有访问权限的 GitHub 账号登录，点击 [v1.0.0 单 EXE](https://github.com/klwb360/NetAudit/releases/download/v1.0.0/NetAudit-1.0.0-windows-x64-e2b4efecdc26-onefile.exe)，下载后双击即可打开本地网页。需要配套资料时下载 [便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v1.0.0/NetAudit-1.0.0-windows-x64-e2b4efecdc26-portable.zip)，解压一次，进入文件夹双击 `Start-NetAudit.bat` 或 `NetAudit.exe`；不要在 ZIP 预览窗口内运行。网页默认进入配置练习，按下面步骤载入备份；也可切到“按需审查”直接审计原始备份。
+使用有访问权限的 GitHub 账号登录，点击 [v1.0.1 单 EXE](https://github.com/klwb360/NetAudit/releases/download/v1.0.1/NetAudit-1.0.1-windows-x64-fb5a64016f45-onefile.exe)，下载后双击即可打开本地网页。需要配套资料时下载 [便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v1.0.1/NetAudit-1.0.1-windows-x64-fb5a64016f45-portable.zip)，解压一次，进入文件夹双击 `Start-NetAudit.bat` 或 `NetAudit.exe`；不要在 ZIP 预览窗口内运行。网页默认进入配置练习，按下面步骤载入备份；也可切到“按需审查”直接审计原始备份。
 
 普通使用无需下载 GitHub 自动生成的 “Source code”。两个运行 ZIP 内的 `*-source-*.zip` 是分发所对应的完整源码，供查阅、修改与重建；Release 已移除重复的独立源码附件，版本标签仍固定到构建提交。
+
+## 各种底色是什么意思？
+
+Cisco 蓝、华为橙、H3C 紫、锐捷绿；共享语法显示候选厂商，未知行保持中性。底色只表示语法归属，不代表安全、可执行或真实设备支持。
+
+原始备份与模拟命令区会按已识别的厂商语法显示底色，配有文字图例与光标行说明。自动模式下共享语法保持中性；指定兼容厂商时显示该厂商底色并注明“上下文 / 共享语法”。其他厂商的明确语法仍显示自身颜色，普通注释、Banner 正文与无法确认的行保持中性。长命令可横向滚动，编辑、选择、复制和导出保留原文；颜色不会写入配置或报告，也不改变模拟及审计判断。
 
 ## 如何开始一次配置练习？
 
@@ -47,7 +53,7 @@
 
 ## 为什么 Release 只剩三个运行附件？
 
-v1.0.0、v0.2.3、v0.2.2、v0.2.1、v0.2.0、v0.1.0 均提供 `portable.zip`、`onefile.zip` 和 `onefile.exe`，运行文件与原版本标签不变。校验文件 `SHA256SUMS.txt`、构建清单 `manifest.json` 和三份 `smoke-*.json` 验收报告永久保存在仓库 [发布档案](releases/README.md)，可按版本查看。原校验文件仍覆盖完整九文件构建产物，其中独立源码 ZIP 可从运行 ZIP 内取得。GitHub 自动生成的 “Source code” ZIP/tar.gz 无法单独隐藏。
+v1.0.1、v1.0.0、v0.2.3、v0.2.2、v0.2.1、v0.2.0、v0.1.0 均提供 `portable.zip`、`onefile.zip` 和 `onefile.exe`，运行文件与原版本标签不变。校验文件 `SHA256SUMS.txt`、构建清单 `manifest.json` 和三份 `smoke-*.json` 验收报告永久保存在仓库 [发布档案](releases/README.md)，可按版本查看。原校验文件仍覆盖完整九文件构建产物，其中独立源码 ZIP 可从运行 ZIP 内取得。GitHub 自动生成的 “Source code” ZIP/tar.gz 无法单独隐藏。
 
 ## 如何切换暗黑风格？
 
