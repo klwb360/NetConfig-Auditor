@@ -1,5 +1,49 @@
 # NetAudit Windows 下载与交付检查点
 
+2026-10-09：私人仓库 `klwb360/NetAudit` 已发布 **v1.0.0**，默认升级为“导入备份 → 中文目标或模拟命令 → 预览 → 明确应用 → 按需审查”的配置学习工具。原始备份与练习副本分开，一批命令失败整批回滚；保留原有四厂商审计、35 条规则、主题、重复风险折叠、情报和可选本机 AI。旧五个版本及其原始运行文件、源码标签和验收档案继续保留。
+
+**[直接下载单 EXE](https://github.com/klwb360/NetAudit/releases/download/v1.0.0/NetAudit-1.0.0-windows-x64-e2b4efecdc26-onefile.exe)** · [推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v1.0.0/NetAudit-1.0.0-windows-x64-e2b4efecdc26-portable.zip) · [v1.0.0 Release](https://github.com/klwb360/NetAudit/releases/tag/v1.0.0)（需登录有权限的 GitHub 账号）。Release 恰有三个运行附件；校验、构建清单和三份验收报告永久保存在 [v1.0.0 发布档案](docs/releases/v1.0.0/README.md)。
+
+下载 → 双击 EXE → 拖入一份配置并核对厂商 → 载入模拟 → 输入目标 / 命令 → 预览并阅读理由 → 明确应用 → 按需审查、查看与导出。便携 ZIP 解压一次后双击；关闭回到启动窗口按 Ctrl+C，迁移复制整个文件夹（包括 `_internal`）。原始备份保留，预览不自动应用；导出的模拟 `.cfg` 保留原文凭据，需按敏感备份保存。
+
+## v1.0.0 实际生成文件
+
+| 文件 | SHA-256 |
+|---|---|
+| `NetAudit-1.0.0-windows-x64-e2b4efecdc26-portable.zip` | `18a8f47a066947de218b8fe9b8f8aa26325fdc364ac62ab9e4bf9a41999d67f6` |
+| `NetAudit-1.0.0-windows-x64-e2b4efecdc26-onefile.zip` | `a992be36e3e5f14f5954d199fa9e6703c018bce5ab88bc434544bce2a720d040` |
+| `NetAudit-1.0.0-windows-x64-e2b4efecdc26-onefile.exe` | `1aedeaa1a553d93faa4e0ce7c369209140b189930bc91382d15f0ca124ec4309` |
+| `NetAudit-1.0.0-source-e2b4efecdc26.zip`（两个运行 ZIP 内） | `027841c69f859a025b8fbe925e39fdef5d8f21e6ba3a34c764456ee3a4e468e8` |
+
+源码与 Release 标签固定为 [`e2b4efecdc2682db8cef49d369c6fb0c9114b8b0`](https://github.com/klwb360/NetAudit/commit/e2b4efecdc2682db8cef49d369c6fb0c9114b8b0)。构建源工作区干净；后续发布元数据与文档提交不改变 EXE 字节。两个运行 ZIP 包含完整对应源码、GPL-3.0-only LICENSE / NOTICE、第三方运行库许可、使用说明、示例、网页和官方情报来源。包内说明保留构建时状态，最终发布状态以本页与固定发布档案为准。
+
+备用下载：[Windows Actions 原始产物](https://github.com/klwb360/NetAudit/actions/runs/37895686338)，有保留期限；外层 ZIP SHA-256：`75f2b57c6c48fbe0b7130b27cd0884582ac8f5028c29c2b72f746b5103dd2f51`。Actions 下载需先解压外层，再解压便携 ZIP；Release 直接提供内部运行文件。
+
+## v1.0.0 实际验收与发布
+
+| 环境与检查 | 结果与证据 |
+|---|---|
+| Windows Server 2022 10.0.20348 AMD64；Python 3.12.10 x64、PyInstaller 6.22.3；runner image 20261004.326.1 | [构建 37895686338](https://github.com/klwb360/NetAudit/actions/runs/37895686338)：396 项应用测试、28 项真实进程验收通过（源码 10、onedir 9、onefile 9） |
+| Linux CI；Python 3.10 / 3.12 / 3.13 | [运行 37895686403](https://github.com/klwb360/NetAudit/actions/runs/37895686403)：三个版本全部通过 |
+| 本地 Linux x86_64 / Python 3.12.14 / Chromium / Playwright | 396 项应用测试、5 项源码进程验收、128 项网页检查、62 项发布工具测试通过 |
+| GitHub Actions 发布器 | [正式发布运行 37896235786](https://github.com/klwb360/NetAudit/actions/runs/37896235786)：62 项保护测试、永久工程归档与三个运行附件下载回验通过 |
+
+Windows 源码、onedir 和 onefile 三种运行形式实际验证四厂商导入识别、中文目标生成与重放、命令预览 / 配置事务与整批回滚、CRLF 与未知配置 / 凭据保留、真正 `plan` / `simulate` CLI 的成功与失败 JSON 输出及退出码；模拟默认不调用审计或 AI。继续验证四厂商三种审计报告、原有 RGOS VLAN 范围与风险聚合、完整审计流程、中文 / 空格路径、BAT / CLI 不暂停、端口回退、四个完整网页资源、默认启动及可观察的浏览器调用、只读位置与用户临时目录。全部 18 份停服记录无剩余进程、无强制清理且端口关闭；onefile 临时目录清理通过。冻结版移除 Python 环境变量并限制 PATH 后运行，构建主机本身仍装有 Python。
+
+Linux Chromium / Playwright 完成 128 项实际网页检查：四厂商拖入、中文目标就绪 / 缺参 / 不支持、预览后明确应用、失败批次不应用、模式续练、撤销与重置、原文配置导出再导入、按需审当前已应用副本与三种完整报告、过期异步结果隔离、忙碌 / 错误恢复、主题切换、重复风险折叠、键盘及桌面 / 窄屏布局。无 JavaScript 错误或外部请求，测试服务正常退出且端口关闭。全部测试、截图和构建样例仅使用合成配置，真实备份和私有报告未纳入仓库、日志或分发包。
+
+独立核验外层 GitHub artifact SHA、九个原始产物、八个顶层校验值、全部 ZIP CRC，以及 onedir 131 / onefile 67 个包内校验值。139 个完整源码文件对应固定构建提交，其中 43 个逐字节一致、96 个 UTF-8 文本仅发生 Windows CRLF 检出转换；二进制、官方情报和已有发布档案均保持原字节。两个运行 ZIP 中的对应源码包和独立 EXE 字节一致；核对 AMD64 PE、运行库、许可证与归属，直接提取 onefile CArchive 的四个网页资源、情报及 `base_library.zip`。网页与 Windows 三种服务形式和 Linux 浏览器使用的规范化源码一致。Linux 独立文件核验不执行 Windows EXE，运行证据来自真实 Windows runner。
+
+## v1.0.0 未测边界
+
+这是离线配置状态模拟，覆盖范围以 [模拟练习说明](network-config-auditor/docs/SIMULATOR.md) 为准；不模拟数据包转发、物理链路、STP 收敛、OSPF 邻居或真实登录。“可修改”不保证实机型号 / 固件兼容或业务连通；“尚不支持”不能据此判断真实设备禁止执行。中文草案是有限的离线单目标模板，复杂需求须拆分并补齐参数。
+
+Windows 10/11、ARM64、普通非管理员账户、物理上未安装 Python 的独立电脑，以及 Windows Explorer 人工双击、系统默认浏览器可视交互与实际拖入仍未实测。冻结版通过限制 PATH、移除 Python 环境验证随包运行库，构建 runner 本身仍安装 Python。建议命令没有在真实设备执行；真实 Ollama 模型和实际产品 NVD 适用性仍待验证。
+
+以下完整保留旧五个版本的交付历史；其中“当前”、测试数量、提交和校验值仅对应各历史版本。最新下载与真实验收以上方 v1.0.0 为准。
+
+## v0.2.3 历史交付记录
+
 2026-10-08：私人仓库 `klwb360/NetAudit` 已发布 **v0.2.3**，增加明亮 / 暗黑 / 跟随系统主题和重复风险折叠。四厂商拖入识别、配置解析、原有风险合并、建议命令与完整报告保持；v0.2.2、v0.2.1、v0.2.0、v0.1.0 原始运行文件、标签和验收记录继续保留。
 
 **[直接下载单 EXE](https://github.com/klwb360/NetAudit/releases/download/v0.2.3/NetAudit-0.2.3-windows-x64-7900be2b8410-onefile.exe)** · [推荐便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.3/NetAudit-0.2.3-windows-x64-7900be2b8410-portable.zip) · [v0.2.3 Release](https://github.com/klwb360/NetAudit/releases/tag/v0.2.3)（需登录有权限的 GitHub 账号）。Release 恰有三个运行附件；校验、构建清单和三份验收报告永久保存在 [v0.2.3 发布档案](docs/releases/v0.2.3/README.md)。

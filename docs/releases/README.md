@@ -4,6 +4,7 @@
 
 | 版本 | 永久资料 | 对应源码 |
 |---|---|---|
+| v1.0.0 | [原始记录与校验](v1.0.0/README.md) | [固定标签](https://github.com/klwb360/NetAudit/tree/v1.0.0) |
 | v0.2.3 | [原始记录与校验](v0.2.3/README.md) | [固定标签](https://github.com/klwb360/NetAudit/tree/v0.2.3) |
 | v0.2.2 | [原始记录与校验](v0.2.2/README.md) | [固定标签](https://github.com/klwb360/NetAudit/tree/v0.2.2) |
 | v0.2.1 | [原始记录与校验](v0.2.1/README.md) | [固定标签](https://github.com/klwb360/NetAudit/tree/v0.2.1) |

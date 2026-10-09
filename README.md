@@ -2,11 +2,11 @@
 
 导入 Cisco、华为、H3C 或锐捷 RGOS 的配置备份，用中文描述一个具体目标，或在模拟命令行逐条练习；先查看命令的前提、理由与配置差异，确认后应用到练习副本，需要时再运行原有审计。配置处理在本机完成，工具不会连接设备或下发命令。
 
-**v1.0.0 待发布**：本分支新增“中文目标 + 模拟命令行”学习流程；Windows 构建与验收结果确认后更新下载入口。当前稳定包为 **[v0.2.3](https://github.com/klwb360/NetAudit/releases/tag/v0.2.3)**，提供四厂商审计、主题切换与重复风险折叠，尚不包含模拟练习。
+**[v1.0.0 已发布](https://github.com/klwb360/NetAudit/releases/tag/v1.0.0)**：默认进入配置练习，支持中文目标、模拟命令行、预览与明确应用，练习后可按需审计。四厂商解析、主题切换、重复风险折叠及完整报告继续保留；旧版本可在 [发布档案](docs/releases/README.md) 查阅。
 
-**[直接下载可运行的单 EXE](https://github.com/klwb360/NetAudit/releases/download/v0.2.3/NetAudit-0.2.3-windows-x64-7900be2b8410-onefile.exe)**：下载后双击，等待本地网页打开即可使用，无需安装 Python。需要 BAT、示例和配套资料时选择 **[便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.3/NetAudit-0.2.3-windows-x64-7900be2b8410-portable.zip)**，解压一次后双击启动。
+**[直接下载可运行的单 EXE](https://github.com/klwb360/NetAudit/releases/download/v1.0.0/NetAudit-1.0.0-windows-x64-e2b4efecdc26-onefile.exe)**：下载后双击，等待本地网页打开即可使用，无需安装 Python。需要 BAT、示例和配套资料时选择 **[便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v1.0.0/NetAudit-1.0.0-windows-x64-e2b4efecdc26-portable.zip)**，解压一次后双击启动。
 
-[v0.2.3 发布页](https://github.com/klwb360/NetAudit/releases/tag/v0.2.3) · [使用说明与常见问题](docs/FAQ.md) · [故障排查](docs/TROUBLESHOOTING.md) · [文件校验与实测范围](DELIVERY.md)
+[v1.0.0 发布页](https://github.com/klwb360/NetAudit/releases/tag/v1.0.0) · [使用说明与常见问题](docs/FAQ.md) · [故障排查](docs/TROUBLESHOOTING.md) · [文件校验与实测范围](DELIVERY.md)
 
 [下载与双击](#windows下载后双击使用) · [模拟练习步骤](#新版网页怎么用) · [练习范围](network-config-auditor/docs/SIMULATOR.md) · [命令行](#源码与命令行) · [文档索引](#文档导航)
 
@@ -16,11 +16,9 @@
 2. **准备**：单 EXE 无需解压。下载 ZIP 时，在 Windows 中右键 →“全部提取”，打开解压后的文件夹；不要在 ZIP 预览窗口中运行。
 3. **启动**：双击下载的 `*-onefile.exe`，或便携文件夹中的 `Start-NetAudit.bat` / `NetAudit.exe`，默认浏览器会自动打开本地网页。若未打开，复制启动窗口显示的实际 `http://127.0.0.1:端口` 地址到浏览器，并保留启动窗口。
 4. **导入备份**：先点击“载入示例”，或拖入一台设备的 UTF-8 配置文件；也可点击“导入配置文件”或粘贴文本。支持中文、空格和无扩展名文件名，最大 2 MiB / 30000 行，一次一个文件。程序按内容识别四厂商，无法可靠识别时请手动选择。
-5. **开始练习（v1.0.0）**：点击“载入模拟”，输入一个目标，例如 `创建 VLAN 20`，点击“生成命令草案”，阅读每步理由后点击“将草案放入命令区”。也可直接输入设备命令，每行一条。
-6. **预览并应用（v1.0.0）**：点击“预览运行”，查看每条命令能否运行、原因和配置差异；确认后点击“应用本次预览”。这只改变当前练习副本，原始备份保留。需要时撤销、重置或“导出模拟配置 .cfg”。
-7. **按需审查与导出**：v1.0.0 点击“审查当前模拟配置”；若只想检查备份，未载入模拟时直接点击“开始审计”。查看安全发现、网络架构、漏洞情报等页签，按严重度筛选，展开重复风险，点击 **JSON、Markdown 或 HTML** 下载完整报告。
-
-当前 v0.2.3 下载包在导入后直接点击“开始审计”；第 5、6 步及“审查当前模拟配置”适用于 v1.0.0 源码与随后发布的新版包。
+5. **开始练习**：点击“载入模拟”，输入一个目标，例如 `创建 VLAN 20`，点击“生成命令草案”，阅读每步理由后点击“将草案放入命令区”。也可直接输入设备命令，每行一条。
+6. **预览并应用**：点击“预览运行”，查看每条命令能否运行、原因和配置差异；确认后点击“应用本次预览”。这只改变当前练习副本，原始备份保留。需要时撤销、重置或“导出模拟配置 .cfg”。
+7. **按需审查与导出**：点击“审查当前模拟配置”；若只想检查备份，未载入模拟时直接点击“开始审计”。查看安全发现、网络架构、漏洞情报等页签，按严重度筛选，展开重复风险，点击 **JSON、Markdown 或 HTML** 下载完整报告。
 
 **切换风格**：在网页顶部选择“明亮风格”“暗黑风格”或“跟随系统”，浏览器记住主题偏好；默认跟随系统。配置内容不会随主题设置保存。
 
@@ -189,7 +187,9 @@ NetAudit/
 
 ## 验证与配置保护
 
-v1.0.0 的实际构建、测试与未实测项目将在 [交付记录](DELIVERY.md) 中单独记录；以下为旧版已完成的验证，不代表新版 EXE 已验收。
+v1.0.0 在 [37895686338 Windows 构建](https://github.com/klwb360/NetAudit/actions/runs/37895686338)中通过 **396 项应用测试和 28 项真实进程验收**（源码 10、onedir 9、onefile 9）。实际环境为 Windows Server 2022 10.0.20348 AMD64 / Python 3.12.10 x64 / PyInstaller 6.22.3 / runner image 20261004.326.1；[Linux Python 3.10 / 3.12 / 3.13 CI](https://github.com/klwb360/NetAudit/actions/runs/37895686403) 全部通过。Linux Chromium 完成 **128 项实际网页检查**，另通过 5 项源码进程验收；[发布器](https://github.com/klwb360/NetAudit/actions/runs/37896235786)通过 **62 项保护测试**、永久归档与三个运行附件上传后的下载回验。四个网页资源、模拟批次回滚、配置原文 / CRLF 保留及真实 CLI 已在三种运行形式验证；全部服务正常退出。
+
+EXE 的源码与版本标签固定到 [`e2b4efecdc2682db8cef49d369c6fb0c9114b8b0`](https://github.com/klwb360/NetAudit/commit/e2b4efecdc2682db8cef49d369c6fb0c9114b8b0)；独立核验源码、包内校验、AMD64 PE、运行库、许可证、情报及 onefile 嵌入资源。详细文件与 SHA-256 见 [交付记录](DELIVERY.md)。以下保留旧版验证历史。
 
 v0.2.3 在 Windows Server 2022 x64 / Python 3.12.10 / PyInstaller 6.22.3 上通过 **272 项应用测试和 28 项真实进程验收**（源码 10、onedir 9、onefile 9）；Linux Python 3.10/3.12/3.13 CI 全部通过。Linux Chromium 完成 **112 项主题与风险折叠检查**；浏览器自动化不等于 Windows 人工桌面交互。发布器通过 57 项保护测试，三个运行附件上传后均下载回验，实际源码标签与 Windows 构建提交一致。
 
