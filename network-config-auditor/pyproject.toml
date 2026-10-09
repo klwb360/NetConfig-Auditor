@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "network-config-auditor"
-version = "0.2.3"
-description = "Offline evidence-based Cisco/Huawei/H3C network configuration auditor"
+version = "1.0.0"
+description = "Offline network configuration learning simulator and evidence-based auditor"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "GPL-3.0-only"}

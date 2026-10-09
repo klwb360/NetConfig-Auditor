@@ -1,18 +1,18 @@
-# NetAudit · 网络配置审计工具
+# NetAudit · 网络配置学习与审计
 
-输入一台 Cisco、华为、H3C 或锐捷 RGOS 交换机/路由器的完整配置，依次进行 **配置解析 → 六域架构检查 → 安全规则 → CVE / KEV 情报 → 可选本机 AI 解释 → 报告输出**。保留带原始行号的配置问题、风险、建议和结构化清单，提供中文本地网页与命令行；程序运行时仅使用 Python 标准库。
+导入一台 Cisco、华为、H3C 或锐捷 RGOS 交换机/路由器的备份，在独立副本中练习配置：**中文目标或设备命令 → 预览结果、理由与差异 → 明确应用 → 撤销 / 重置 / 导出配置 → 按需审计**。原有六域架构检查、35 个规则 ID、CVE / KEV 核对、可选本机 AI 与 JSON / Markdown / HTML 报告继续提供；运行时仅使用 Python 标准库。
 
-**[v0.2.3 已发布](https://github.com/klwb360/NetAudit/releases/tag/v0.2.3)**。可 [直接下载单 EXE](https://github.com/klwb360/NetAudit/releases/download/v0.2.3/NetAudit-0.2.3-windows-x64-7900be2b8410-onefile.exe) 双击运行，或使用 [便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v0.2.3/NetAudit-0.2.3-windows-x64-7900be2b8410-portable.zip)；新版提供主题切换和重复风险折叠，保留文件拖入、四厂商识别、风险合并与分步骤命令。真实测试范围与校验值见 [仓库交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md)。旧 v0.2.1 Windows 包仍为三厂商版本。
+**本页对应 v1.0.0**。Windows 运行文件见 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest) 的 **Assets**：选择 `*-onefile.exe` 双击运行，或下载 `*-portable.zip` 解压后启动；使用本页模拟功能时请核对文件版本为 **1.0.0 或更新**，旧 v0.2.3 只有审计功能。实际发布状态、文件名、校验值与验收范围见在线 [仓库交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md)。
 
 本项目审计了 [pynipper-ng](https://github.com/syn-4ck/pynipper-ng)，保留并改写其插件基类，重建了三厂商解析、审计规则和报告模块。来源、固定提交和改动见 [NOTICE](NOTICE)；审计详情见 [代码审计报告](docs/UPSTREAM_AUDIT.md)。项目采用 GPL-3.0-only。
 
 ## 最快开始
 
-Windows 普通用户建议使用便携包：**下载 → 解压 → 双击 `Start-NetAudit.bat` → 导入配置 → 查看与导出**。便携 EXE 包自带 Python 运行库，无需安装 Python、配置开发环境或使用管理员权限。下载方法、关闭与迁移说明见 [Windows 使用说明](docs/WINDOWS.md)。构建方法与实际验收边界见 [便携化记录](docs/PORTABILITY.md)。
+Windows 普通用户使用便携包：**下载 → 解压 → 双击 `Start-NetAudit.bat` → 导入备份 → 模拟练习 → 按需审计与导出**。单 EXE 下载后无需解压。便携 EXE 自带 Python 运行库，普通使用设计为无需管理员权限。下载方法、关闭与迁移说明见 [Windows 使用说明](docs/WINDOWS.md)。构建方法与实际验收边界见 [便携化记录](docs/PORTABILITY.md)。
 
-v0.2.2 可将一份 UTF-8 配置文件拖入左侧文本区域，或使用“导入配置文件”；两种方式都按内容自动识别四厂商，支持没有扩展名的配置文件。信息不足或混合厂商标记时提示手动选择，识别后仍可调整；点击“开始审计”才运行审计。文件最大 2 MiB、30000 行，文件夹与一次多个文件会给出提示。旧版 v0.2.1 EXE 不包含此功能。
+将一份 UTF-8 配置文件拖入左侧文本区域，或使用“导入配置文件”；按内容自动识别四厂商，支持中文、空格及无扩展名文件。信息不足或混合厂商标记时提示手动选择。文件最大 2 MiB / 30000 行，每次一个文件，不支持文件夹；也可粘贴文本或“载入示例”。
 
-**v0.2.3** 在顶部提供“明亮风格”“暗黑风格”和“跟随系统”主题选项，默认跟随系统，浏览器记住主题偏好。审计后，同类风险集中展示项数与涉及处数；重复项目默认折叠，单项单处直接显示。点击项目查看完整对象、证据与整改建议，也可“展开全部”或“收起全部”。不同 VLAN 等独立发现保留各自命令；折叠只调整展示，统计和三种报告保留完整发现。本页上方 v0.2.3 Windows 包已包含这两项功能；旧 v0.2.2 EXE 不包含。
+顶部提供“明亮风格”“暗黑风格”和“跟随系统”，默认跟随系统，浏览器仅保存主题偏好。审计后同类风险默认折叠，保留各自对象、证据与建议；可以“展开全部”或“收起全部”。折叠和严重度筛选不影响完整报告。
 
 源码版 Windows 也可双击 `Start-NetAudit.bat`，需要 Python **3.10 或更新版本**。BAT 会优先运行同目录的 `NetAudit.exe`，否则检测 Python。
 
@@ -25,11 +25,17 @@ python -m netaudit serve
 
 无参数运行 `python -m netaudit` 或双击 EXE，会启动网页并自动打开默认浏览器。`serve` 同样默认打开浏览器；使用 `python -m netaudit serve --no-browser` 可关闭此行为。默认访问 **http://127.0.0.1:8765**，端口占用时自动选择空闲端口，以启动窗口显示的实际地址为准。
 
-选择厂商，粘贴配置或导入 UTF-8 文本，点击“开始审计”。可先点击“载入示例”。v0.2.0 界面支持严重度筛选、六域覆盖、查看完整解析清单、本地情报输入、可选本机 AI 和 JSON / Markdown / HTML 导出。关闭程序请回到启动窗口按 **Ctrl+C**；关闭网页标签页不会停止服务。迁移时复制整个解压文件夹。
+默认进入“配置练习”。点击“载入模拟”，建立独立副本；中文目标点击“生成命令草案”后可“将草案放入命令区”，也可直接输入命令。点击“预览运行”，阅读理由与差异，再“应用本次预览”。审计是可选操作：点击“审查当前模拟配置”；未载入模拟时，“开始审计”直接检查左侧备份。关闭程序请回到启动窗口按 **Ctrl+C**；关闭网页标签页不会停止服务。迁移时复制整个解压文件夹。
 
 Windows 通常可将 `python` 替换为 `py -3`；Linux/macOS 通常可替换为 `python3`。不安装依赖也可以直接运行。
 
 ```bash
+# 生成单个中文目标的命令草案，不应用修改
+python -m netaudit plan examples/cisco.cfg --vendor cisco --goal "创建 VLAN 20"
+
+# 逐条指定命令，成功后另存配置；也可以使用 --commands commands.txt
+python -m netaudit simulate examples/cisco.cfg --vendor cisco --command "configure terminal" --command "vlan 20" --command "end" --out reports/practice.cfg
+
 # Cisco 样例 → HTML 报告
 python -m netaudit audit examples/cisco.cfg --format html --out reports/cisco.html
 
@@ -59,6 +65,20 @@ netaudit audit device.cfg --vendor cisco --format json --out reports/device.json
 
 `audit -` 从标准输入读取配置。输入与输出不能是同一个文件；报告使用原子写入，在支持 POSIX 权限的系统上默认权限为 `0600`。
 
+## 配置模拟与中文目标
+
+这是**离线配置状态模拟器**：它核对语法、命令视图及当前配置依赖，不连接设备，不模拟 ping、数据包转发、链路通断、STP 收敛或 OSPF 邻居。“可修改”不保证真实设备型号、固件、登录或业务支持；“尚不支持”只表示本工具没有实现该语法，不能判断实机不能运行。
+
+练习范围包括 VLAN 创建/删除、已有接口的描述和管理启停、access/trunk VLAN、主 IPv4 地址、基础 ACL、默认 VRF IPv4 静态路由和部分 VTY / HTTP / SSH / STP 配置。练习范围小于下方解析范围，例如解析到 OSPF 或 NAT 并不代表能练习所有相关命令；当前视图的提示和 [模拟练习说明](docs/SIMULATOR.md) 给出具体边界。
+
+中文草案由离线规则生成，不调用 AI；只接受一个明确目标，并用同一模拟器验证整份草案。可尝试 `创建 VLAN 20`、`把接口 GigabitEthernet0/1 加入 VLAN 20`、`关闭 HTTP`。接口必须使用备份中的完整名称，地址、掩码和下一跳需明确给出；缺少参数、含有条件或多个动作时会提示补充。本版不生成账号、密码或密钥修改草案。
+
+一批命令中任何一条被阻止、参数错误或尚未支持，整批配置和视图变更都回滚。网页只有点击“应用本次预览”才改变副本；未应用的候选不参与导出和审计。原始备份不被覆盖，未知行和未改动原文保留。可撤销最多 20 步，历史总量不超过 16 MiB；重置恢复原始备份及执行视图。刷新、关闭页面或变更左侧原始输入会结束练习，请及时导出需要保留的配置。
+
+CLI `simulate` 和 `plan` 都向本机标准输出写 JSON。`simulate` 可省略命令以查看初始状态；每批最多 200 行 / 64 KiB。`--commands` 命令文件与可重复的 `--command` 互斥。需要续练时，用上次已接受的 `config` 作为新输入，将上次 `context` 对象单独保存为 JSON 文件，再传入 `--context context.json`。`--out candidate.cfg` 仅在整批成功时原子写入配置，保留原有行尾，不允许覆盖输入资料；失败返回 2 且不写输出文件。`plan` 只有 `ready` 返回 0，其余待补充或不支持状态返回 2。
+
+模拟 JSON 的 `config` 字段及导出 `.cfg` **保留原始凭据**，用于继续练习或保存完整备份；请勿放入公开日志或反馈中。显示与差异会遮蔽常见凭据，不能保证所有自定义字段均已脱敏。需要报告时，再对已导出的配置运行 `audit`；配置导出与 JSON / Markdown / HTML 审计报告是不同用途。
+
 ## 情报与可选 AI
 
 默认审计使用随包 CISA KEV 离线快照，不进行外部联网。CVE 适用性需要用户提供精确设备 CPE、明确版本以及本地 NVD CVE 2.0 数据；不能仅凭品牌或配置片段确认漏洞。KEV 也不能证明当前设备已被入侵。文件格式、官方来源、版本比较限制与快照许可见 [INTELLIGENCE.md](docs/INTELLIGENCE.md)。
@@ -84,6 +104,8 @@ AI 默认关闭，当前只支持本机 Ollama 回环地址。仅在用户明确
 厂商有独有语法时可自动识别。RGOS 使用明确的 `version ...RGOS` 标记识别；其余配置常与 IOS 共享语法，缺少版本标记时请手动选择“锐捷 RGOS”或 CLI `--vendor ruijie`。华为/H3C 有很多共享命令，只有 `sysname` 等共享语法时请明确选择厂商。混合厂商标记会拒绝自动猜测。
 
 ## 支持范围
+
+以下为解析与审计范围，模拟命令支持范围见上节与 [SIMULATOR.md](docs/SIMULATOR.md)。
 
 | 类别 | Cisco IOS / IOS XE | Huawei VRP | H3C Comware |
 |---|---|---|---|
@@ -123,11 +145,11 @@ JSON 使用 `schema_version: "1.1"`，保留 `device`、`summary`、`findings`�
 
 ## 本地运行与配置保护
 
-网页服务只监听 `127.0.0.1`；校验 Host、Origin 和每次启动生成的会话令牌，不启用跨域读取。页面、样式、脚本均在本地，无第三方 CDN。默认不请求外部情报和模型；显式 `intel-update` 才连接官方 CISA 数据源，显式 AI 才连接本机 Ollama。网页不会持久保存上传配置，也不记录配置请求；用户导出报告时会主动写入下载目录。
+网页服务只监听 `127.0.0.1`；校验 Host、Origin 和每次启动生成的会话令牌，不启用跨域读取。页面、样式、脚本均在本地，无第三方 CDN。默认练习和审计不请求外部情报和模型；显式 `intel-update` 才连接官方 CISA 数据源，显式 AI 才连接本机 Ollama。网页不会持久保存上传配置或练习历史，也不记录配置请求；用户导出配置或报告时会写入下载目录。
 
 凭据在保留证据和清单前隐藏，HTML 输出使用转义，网页使用 `textContent`。自动脱敏覆盖常见 password/secret、SNMP community、key/key-string 和认证密钥语法；不保证识别所有自定义敏感字段。报告仍含地址、设备名和网络结构，应按内部配置资料保护。真实配置放在被忽略的 `configs/`，报告放在 `reports/`；仓库示例全部为合成数据。
 
-资源限制：每份输入 2 MiB / 30000 行、512 个接口、每 ACL 256 条规则、总计 2048 条 ACL 规则。超限拒绝输出部分结果。Web 同时最多执行 4 个审计请求。
+资源限制：每份输入 2 MiB / 30000 行、512 个接口、每 ACL 256 条规则、总计 2048 条 ACL 规则。超限拒绝输出部分结果。模拟每批最多 200 行 / 64 KiB，中文目标最多 2000 字符；Web 处理请求使用最多 4 个并发名额。
 
 ## 验证
 
@@ -136,6 +158,6 @@ python -m unittest discover -s tests -v
 python tools/reproduce_upstream.py
 ```
 
-测试覆盖四厂商解析、VLAN 范围与同类发现合并、命令前提和参数模板、ACL 覆盖顺序、NAT 选流语义、多个 VTY 范围、原始行号、脱敏、HTML 转义、CLI 退出码、文件权限及本地服务的来源/Host/令牌限制。上游复现脚本使用固定源码方法与只实现正则查询的解析替身，隔离复现三个已确认缺陷；不代表安装旧依赖后跑过完整上游程序。
+测试覆盖四厂商解析、VLAN 范围与同类发现合并、命令前提和参数模板、ACL 覆盖顺序、NAT 选流语义、多个 VTY 范围、原始行号、脱敏、HTML 转义、CLI 退出码、文件权限及本地服务的来源/Host/令牌限制。v1.0.0 增加模拟视图、依赖阻止、整批回滚、原文保留、中文草案、API 和 CLI 验证；实际通过结果、环境与未实测范围以 [验证记录](docs/TESTING.md) 为准。上游复现脚本使用固定源码方法与只实现正则查询的解析替身，隔离复现三个已确认缺陷；不代表安装旧依赖后跑过完整上游程序。
 
 新增规则可在 `netaudit/rules.py` 继承 `GenericPlugin`，并加入显式 `PLUGINS` 注册表。新增解析需补充能覆盖误报/漏报边界的 fixture 与测试。

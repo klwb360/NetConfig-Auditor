@@ -269,6 +269,12 @@ def build(output: Path, work: Path, identity: dict[str, object]) -> None:
             for path in sorted((PROJECT / "netaudit" / "data").rglob("*"))
             if path.is_file()
         ],
+        "web_resources": [
+            {"file": path.relative_to(PROJECT).as_posix(),
+             "size_bytes": path.stat().st_size, "sha256": sha256(path)}
+            for path in sorted((PROJECT / "netaudit" / "web").iterdir())
+            if path.is_file()
+        ],
         "build_method": {
             "tool": "PyInstaller", "modes_in_order": ["onedir", "onefile"],
             "console": True, "upx": False, "runtime_tmpdir": "system default",
@@ -284,6 +290,7 @@ def build(output: Path, work: Path, identity: dict[str, object]) -> None:
             "Automated Windows runner verification; human Explorer double-click and visual browser rendering need a desktop check.",
             "Windows x64 only. Other Windows versions and CPU architectures are not claimed as tested.",
             "Closing a browser tab does not stop the local server; use Ctrl+C or close its console window.",
+            "Offline configuration-state learning only; no packet forwarding, protocol convergence, real device commands or live business impact are simulated.",
         ],
     }
     portable_zip = package("onedir", onedir_exe, output, work, stem, source_zip, manifest, licenses)

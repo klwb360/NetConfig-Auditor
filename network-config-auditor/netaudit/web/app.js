@@ -21,7 +21,24 @@ let exports_ = null, report_ = null;
 const findingGroupOpen = new Map();
 let inputRevision = 0, auditRunning = false, configSource = "输入文本";
 let fileLoading = false, fileLoadId = 0, importAbort = null;
-function refreshRunState() { $("run").disabled=auditRunning||fileLoading; }
+let sourceRawText = null, auditConfigProvider = null;
+function sourceInput() {
+  const value = $("config").value;
+  const config = sourceRawText !== null && value === sourceRawText.replace(/\r\n?/g,"\n") ? sourceRawText : value;
+  return {config, vendor:$("vendor").value, source:configSource, importing:fileLoading};
+}
+function notifySourceChange() { window.dispatchEvent(new CustomEvent("netaudit:source-change")); }
+function auditInput() { return auditConfigProvider?.() || sourceInput(); }
+async function localPost(path, payload, {signal} = {}) {
+  const sessionResponse = await fetch("/api/session", {cache:"no-store",signal});
+  if(!sessionResponse.ok) throw new Error("无法建立本地会话，请刷新页面后重试。");
+  const session = await sessionResponse.json();
+  const response = await fetch(path, {method:"POST",headers:{"Content-Type":"application/json","X-NetAudit-Token":session.token},body:JSON.stringify(payload),signal});
+  const result = await response.json();
+  if(!response.ok) throw new Error(result.error || "本地处理未完成，请检查输入后重试。");
+  return result;
+}
+function refreshRunState() { $("run").disabled=auditRunning||fileLoading; window.dispatchEvent(new CustomEvent("netaudit:import-state",{detail:{importing:fileLoading}})); }
 function cancelConfigImport() {
   fileLoadId++;fileLoading=false;
   if(importAbort)importAbort.abort();importAbort=null;refreshRunState();
@@ -132,10 +149,10 @@ async function readIntelligenceFile(id,label){
   if(!value||typeof value!=="object"||Array.isArray(value))throw new Error(label+" JSON 顶层必须是对象");return value;
 }
 async function auditPayload(){
-  const config=$("config").value;if(new TextEncoder().encode(config).length>2*1024*1024)throw new Error("配置超过 2 MiB 限制");
+  const selected=auditInput(),config=selected.config;if(new TextEncoder().encode(config).length>2*1024*1024)throw new Error("配置超过 2 MiB 限制");
   const asset={},cpe=$("cpe").value.trim(),ids=$("cve-ids").value.trim();if(cpe)asset.cpe=cpe;if(ids)asset.cve_ids=[...new Set(ids.split(/[\s,，]+/).filter(Boolean))];
   const enabled=$("ai-enabled").checked,model=$("ai-model").value.trim();if(enabled&&!model)throw new Error("启用 AI 时需填写已安装的本机模型名称");
-  const payload={vendor:$("vendor").value,config,asset,ai:enabled?{enabled:true,provider:"ollama",endpoint:"http://127.0.0.1:11434",model,timeout:30}:{enabled:false}};
+  const payload={vendor:selected.vendor,config,asset,ai:enabled?{enabled:true,provider:"ollama",endpoint:"http://127.0.0.1:11434",model,timeout:30}:{enabled:false}};
   const [kev,nvd]=await Promise.all([readIntelligenceFile("kev-file","KEV"),readIntelligenceFile("nvd-file","NVD")]);if(kev!==undefined)payload.kev=kev;if(nvd!==undefined)payload.nvd=nvd;return payload;
 }
 function findingOccurrences(finding) {
@@ -219,6 +236,7 @@ function renderFindings() {
   syncControls();
 }
 $("run").addEventListener("click", async () => {
+  window.dispatchEvent(new CustomEvent("netaudit:audit-view"));
   const revision=inputRevision;auditRunning=true;
   $("run").disabled=true;$("example").disabled=true;clearResults("正在审计，请等待本地处理完成。");
   $("status").textContent="正在审计…启用 AI 时请等待本机模型完成。";renderPipeline(null,true);
@@ -248,8 +266,8 @@ $("run").addEventListener("click", async () => {
   }
   finally {auditRunning=false;refreshRunState();$("example").disabled=false;document.querySelector(".results").setAttribute("aria-busy","false");}
 });
-for(const id of ["config","cpe","cve-ids","ai-model"])$(id).addEventListener("input",()=>{if(id==="config"){cancelConfigImport();configSource="手动编辑";updateConfigMeta();$("vendor-detection").textContent="配置已编辑，可手动选择厂商或在审计时自动识别。";}invalidateResults();});
-$("vendor").addEventListener("change",()=>{cancelConfigImport();invalidateResults();$("vendor-detection").textContent=$("vendor").value==="auto"?"审计时按配置内容自动识别。":"已手动选择："+$("vendor").selectedOptions[0].textContent;});
+for(const id of ["config","cpe","cve-ids","ai-model"])$(id).addEventListener("input",()=>{if(id==="config"){cancelConfigImport();sourceRawText=null;configSource="手动编辑";notifySourceChange();updateConfigMeta();$("vendor-detection").textContent="配置已编辑，可手动选择厂商或在审计时自动识别。";}invalidateResults();});
+$("vendor").addEventListener("change",()=>{cancelConfigImport();notifySourceChange();invalidateResults();$("vendor-detection").textContent=$("vendor").value==="auto"?"审计时按配置内容自动识别。":"已手动选择："+$("vendor").selectedOptions[0].textContent;});
 $("ai-enabled").addEventListener("change",()=>{$("ai-model").disabled=!$("ai-enabled").checked;invalidateResults();});
 for(const kind of ["kev","nvd"]){$("clear-"+kind).addEventListener("click",()=>{$(kind+"-file").value="";invalidateResults();});$(kind+"-file").addEventListener("change",()=>{invalidateResults();const file=$(kind+"-file").files[0];if(file&&file.size>16*1024*1024){$(kind+"-file").value="";$("status").textContent=kind.toUpperCase()+" 文件超过 16 MiB 限制，请选择较小的官方 JSON 文件。";}});}
 $("severity").addEventListener("change",()=>{if(report_)renderFindings();});
@@ -262,7 +280,7 @@ async function readConfigBuffer(file) {
   } finally {clearTimeout(timer);}
 }
 async function loadConfigFile(file) {
-  cancelConfigImport();const loadId=fileLoadId;
+  cancelConfigImport();notifySourceChange();const loadId=fileLoadId;
   let revision=invalidateResults(),timer=null;
   $("file").value="";
   if(file.size>2*1024*1024){$("status").textContent="文件超过 2 MiB 限制";return;}
@@ -275,7 +293,7 @@ async function loadConfigFile(file) {
     if(!text.trim())throw new Error("文件为空，请导入设备配置。");
     if(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(text))throw new Error("文件含非文本控制字符，请导入 UTF-8 配置文本。");
     if(configLineCount(text)>30000)throw new Error("配置超过 30000 行限制。");
-    revision=invalidateResults();$("config").value=text;$("vendor").value="auto";
+    sourceRawText=text;$("config").value=text;$("vendor").value="auto";notifySourceChange();revision=invalidateResults();
     configSource=file.name;updateConfigMeta();$("vendor-detection").textContent="正在按配置内容识别厂商…";
     $("status").textContent="文件已载入，正在识别厂商…";
     const controller=new AbortController();importAbort=controller;
@@ -288,9 +306,9 @@ async function loadConfigFile(file) {
       const value=await response.json();if(revision!==inputRevision)return;
       if(!response.ok)throw new Error("自动识别暂不可用");
       if(value.status==="detected"&&["cisco","huawei","h3c","ruijie"].includes(value.vendor)) {
-        $("vendor").value=value.vendor;
+        $("vendor").value=value.vendor;notifySourceChange();
         $("vendor-detection").textContent="已自动识别："+$("vendor").selectedOptions[0].textContent+"；可手动调整。";
-        $("status").textContent="文件已载入，"+$("vendor-detection").textContent+"点击开始审计。";
+        $("status").textContent="文件已载入，"+$("vendor-detection").textContent+"点击载入模拟开始练习，也可直接审计。";
       } else {
         $("vendor-detection").textContent="无法可靠识别，请手动选择设备厂商。";
         $("status").textContent="文件已载入，"+$("vendor-detection").textContent;
@@ -327,7 +345,7 @@ window.addEventListener("drop",event=>{if(hasFiles(event)){event.preventDefault(
 document.querySelectorAll("[data-format]").forEach(button=>button.addEventListener("click",()=>{
   if(!exports_)return;const f=button.dataset.format;const blob=new Blob([exports_[f]],{type:{json:"application/json",md:"text/markdown",html:"text/html"}[f]+";charset=utf-8"});const url=URL.createObjectURL(blob);const a=node("a");a.href=url;a.download="network-audit."+f;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }));
-$("example").addEventListener("click",()=>{cancelConfigImport();invalidateResults();$("vendor").value="cisco";$("vendor-detection").textContent="Cisco 合成示例；可导入自己的配置自动识别厂商。";$("config").value=`hostname LAB-SW
+$("example").addEventListener("click",()=>{cancelConfigImport();sourceRawText=null;invalidateResults();$("vendor").value="cisco";$("vendor-detection").textContent="Cisco 合成示例；可导入自己的配置自动识别厂商。";$("config").value=`hostname LAB-SW
 spanning-tree mode rapid-pvst
 vlan 10
  name OFFICE
@@ -359,5 +377,15 @@ line vty 0 4
  login local
  exec-timeout 0 0
 !
-`;configSource="Cisco 合成示例";updateConfigMeta();$("status").textContent="已载入 Cisco 合成问题示例（含 STP / OSPF），仅供演示。";});
+`;configSource="Cisco 合成示例";updateConfigMeta();notifySourceChange();$("status").textContent="已载入 Cisco 合成问题示例（含 STP / OSPF），仅供演示。";});
 selectResultTab("findings");allowExports(false);updateConfigMeta();
+
+// The simulator owns its in-memory copy; the original import stays independent.
+window.NetAuditBridge = Object.freeze({
+  readInput:sourceInput,
+  post:localPost,
+  setAuditConfigProvider(provider) { auditConfigProvider = typeof provider === "function" ? provider : null; },
+  invalidateAudit(message="模拟配置已改变，请重新审查对应结果。") {
+    invalidateResults();clearResults(message);$("status").textContent=message;
+  }
+});

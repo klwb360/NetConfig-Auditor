@@ -1,10 +1,21 @@
 # 架构与扩展
 
-NetAudit 在本机解析一台设备的配置文本，按配置解析、六域架构检查、安全规则、CVE / KEV、可选本机 AI 和报告输出组织审计。CLI、网页和便携 EXE 使用同一流程；建议命令作为报告内容展示，没有连接设备或下发配置的执行器。v0.2.0 的运行环境和实际验收以 [交付记录](../DELIVERY.md) 为准。
+NetAudit v1.0.0 先提供离线配置练习，再由用户选择是否审计。CLI、网页和便携 EXE 共用模拟器与中文目标模块；它们只修改配置副本，不连接设备、不执行操作系统命令。原审计流程继续按配置解析、六域架构检查、安全规则、CVE / KEV、可选本机 AI 和报告输出组织。各版本实际构建和验收以 [交付记录](../DELIVERY.md) 为准。
 
 ```mermaid
 flowchart TD
-    INPUT[配置文件 / 粘贴文本] --> P[配置解析器 + 凭据脱敏]
+    INPUT[原始配置备份] --> COPY[内存练习副本]
+    GOAL[中文单一目标] --> PLAN[离线草案与前提校验]
+    PLAN --> COMMANDS[命令批次]
+    COMMANDS --> SIM[配置模拟器]
+    COPY --> SIM
+    SIM --> PREVIEW[结果与脱敏差异]
+    PREVIEW --> APPLY[明确应用 / 撤销 / 重置]
+    APPLY --> COPY
+    COPY --> CFG[导出完整配置]
+    COPY --> OPTIONAL{按需审计}
+    INPUT --> OPTIONAL
+    OPTIONAL --> P[配置解析器 + 凭据脱敏]
     P --> M[Config 结构化清单]
     M --> A[网络架构检查]
     A --> VLAN[VLAN]
@@ -26,7 +37,7 @@ flowchart TD
     REPORT --> OUT[JSON / Markdown / HTML / 中文网页]
 ```
 
-图中的阶段表示报告组织和处理顺序。架构检查产生的发现会与原有配置规则合并、统一排序；情报与 AI 使用独立字段，不覆盖配置证据或规则严重度。默认情报来自随包离线快照，AI 默认关闭。
+模拟器与中文草案不会调用审计、情报或 AI；用户明确审计时才进入后半段。架构检查产生的发现与原有配置规则合并、统一排序，情报与 AI 使用独立字段，不覆盖配置证据或规则严重度。默认情报来自随包离线快照，AI 默认关闭。
 
 ## 目录与职责
 
@@ -36,6 +47,8 @@ flowchart TD
 |---|---|
 | [`netaudit/cli.py`](../network-config-auditor/netaudit/cli.py)、`__main__.py` | 参数、配置/情报文件、网页启动、显式情报更新、报告输出和退出码；显式输出采用临时文件加原子替换，拒绝覆盖输入资料 |
 | [`netaudit/pipeline.py`](../network-config-auditor/netaudit/pipeline.py) | `audit_configuration()` 统一编排解析、架构/规则、情报、可选 AI 和流程状态 |
+| [`netaudit/simulator.py`](../network-config-auditor/netaudit/simulator.py) | 原文配置编辑、命令视图、前提判断、整批回滚、脱敏差异与能力提示；不从脱敏清单反序列化配置 |
+| [`netaudit/simulation_goals.py`](../network-config-auditor/netaudit/simulation_goals.py) | 完整单一中文目标匹配、必要参数提示、厂商命令草案、调用同一模拟器验证；不调用模型 |
 | [`netaudit/parser.py`](../network-config-auditor/netaudit/parser.py) | 厂商识别、命令上下文和正反向变化，VLAN/STP/OSPF/接口/路由/ACL/NAT/管理面解析，未建模行与资源上限 |
 | [`netaudit/model.py`](../network-config-auditor/netaudit/model.py) | 配置、接口、ACL、路由、NAT、管理段、STP/OSPF 状态、证据与发现；区分未知和显式设置 |
 | [`netaudit/privacy.py`](../network-config-auditor/netaudit/privacy.py) | 保留证据前遮蔽常见凭据，保留密码类型用于规则；不承诺覆盖所有敏感语法 |
@@ -44,19 +57,29 @@ flowchart TD
 | [`netaudit/intelligence.py`](../network-config-auditor/netaudit/intelligence.py)、[`netaudit/data/`](../network-config-auditor/netaudit/data/) | 离线 KEV 来源、精确 CPE / 版本适用性核对、候选 CVE 和显式官方更新 |
 | [`netaudit/ai.py`](../network-config-auditor/netaudit/ai.py) | 用户显式启用的本机 Ollama 解释、字段白名单、回环地址验证、输出限制与失败降级 |
 | [`netaudit/reports.py`](../network-config-auditor/netaudit/reports.py) | 同一个报告字典转为 JSON、Markdown 或 HTML，展示阶段/架构/情报/AI，并转义可控文本 |
-| [`netaudit/server.py`](../network-config-auditor/netaudit/server.py) | 本地资源、会话令牌、HTTP 审计、输入限制、端口回退和浏览器调用 |
-| [`netaudit/web/`](../network-config-auditor/netaudit/web/) | 中文界面、导入/示例、严重度、六域覆盖、情报与 AI 设置、清单和下载；无外部 CDN |
+| [`netaudit/server.py`](../network-config-auditor/netaudit/server.py) | 本地资源、会话令牌、无状态模拟/草案/审计 API、输入限制、端口回退和浏览器调用 |
+| [`netaudit/web/`](../network-config-auditor/netaudit/web/) | `app.js` 保留导入、主题与审计；`simulator.js` 管理页面内的原始备份、已应用副本、待确认预览、撤销和练习交互；无外部 CDN |
 | [`tests/`](../network-config-auditor/tests/) | 解析、规则、情报、AI、统一流程、报告、入口与便携行为验证 |
 | [`tools/build_windows.py`](../network-config-auditor/tools/build_windows.py)、[`tools/smoke_portable.py`](../network-config-auditor/tools/smoke_portable.py) | 隔离构建、资源收集、源码/EXE 进程验收、来源/许可证与校验和 |
 | [`Start-NetAudit.bat`](../network-config-auditor/Start-NetAudit.bat)、[`tools/windows_entry.py`](../network-config-auditor/tools/windows_entry.py) | Windows 目录/Python/EXE 选择、冻结入口、输出编码和退出码 |
 
 ## 数据流与边界
 
+`simulate_configuration(config, vendor, commands, context)` 接受原文备份、命令批次与当前视图，返回候选配置、结果、视图、脱敏差异、解析清单及限制。`exec / config / interface / vlan / vty / acl` 仅是练习视图，不模拟权限认证或完整设备系统。每批最多 200 行 / 64 KiB；配置仍遵守解析器 2 MiB / 30000 行等上限。
+
+模拟结果明确区分 `applied / noop / show / mode / blocked / unsupported / invalid`。其中 `applied` 表示该命令在候选生成中可修改，并非已写入真实设备或网页当前副本；整批存在 `blocked / unsupported / invalid` 时，配置与视图全部回滚，先前成功项标记 `rolled_back`。未知语法不当作实机禁止，不模拟转发、ping、链路、STP 收敛或 OSPF 邻居。
+
+原文编辑器保留未改动行、未建模内容、凭据与行尾；解析模型用于验证，**不得**用已脱敏的 `Config` 清单重建备份。响应的 `config` 是完整敏感配置；`diff` 与显示结果遮蔽常见凭据。CLI 只有成功且显式指定 `--out` 才写出候选，不允许覆盖输入资料。源码/API 调用者应自行区分候选与已接受状态。
+
+`plan_goal(config, vendor, goal, context)` 仅匹配已支持的完整单一目标，返回 `ready / needs-input / unsupported / blocked`。缺少参数、条件句、否定或多动作不会按部分匹配生成命令；不猜接口、地址、凭据或真实设备能力。草案通过同一模拟器验证后才可 `ready`，但还没有应用配置。返回每步命令、理由及必要问题，不返回完整备份或库存。中文草案和审计后可选的 Ollama 解释相互独立。
+
+网页在内存中分别保存原始输入、已应用副本、候选、视图及撤销快照。明确应用后才替换副本；候选不参与导出或审计。撤销最多 20 步且累计不超过 16 MiB；重置回初始配置和执行视图。新备份、输入编辑或厂商更改使练习失效，刷新后不恢复配置。`app.js` 与 `simulator.js` 通过 `NetAuditBridge` 共享输入读取、带令牌请求、结果失效和审计对象选择；输入版本与取消信号阻止异步旧结果覆盖新状态。
+
 `parse_config(text, vendor)` 返回 `Config`。厂商独有证据不足或混合时要求明确选择；证据行号从 1 开始，按原输入计数，保留命令前调用 `redact()`。未支持语法进入 `warnings`，实际数量保留在 `unsupported_count`，最多展示 200 条。超限拒绝结果，避免以部分输入作出完整结论。
 
 模型以 `None` 表示未确认的设置，例如 shutdown、VTY 协议、STP 启停、OSPF 认证和 VLAN 列表；缺失命令不能解释成某设备版本的默认值。ACL `complete=False` 或未知条件禁用覆盖推断，`ordered=False` 不推断前序遮蔽。VLAN 的 `allowed_vlan_ranges` 使用闭区间：`null` 是未知，`[]` 是显式 none，`[[1,4094]]` 是 all。
 
-`rules.audit(config)` 执行架构检查和注册插件，统一排序，生成配置报告；保留原有底层调用方式。`pipeline.audit_configuration(text, vendor, ...)` 进一步核对本地情报、调用可选 AI，并生成完整流程。CLI 与 HTTP 都调用完整流程；没有情报输入仍会展示随包 KEV 来源和当前无法确认匹配的状态。
+`rules.audit(config)` 执行架构检查和注册插件，统一排序，生成配置报告；保留原有底层调用方式。`pipeline.audit_configuration(text, vendor, ...)` 进一步核对本地情报、调用可选 AI，并生成完整流程。CLI 的 `audit` 与 HTTP `/api/audit` 调用该流程；没有情报输入仍会展示随包 KEV 来源和当前无法确认匹配的状态。
 
 六域 `checked` 仅表示对已观察受支持配置进行了检查，`needs-review` 表示存在发现或相关未建模内容，`not-observed` 表示未观察到配置。STP 检查不证明根桥或环路，OSPF Network 用于选择接口，不等于实际发布整段地址；OSPF 检查不确认邻居、收敛或密钥有效性。规则 `confirmed-config` 表示配置证据明确，`needs-review` 表示还需版本、拓扑或业务复核。
 
@@ -66,7 +89,7 @@ AI 只有显式启用、选定模型后才调用本机 Ollama，地址限制为�
 
 ## 报告结构
 
-完整 v0.2.0 JSON 报告使用 `schema_version: "1.1"` 和 `tool_version: "0.2.0"`，保留旧字段，并增加阶段信息：
+审计 JSON 继续使用 `schema_version: "1.1"`，`tool_version` 标注实际程序版本。模拟与草案响应使用独立结构，不混入审计报告：
 
 | 顶层字段 | 内容 |
 |---|---|
@@ -84,7 +107,7 @@ Markdown、HTML 和网页都从这套结构生成。修改字段时同步检查�
 
 ## 本地服务与数据保护
 
-服务仅绑定 `127.0.0.1`，提供本地页面、资源、会话与审计 API。POST 要求允许的 Host、同源 Origin、会话令牌与合法 JSON，并限制并发审计。上传配置在请求中处理，不持久保存，也不记入请求日志；用户主动导出或 `--out` 才写报告，目标目录必须可写。
+服务仅绑定 `127.0.0.1`，提供本地页面、资源、会话与 API。`/api/detect`、`/api/simulate`、`/api/plan` 和 `/api/audit` 共用允许的 Host、同源 Origin、会话令牌、JSON 与并发限制。模拟 API 无服务器会话存储，每次传入配置与视图；后端返回候选，是否应用由调用者决定。上传配置在请求中处理，不持久保存，也不记入请求日志；用户主动导出或 `--out` 才写配置/报告，目标目录必须可写。
 
 默认审计不联网。`intel-update` 是显式联网操作，只下载官方 KEV，不上传配置或资产；更新文件写用户指定位置或用户缓存/临时目录，不会改写随包快照。AI 请求仅访问用户显式启用的本机模型。程序可以从只读位置启动，导出和更新资料需选择可写位置。
 
@@ -95,6 +118,8 @@ Markdown、HTML 和网页都从这套结构生成。修改字段时同步检查�
 3. 架构检查放在 `architecture.py`；常规规则继承 `GenericPlugin` 并加入 `PLUGINS`。生成稳定 ID、说明、建议、证据和确认程度，不使用跨审计共享可变状态。
 4. 测试应报、应不报与未知情况，关注合法的服务器 Trunk、被动 OSPF、VRF 边界、ACL 用途/顺序和 VTY 分段；情报测试复杂条件降级，AI 测试本机限制和失败报告。
 5. 更新 [规则目录](../network-config-auditor/docs/RULES.md)、支持范围和来源。建议是审阅模板，不添加自动设备修复。
+
+新增模拟命令还需检查正确视图、厂商、正反操作、依赖与原文编辑边界；含未知子配置或无法确认作用域时拒绝修改。覆盖整批回滚、幂等、原始凭据/未知行/CRLF 保留等用例。新增中文目标需完整匹配、给出每步理由，并通过同一引擎验证；不要仅凭解析器已支持就宣称可模拟。
 
 ## 源码与冻结运行
 

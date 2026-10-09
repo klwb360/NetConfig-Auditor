@@ -12,6 +12,8 @@ import webbrowser
 from .parser import MAX_BYTES, MAX_LINES, detect_vendor
 from .reports import render
 from .pipeline import audit_configuration
+from .simulator import simulate_configuration
+from .simulation_goals import plan_goal
 
 _SLOTS = threading.BoundedSemaphore(4)
 WEB_DIR = Path(__file__).resolve().parent / "web"
@@ -88,7 +90,7 @@ def make_handler(token: str):
                 if origin and origin not in (f"http://127.0.0.1:{self.server.server_port}", f"http://localhost:{self.server.server_port}"):
                     return self._error(403, "Origin 不允许")
                 return self._send(200, json.dumps({"token": token}))
-            paths = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("app.js", "text/javascript; charset=utf-8"), "/style.css": ("style.css", "text/css; charset=utf-8")}
+            paths = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("app.js", "text/javascript; charset=utf-8"), "/simulator.js": ("simulator.js", "text/javascript; charset=utf-8"), "/style.css": ("style.css", "text/css; charset=utf-8")}
             if self.path not in paths:
                 return self._error(404, "路径不存在")
             name, mime = paths[self.path]
@@ -101,7 +103,7 @@ def make_handler(token: str):
             expected_origins = (f"http://127.0.0.1:{self.server.server_port}", f"http://localhost:{self.server.server_port}")
             if origin not in expected_origins or self.headers.get("X-NetAudit-Token") != token:
                 return self._error(403, "请求来源或会话令牌不允许")
-            if self.path not in ("/api/audit", "/api/detect"):
+            if self.path not in ("/api/audit", "/api/detect", "/api/simulate", "/api/plan"):
                 return self._error(404, "路径不存在")
             if self.headers.get_content_type() != "application/json" or self.headers.get("Transfer-Encoding"):
                 return self._error(415, "仅接受带 Content-Length 的 JSON")
@@ -112,7 +114,7 @@ def make_handler(token: str):
             if not 0 < length <= MAX_REQUEST_BYTES:
                 return self._error(413, "输入超过限制")
             if not _SLOTS.acquire(blocking=False):
-                return self._error(429, "并发审计过多，请稍后重试")
+                return self._error(429, "并发请求过多，请稍后重试")
             try:
                 self.connection.settimeout(15)
                 data = self.rfile.read(length)
@@ -126,6 +128,12 @@ def make_handler(token: str):
                     return self._send(200, json.dumps(result, ensure_ascii=False))
                 if not isinstance(value.get("vendor", "auto"), str):
                     return self._error(400, "config/vendor 类型不合法")
+                if self.path in ("/api/simulate", "/api/plan"):
+                    operation = simulate_configuration if self.path == "/api/simulate" else plan_goal
+                    field = "commands" if self.path == "/api/simulate" else "goal"
+                    result = operation(value["config"], value.get("vendor", "auto"),
+                                       value.get(field, ""), value.get("context"))
+                    return self._send(200, json.dumps(result, ensure_ascii=False))
                 result = audit_configuration(
                     value["config"], value.get("vendor", "auto"), asset=value.get("asset"),
                     kev=value.get("kev"), nvd=value.get("nvd"), ai=value.get("ai"))

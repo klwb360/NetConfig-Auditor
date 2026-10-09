@@ -20,7 +20,7 @@ class PipelineTests(unittest.TestCase):
         with redirect_stdout(output), self.assertRaises(SystemExit) as exited:
             main(["--version"])
         self.assertEqual(exited.exception.code, 0)
-        self.assertEqual(output.getvalue().strip(), "NetAudit 0.2.3")
+        self.assertEqual(output.getvalue().strip(), "NetAudit 1.0.0")
 
     def test_default_pipeline_is_local_and_honest_about_missing_inputs(self):
         with patch("urllib.request.OpenerDirector.open", side_effect=AssertionError("Unexpected network request")):

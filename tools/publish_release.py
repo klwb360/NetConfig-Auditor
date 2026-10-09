@@ -114,6 +114,7 @@ def verify_files(files, commit, run_id, run_attempt):
     manifest = json.loads(files["manifest.json"])
     version = manifest["application_version"]
     require(re.fullmatch(r"\d+\.\d+\.\d+", version), "Invalid application version")
+    has_simulator = tuple(map(int, version.split("."))) >= (1, 0, 0)
     prefix = f"NetAudit-{version}-windows-x64-{commit[:12]}"
     packages = {prefix + "-portable.zip", prefix + "-onefile.zip", prefix + "-onefile.exe",
                 f"NetAudit-{version}-source-{commit[:12]}.zip"}
@@ -152,6 +153,35 @@ def verify_files(files, commit, run_id, run_attempt):
                 shutdown = check["shutdown"]
                 require(shutdown["remaining_pids"] == [] and shutdown["forced_cleanup"] is False
                         and shutdown["port_closed"] is True, "Unclean server shutdown")
+        if has_simulator:
+            cli_checks = [c for c in report["checks"] if "simulator_cli" in c]
+            expected_cli = {"plan_ready": True, "successful_transaction": True, "command_file": True,
+                "repeated_arguments": True, "crlf_preserved": True, "failed_batch_exit": 2,
+                "failed_output_unchanged": True, "input_unchanged": True, "no_automatic_audit": True,
+                "unicode_and_spaces_in_paths": True}
+            require(len(cli_checks) >= 2, "Incomplete simulator CLI acceptance")
+            for check in cli_checks:
+                require(all(type(check["simulator_cli"].get(key)) is type(value)
+                            and check["simulator_cli"].get(key) == value for key, value in expected_cli.items()),
+                        "Incomplete simulator CLI acceptance")
+            # Every direct/BAT server path (fallback, no-argument, read-only)
+            # must load the simulator UI and exercise actual API transitions.
+            web_checks = [c for c in report["checks"] if "resources_sha256" in c]
+            require(len(web_checks) >= 6, "Incomplete simulator server-path acceptance")
+            expected_simulation = {"vendors": ["cisco", "huawei", "h3c", "ruijie"],
+                "transaction": "committed", "missing_vlan_rollback": True, "unknown_command_rollback": True,
+                "original_text_preserved": True, "chinese_goal": "ready", "plan_replay_matches": True,
+                "automatic_audit": False, "audit_after_simulation": "explicit",
+                "candidate_exports": ["json", "md", "html"]}
+            for check in web_checks:
+                resources = check["resources_sha256"]
+                require(set(resources) == {"index.html", "style.css", "app.js", "simulator.js"}
+                        and all(isinstance(sha, str) and re.fullmatch(r"[a-f0-9]{64}", sha)
+                                for sha in resources.values()), "Incomplete simulator web resources")
+                simulation = check.get("simulation", {})
+                require(all(type(simulation.get(key)) is type(value) and simulation.get(key) == value
+                            for key, value in expected_simulation.items()), "Incomplete simulator state acceptance")
+                require("shutdown" in check, "Simulator server shutdown was not verified")
     return files, manifest
 
 
@@ -168,6 +198,7 @@ def notes(repository, tag, manifest, run_id, records_commit="main"):
     version = manifest["application_version"]
     version_parts = tuple(map(int, version.split(".")))
     has_rgos_remediation = version_parts >= (0, 2, 2)
+    has_simulator = version_parts >= (1, 0, 0)
     vendor_choices = "Cisco、华为、H3C 或锐捷 RGOS" if has_rgos_remediation else "Cisco、华为或 H3C"
     vendor_coverage = "四厂商" if has_rgos_remediation else "三厂商"
     commit = manifest["source"]["commit"]
@@ -215,20 +246,36 @@ def notes(repository, tag, manifest, run_id, records_commit="main"):
 - 折叠仅调整网页展示，严重度筛选、审计统计和 JSON / Markdown / HTML 完整报告仍保留原有发现与证据。
 
 """
+    simulator_features = "" if not has_simulator else """
+### 配置模拟与学习练习
+
+- 导入完整备份，输入中文目标获取命令草案，也可逐条或批量输入模拟命令；支持 Cisco、华为、H3C 和锐捷 RGOS 已建模的配置语法。
+- 按配置视图、已有对象和依赖关系判断当前能否运行，逐条用简短语言解释结果与下一步；创建 VLAN、接口模式和 VLAN 引用等变更可查看候选状态及脱敏差异。
+- 不满足前置条件、参数错误或未知命令会使整批配置与视图原子回滚；导入的未修改配置按原文保留，可重新开始练习或导出候选配置。
+- 中文目标生成先经过同一模拟引擎校验，缺参数时给出问题，不猜测业务地址；本版采用本地有限目标模板，无需 AI 模型。
+- 模拟不会自动审计。练习后可自行审计候选配置，继续使用原有安全规则、CVE / KEV、可选 AI 和三种报告导出。
+- 这是离线配置状态模拟器，不是完整设备仿真；不模拟数据包转发、STP / OSPF 收敛、真实链路或业务中断。可运行表示本工具支持且前提满足，不保证实机固件接受。工具不连接设备执行命令。
+- 候选配置及备份导出会保留原有凭据，请按敏感文件保管；页面命令结果与差异脱敏，浏览器不持久保存配置。
+
+"""
+    start_steps = (f"3. 浏览器打开后导入 UTF-8 备份，确认 {vendor_choices}；进入模拟练习。\n"
+                   "4. 输入中文目标生成草案，或在模拟命令行练习；查看结果、理由与差异，按需导出候选配置。\n"
+                   "5. 如需审查，主动审计候选配置，再导出 JSON、Markdown 或 HTML 报告。") if has_simulator else (
+                   f"3. 浏览器打开后导入 UTF-8 配置，选择 {vendor_choices}，点击“开始审计”；也可先载入示例。\n"
+                   "4. 查看发现与严重度，导出 JSON、Markdown 或 HTML 报告。")
     return f"""下载后即可使用的 Windows x64 便携版，配置处理在本机完成。
 
 **推荐下载：[便携 ZIP]({base}/releases/download/{tag}/{portable})**（下方 Assets 中名称以 `-portable.zip` 结尾的文件）。
 
 1. 使用有权访问本私人仓库的 GitHub 账号下载便携 ZIP。
 2. 解压一次，双击文件夹中的 `Start-NetAudit.bat` 或 `NetAudit.exe`。
-3. 浏览器打开后导入 UTF-8 配置，选择 {vendor_choices}，点击“开始审计”；也可先载入示例。
-4. 查看发现与严重度，导出 JSON、Markdown 或 HTML 报告。
+{start_steps}
 
 关闭：回到启动窗口按 Ctrl+C；关闭浏览器标签页不会停止服务。迁移：复制整个文件夹（包括 `_internal`）到另一台电脑。EXE 自带 Python 运行库，普通使用设计为无需安装 Python、无需管理员权限。端口占用时以启动窗口显示的实际地址为准。
 
 `-onefile.zip` 提供单 EXE 与配套说明、示例、许可证和源码；`-onefile.exe` 可独立启动。再次分发仍需保留 GPL-3.0-only 许可证、归属说明与对应源码。普通用户无需下载 GitHub 自动生成的 “Source code”。
 
-{features}{ui_features}{remediation_features}{theme_features}
+{simulator_features}{features}{ui_features}{remediation_features}{theme_features}
 
 ### 验证与来源
 

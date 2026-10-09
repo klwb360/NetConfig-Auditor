@@ -38,7 +38,7 @@ def _write_private(path: Path, text: str):
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, name = tempfile.mkstemp(prefix=".netaudit-", dir=path.parent)
     try:
-        with os.fdopen(fd, "w", encoding="utf-8") as out:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="") as out:
             out.write(text)
         os.replace(name, path)
     finally:
@@ -52,7 +52,7 @@ def main(argv=None):
     # `NetAudit.exe --no-browser` form without changing audit arguments.
     if not argv or argv[0] in ("--no-browser", "--port") or argv[0].startswith("--port="):
         argv.insert(0, "serve")
-    p = argparse.ArgumentParser(description="华为/Cisco/H3C/锐捷 RGOS 离线网络配置审计；无参数时打开本地网页")
+    p = argparse.ArgumentParser(description="华为/Cisco/H3C/锐捷 RGOS 离线配置练习与审计；无参数时打开本地网页")
     p.add_argument("--version", action="version", version=f"NetAudit {__version__}")
     sub = p.add_subparsers(dest="command", required=True)
     a = sub.add_parser("audit", help="审计配置文件或标准输入")
@@ -68,6 +68,19 @@ def main(argv=None):
     a.add_argument("--ai-model", help="显式启用本机 Ollama 模型进行解释")
     a.add_argument("--ai-endpoint", default="http://127.0.0.1:11434", help="Ollama 本机地址")
     a.add_argument("--ai-timeout", type=float, default=30, help="AI 请求超时秒数（默认 30）")
+    simulation = sub.add_parser("simulate", help="在配置副本中练习命令，输出 JSON；失败批次全部回滚")
+    simulation.add_argument("input", help="UTF-8 备份文件；- 表示标准输入")
+    simulation.add_argument("--vendor", choices=VENDORS, default="auto")
+    commands = simulation.add_mutually_exclusive_group()
+    commands.add_argument("--commands", type=Path, help="UTF-8 命令文件，最大 64 KiB / 200 行")
+    commands.add_argument("--command", dest="command_lines", action="append", help="命令，可重复指定；省略时查看当前状态")
+    simulation.add_argument("--context", type=Path, help="上次结果中的 context 对象 JSON 文件")
+    simulation.add_argument("--out", type=Path, help="成功时保存完整候选配置；含原有敏感信息，请妥善保管")
+    plan = sub.add_parser("plan", help="根据单个中文目标生成并验证命令草案，不应用修改")
+    plan.add_argument("input", help="UTF-8 备份文件；- 表示标准输入")
+    plan.add_argument("--vendor", choices=VENDORS, default="auto")
+    plan.add_argument("--goal", required=True, help="例如：创建 VLAN 20")
+    plan.add_argument("--context", type=Path, help="当前 context 对象 JSON 文件")
     web = sub.add_parser("serve", help="启动本地网页界面，仅绑定 127.0.0.1")
     web.add_argument("--port", type=int, default=8765)
     web.add_argument("--no-browser", action="store_true", help="启动服务但不自动打开浏览器")
@@ -94,6 +107,34 @@ def main(argv=None):
                 data = f.read(MAX_BYTES + 1)
         if len(data) > MAX_BYTES:
             raise ValueError("配置超过 2 MiB 限制")
+        if args.command in ("simulate", "plan"):
+            from .simulator import simulate_configuration
+            from .simulation_goals import plan_goal
+            config = data.decode("utf-8-sig")
+            context = _load_json(args.context, "命令行上下文", 4096)
+            if args.command == "plan":
+                result = plan_goal(config, args.vendor, args.goal, context)
+                print(json.dumps(result, ensure_ascii=False, indent=2))
+                return 0 if result["status"] == "ready" else 2
+            if args.out:
+                protected = [Path(args.input) if args.input != "-" else None, args.commands, args.context]
+                if any(path and args.out.resolve() == path.resolve() for path in protected):
+                    raise ValueError("模拟输出不能覆盖输入配置、命令或上下文文件")
+            if args.commands:
+                with args.commands.open("rb") as stream:
+                    raw = stream.read(65537)
+                if len(raw) > 65536:
+                    raise ValueError("命令文件超过 64 KiB 限制")
+                script = raw.decode("utf-8-sig")
+            else:
+                script = "\n".join(args.command_lines or [])
+            result = simulate_configuration(config, args.vendor, script, context)
+            failed = result["summary"]["rolled_back"]
+            if args.out and not failed:
+                _write_private(args.out, result["config"])
+                print(f"模拟配置已导出：{args.out}；未修改设备或原备份。", file=sys.stderr)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 2 if failed else 0
         if args.out:
             if args.input != "-" and args.out.resolve() == Path(args.input).resolve():
                 raise ValueError("报告输出不能覆盖输入配置")

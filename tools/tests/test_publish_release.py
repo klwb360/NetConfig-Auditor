@@ -51,6 +51,25 @@ def runtime_files():
     return {name: files[name] for name in p.runtime_names(TAG, COMMIT)}
 
 
+def simulator_evidence(manifest, reports):
+    """Synthetic accepted Windows report structure, not runtime test evidence."""
+    for report in reports.values():
+        for check in report["checks"][-2:]:
+            check["simulator_cli"] = {"plan_ready": True, "successful_transaction": True, "command_file": True,
+                "repeated_arguments": True, "crlf_preserved": True, "failed_batch_exit": 2,
+                "failed_output_unchanged": True, "input_unchanged": True, "no_automatic_audit": True,
+                "unicode_and_spaces_in_paths": True}
+        for check in report["checks"][:6]:
+            check["resources_sha256"] = {name: "a" * 64 for name in
+                                         ("index.html", "style.css", "app.js", "simulator.js")}
+            check["simulation"] = {"vendors": ["cisco", "huawei", "h3c", "ruijie"],
+                "transaction": "committed", "missing_vlan_rollback": True, "unknown_command_rollback": True,
+                "original_text_preserved": True, "chinese_goal": "ready", "plan_replay_matches": True,
+                "automatic_audit": False, "audit_after_simulation": "explicit",
+                "candidate_exports": ["json", "md", "html"]}
+            check["shutdown"] = {"remaining_pids": [], "forced_cleanup": False, "port_closed": True}
+
+
 class PublicationAPI:
     repository = "owner/repo"
 
@@ -182,6 +201,50 @@ class PublicationGuards(unittest.TestCase):
 
     def test_new_version_accepts_all_passed_extended_checks(self):
         self.assertEqual(len(self.verify(bundle(version="0.2.0", counts=(("source", 10), ("onedir", 9), ("onefile", 9))))[0]), 9)
+
+    def test_simulator_release_requires_actual_server_path_evidence(self):
+        with self.assertRaisesRegex(ValueError, "simulator CLI"):
+            self.verify(bundle(version="1.0.0", counts=(("source", 10), ("onedir", 9), ("onefile", 9))))
+
+    def test_simulator_release_accepts_all_modes_and_rejects_incomplete_evidence(self):
+        counts = (("source", 10), ("onedir", 9), ("onefile", 9))
+        self.assertEqual(len(self.verify(bundle(simulator_evidence, version="1.0.0", counts=counts))[0]), 9)
+        mutations = (
+            lambda c: c["resources_sha256"].pop("simulator.js"),
+            lambda c: c["resources_sha256"].update({"simulator.js": "missing"}),
+            lambda c: c["simulation"].update({"missing_vlan_rollback": False}),
+            lambda c: c["simulation"].update({"unknown_command_rollback": False}),
+            lambda c: c["simulation"].update({"original_text_preserved": False}),
+            lambda c: c["simulation"].update({"automatic_audit": True}),
+            lambda c: c["simulation"].update({"automatic_audit": 0}),
+            lambda c: c["simulation"].update({"chinese_goal": "blocked"}),
+            lambda c: c["simulation"].update({"plan_replay_matches": False}),
+            lambda c: c["simulation"].update({"vendors": ["cisco"]}),
+            lambda c: c.pop("shutdown"),
+            lambda c: c.pop("resources_sha256"),
+        )
+        for mode in ("source", "onedir", "onefile"):
+            for index, mutate in enumerate(mutations):
+                with self.subTest(mode=mode, mutation=index):
+                    def change(manifest, reports):
+                        simulator_evidence(manifest, reports)
+                        mutate(reports[mode]["checks"][0])
+                    with self.assertRaises(ValueError):
+                        self.verify(bundle(change, version="1.0.0", counts=counts))
+
+    def test_simulator_release_rejects_missing_or_failed_cli_evidence(self):
+        for mode in ("source", "onedir", "onefile"):
+            for field in (None, "plan_ready", "failed_output_unchanged", "crlf_preserved", "failed_batch_exit"):
+                with self.subTest(mode=mode, field=field):
+                    def change(manifest, reports):
+                        simulator_evidence(manifest, reports)
+                        check = reports[mode]["checks"][-1]
+                        if field is None:
+                            check.pop("simulator_cli")
+                        else:
+                            check["simulator_cli"][field] = False
+                    with self.assertRaisesRegex(ValueError, "simulator CLI"):
+                        self.verify(bundle(change, version="1.0.0", counts=(("source", 10), ("onedir", 9), ("onefile", 9))))
 
     def test_reject_failed_or_foreign_workflow(self):
         run = {"status": "completed", "conclusion": "success", "head_sha": COMMIT,
@@ -366,6 +429,8 @@ class ReleaseNotesTests(unittest.TestCase):
         def add_environment(manifest, reports):
             manifest["environment"].update({"os": "Windows-2022", "python": "3.12.10"})
             manifest["build_dependencies"] = {"pyinstaller": "6.12.0"}
+            if tuple(map(int, version.split("."))) >= (1, 0, 0):
+                simulator_evidence(manifest, reports)
         archive = bundle(add_environment, version=version,
                          counts=(("source", 10), ("onedir", 9), ("onefile", 9)))
         return p.verify_bundle(archive, COMMIT, "123", 1, p.digest(archive))[1]
@@ -434,3 +499,28 @@ class ReleaseNotesTests(unittest.TestCase):
         self.assertIn("GPL-3.0-only", text)
         self.assertIn("两个分发 ZIP 内保留对应源码 ZIP、许可证与来源说明", text)
         self.assertEqual(json.dumps(manifest, sort_keys=True), original)
+
+    def test_all_legacy_notes_are_byte_identical(self):
+        # Captured before v1 implementation, with the same deterministic fixture.
+        hashes = {
+            "0.1.0": "da584fb3eafb8bfac1b4af435ad942c7493b97d56c265cdd4ce7ef91808238a8",
+            "0.2.0": "f9513461d464b3799ed6937af50583774b2366a1745550698e2f181fc63a8639",
+            "0.2.1": "9aaacbf4acf79d9d8a6a50c745d898ba1448abc24ad7f08a3bd20ac55b625d94",
+            "0.2.2": "70c236c5f7bd34d5ea37c7b2bc51aeaf2776973fc3851e0fbb5d5945685554bf",
+            "0.2.3": "ce31cc99bbe682854e19aa18f815f245cea6b99f16709a2d63be5f892f14bafa",
+            "0.3.0": "1f5fb013df29539309baf77e2cc4dad4dbd6ef1156d38331dfb2e27b69074bab",
+        }
+        for version, expected in hashes.items():
+            with self.subTest(version=version):
+                rendered = p.notes("owner/repo", "v" + version, self.manifest(version), "123")
+                self.assertEqual(hashlib.sha256(rendered.encode()).hexdigest(), expected)
+
+    def test_simulator_notes_explain_learning_flow_and_limits(self):
+        rendered = p.notes("owner/repo", "v1.0.0", self.manifest("1.0.0"), "123")
+        for expected in ("配置模拟与学习练习", "中文目标", "模拟命令行", "整批配置与视图原子回滚",
+                         "模拟不会自动审计", "按原文保留", "不猜测业务地址", "无需 AI 模型",
+                         "不是完整设备仿真", "不保证实机固件接受", "按敏感文件保管"):
+            self.assertIn(expected, rendered)
+        self.assertEqual(len([line for line in rendered.splitlines() if line.startswith("| `NetAudit-")]), 3)
+        for version in ("0.1.0", "0.2.0", "0.2.1", "0.2.2", "0.2.3", "0.3.0"):
+            self.assertNotIn("配置模拟与学习练习", p.notes("owner/repo", "v" + version, self.manifest(version), "123"))

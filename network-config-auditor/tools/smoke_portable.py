@@ -506,10 +506,81 @@ def exercise_pipeline_web(port: int, headers: dict) -> dict:
             "matched_cve": "CVE-2023-20198", "ai": "disabled; no model requested"}
 
 
+def exercise_simulator_web(port: int, headers: dict) -> dict:
+    """Exercise actual state transitions; record assertions, never raw backups."""
+    vendors = ("cisco", "huawei", "h3c", "ruijie")
+    for vendor in vendors:
+        ios = vendor in ("cisco", "ruijie")
+        separator = "!" if ios else "#"
+        config = (f"{('hostname' if ios else 'sysname')} SimulatorSmoke\r\n"
+                  f"{separator} keep original spacing and line endings\r\n"
+                  "unknown-preserved-setting   keep-this\r\n"
+                  f"{separator}\r\ninterface GigabitEthernet0/1\r\n"
+                  f" description Original  spacing\r\n{separator}\r\n")
+        entry, leave, finish = ("configure terminal", "exit", "end") if ios else ("system-view", "quit", "return")
+        mode = "switchport mode access" if ios else "port link-type access"
+        membership = "switchport access vlan" if ios else "port default vlan" if vendor == "huawei" else "port access vlan"
+
+        def simulate(commands: str) -> dict:
+            value = json.loads(request(port, "POST", "/api/simulate", json.dumps(
+                {"config": config, "vendor": vendor, "commands": commands}), headers)[0])
+            require(not ({"report", "exports", "findings", "pipeline", "ai"} & set(value)),
+                    "Simulation unexpectedly returned an audit or AI report")
+            return value
+
+        untouched = simulate("")
+        require(untouched["config"] == config and untouched["summary"]["changed"] is False,
+                f"Simulator import rewrote original {vendor} backup")
+        commands = "\n".join((entry, "vlan 20", leave, "interface GigabitEthernet0/1", mode,
+                               membership + " 20", finish))
+        accepted = simulate(commands)
+        require(accepted["summary"]["changed"] is True and accepted["summary"]["rolled_back"] is False,
+                f"Simulator rejected supported VLAN/interface transaction for {vendor}")
+        require(accepted["context"] == {"mode": "exec", "target": ""}, "Successful simulator batch lost CLI context")
+        require(accepted["inventory"]["interfaces"]["GigabitEthernet0/1"]["access_vlan"] == 20,
+                "Simulation did not update interface VLAN state")
+        require("vlan 20" in accepted["config"] and "unknown-preserved-setting   keep-this\r\n" in accepted["config"]
+                and " description Original  spacing\r\n" in accepted["config"],
+                "Simulation lost unrelated original lines or CRLF")
+        for label, failed_commands in (
+            ("missing VLAN", commands.replace(membership + " 20", membership + " 999")),
+            ("unknown command", "\n".join((entry, "vlan 30", leave, "unknown-simulator-command", finish))),
+        ):
+            rejected = simulate(failed_commands)
+            require(rejected["summary"]["rolled_back"] is True and rejected["summary"]["applied"] == 0
+                    and rejected["config"] == config and rejected["context"] == untouched["context"]
+                    and rejected["inventory"] == untouched["inventory"] and rejected["diff"] == "",
+                    f"{vendor} {label} did not atomically roll back original text, state and context")
+            require(any(r["status"] in ("blocked", "unsupported", "invalid") and r["reason"] and r["suggestion"]
+                        for r in rejected["results"]), "Blocked simulation lacks a reason and next step")
+        plan = json.loads(request(port, "POST", "/api/plan", json.dumps({"config": config, "vendor": vendor,
+            "goal": "把接口 GigabitEthernet0/1 加入 VLAN 20"}), headers)[0])
+        require(plan["status"] == "ready" and plan["commands"] and plan["steps"] and not plan["questions"],
+                f"Chinese goal did not produce a ready, explained command draft for {vendor}")
+        require(not ({"config", "report", "exports", "findings", "pipeline", "ai"} & set(plan)),
+                "Planning unexpectedly applied a candidate or returned an audit")
+        replay = simulate(plan["commands"])
+        require(replay["config"] == accepted["config"] and replay["summary"]["rolled_back"] is False,
+                "Chinese goal draft did not replay to the expected configuration")
+        # Only this explicit request audits the candidate after simulation.
+        audited = json.loads(request(port, "POST", "/api/audit", json.dumps({
+            "config": accepted["config"], "vendor": vendor}), headers)[0])
+        require(not any(f["rule_id"] == "VLAN-UNDEFINED" for f in audited["report"]["findings"]),
+                "Explicit audit did not observe simulated VLAN definition")
+        require(set(audited["exports"]) == {"json", "md", "html"}, "Candidate audit is missing report exports")
+        for format_, content in audited["exports"].items():
+            validate_report(content, format_, vendor)
+    return {"vendors": list(vendors), "transaction": "committed", "missing_vlan_rollback": True,
+            "unknown_command_rollback": True, "original_text_preserved": True,
+            "chinese_goal": "ready", "plan_replay_matches": True, "automatic_audit": False,
+            "audit_after_simulation": "explicit", "candidate_exports": ["json", "md", "html"]}
+
+
 def exercise_web(port: int, reference: Path, examples: Path) -> dict:
     resources: dict[str, str] = {}
     for route, filename, mime in (("/", "index.html", "text/html"), ("/style.css", "style.css", "text/css"),
-                                   ("/app.js", "app.js", "text/javascript")):
+                                   ("/app.js", "app.js", "text/javascript"),
+                                   ("/simulator.js", "simulator.js", "text/javascript")):
         text, headers = request(port, "GET", route)
         require(headers.get("Content-Type", "").startswith(mime), f"Wrong MIME type for {route}")
         require(text == (reference / filename).read_text(encoding="utf-8"), f"Packaged {filename} differs from source")
@@ -561,6 +632,7 @@ def exercise_web(port: int, reference: Path, examples: Path) -> dict:
     return {"resources_sha256": resources, "vendors_findings": totals,
             "file_import_detection": {"vendors": detections, "ambiguous": "needs-manual"},
             "rgos_regression": rgos,
+            "simulation": exercise_simulator_web(port, headers),
             "pipeline_integration": exercise_pipeline_web(port, headers),
             "exports": ["json", "md", "html"], "session_token": "validated; omitted"}
 
@@ -681,8 +753,59 @@ class Harness:
             result = run_command(target, ["audit", str(cfg), "--format", "json", *extra], self.cwd)
             require(result.returncode == expected, f"CLI exit-code check expected {expected}, got {result.returncode}")
             runs.append({"arguments": extra, "exit_code": result.returncode})
-        return {"runs": runs, "stdin": "DEVNULL", "timeout_seconds": COMMAND_TIMEOUT,
+        return {"runs": runs, "simulator_cli": self.simulator_cli(target, output_dir),
+                "stdin": "DEVNULL", "timeout_seconds": COMMAND_TIMEOUT,
                 "external_cwd": True, "unicode_and_spaces_in_paths": True}
+
+    def simulator_cli(self, target: Target, directory: Path) -> dict:
+        config = directory / "模拟 原始备份.cfg"
+        original = ("hostname SimulatorCLISmoke\r\n!\r\nunknown-setting  preserve-this\r\n!\r\n"
+                    "interface GigabitEthernet0/1\r\n description Keep  original\r\n!\r\n").encode("utf-8")
+        config.write_bytes(original)
+        result = run_command(target, ["plan", str(config), "--vendor", "cisco", "--goal",
+                                      "把接口 GigabitEthernet0/1 加入 VLAN 20"], self.cwd)
+        require(result.returncode == 0, "Chinese goal CLI failed")
+        plan = json.loads(result.stdout.decode("utf-8"))
+        require(plan.get("status") == "ready" and plan.get("commands") and plan.get("steps"),
+                "Chinese goal CLI did not return an explained ready draft")
+        script = directory / "模拟 命令.txt"
+        script.write_bytes(plan["commands"].encode("utf-8"))
+        output = directory / "模拟 候选配置.cfg"
+        result = run_command(target, ["simulate", str(config), "--vendor", "cisco", "--commands",
+                                      str(script), "--out", str(output)], self.cwd)
+        require(result.returncode == 0, "Supported simulation command-file CLI failed")
+        simulation = json.loads(result.stdout.decode("utf-8"))
+        require(simulation["summary"]["changed"] is True and simulation["summary"]["rolled_back"] is False
+                and simulation["inventory"]["interfaces"]["GigabitEthernet0/1"]["access_vlan"] == 20,
+                "Simulation CLI did not update the intended VLAN/interface state")
+        candidate = output.read_bytes()
+        require(candidate == simulation["config"].encode("utf-8")
+                and b"unknown-setting  preserve-this\r\n" in candidate
+                and b" description Keep  original\r\n" in candidate
+                and b"\n" not in candidate.replace(b"\r\n", b""),
+                "Simulation CLI output lost original text or CRLF")
+        require(not ({"report", "findings", "exports", "pipeline", "ai"} & set(simulation)),
+                "Simulation CLI unexpectedly returned an audit report")
+        repeated = [part for command in plan["commands"].splitlines() for part in ("--command", command)]
+        result = run_command(target, ["simulate", str(config), "--vendor", "cisco", *repeated], self.cwd)
+        require(result.returncode == 0 and json.loads(result.stdout.decode("utf-8"))["config"] == simulation["config"],
+                "Repeated --command arguments differ from command-file simulation")
+        script.write_text(plan["commands"] + "\nunknown-simulator-command\n", encoding="utf-8")
+        for rejected_output in (output, directory / "失败 不应创建.cfg"):
+            result = run_command(target, ["simulate", str(config), "--vendor", "cisco", "--commands",
+                                          str(script), "--out", str(rejected_output)], self.cwd)
+            require(result.returncode == 2, "Failed simulation CLI must return exit 2 without pausing")
+            rejected = json.loads(result.stdout.decode("utf-8"))
+            require(rejected["summary"]["rolled_back"] is True and rejected["summary"]["applied"] == 0
+                    and rejected["config"].encode("utf-8") == original,
+                    "Failed CLI batch did not roll back the complete original configuration")
+            require(output.read_bytes() == candidate and (rejected_output == output or not rejected_output.exists()),
+                    "Failed CLI batch wrote or overwrote a candidate output")
+        require(config.read_bytes() == original, "Simulation CLI modified the imported backup")
+        return {"plan_ready": True, "successful_transaction": True, "command_file": True,
+                "repeated_arguments": True, "crlf_preserved": True, "failed_batch_exit": 2,
+                "failed_output_unchanged": True, "input_unchanged": True, "no_automatic_audit": True,
+                "unicode_and_spaces_in_paths": True}
 
     def pipeline(self, target: Target) -> dict:
         extraction_before = {path.name for path in self.runtime.glob("_MEI*")}

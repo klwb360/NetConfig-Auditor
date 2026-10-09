@@ -4,13 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <title>NetAudit · 网络配置审计</title>
+  <title>NetAudit · 配置学习与模拟</title>
   <link rel="stylesheet" href="/style.css">
   <script src="/app.js" defer></script>
+  <script src="/simulator.js" defer></script>
 </head>
 <body>
 <header class="app-header">
-  <a class="brand" href="#workspace" aria-label="NetAudit 配置审计工作台"><b aria-hidden="true">N</b><span>NetAudit<small>网络配置审计</small></span></a>
+  <a class="brand" href="#workspace" aria-label="NetAudit 配置学习工作台"><b aria-hidden="true">N</b><span>NetAudit<small>配置学习与模拟 · v1.0</small></span></a>
   <div class="header-tools">
     <label class="theme-control" for="theme-select"><span>外观</span><select id="theme-select"><option value="system">跟随系统</option><option value="light">明亮风格</option><option value="dark">暗黑风格</option></select></label>
     <span class="local"><i aria-hidden="true"></i> 本地运行<span class="local-detail"> · 配置不出本机</span></span>
@@ -19,18 +20,22 @@
 <main>
   <section class="overview" aria-label="工作台概览">
     <div class="intro">
-      <span class="eyebrow">CONFIGURATION REVIEW</span>
-      <h1>配置审计工作台</h1>
-      <p>从一份设备配置出发，核对架构、安全风险与整改依据。</p>
-      <div class="supported-vendors" aria-label="支持的厂商"><span>Cisco</span><span>Huawei</span><span>H3C</span><span>Ruijie RGOS</span><span class="scope-note">六类架构 · 本地情报 · 可选 AI</span></div>
+      <span class="eyebrow">CONFIGURATION LAB</span>
+      <h1>先练习，再修改</h1>
+      <p>导入备份，描述目标，预览命令会改变什么；需要时再审查风险。</p>
+      <div class="supported-vendors" aria-label="支持的厂商"><span>Cisco</span><span>Huawei</span><span>H3C</span><span>Ruijie RGOS</span><span class="scope-note">离线配置练习 · 审查按需开启</span></div>
     </div>
     <aside class="quick-start" aria-label="新手使用提示">
-      <div class="quick-start-head"><h2>三步完成一次审计</h2><span>无需管理员权限</span></div>
-      <ol><li><b>1</b><div><strong>导入配置</strong><span>拖入文件或粘贴文本</span></div></li><li><b>2</b><div><strong>开始审计</strong><span>核对发现与配置证据</span></div></li><li><b>3</b><div><strong>导出报告</strong><span>Markdown / HTML / JSON</span></div></li></ol>
+      <div class="quick-start-head"><h2>从备份开始一次练习</h2><span>无需管理员权限</span></div>
+      <ol><li><b>1</b><div><strong>导入配置</strong><span>拖入文件或粘贴文本</span></div></li><li><b>2</b><div><strong>模拟命令</strong><span>看清操作、理由与差异</span></div></li><li><b>3</b><div><strong>确认与保存</strong><span>选择应用、导出或审查</span></div></li></ol>
     </aside>
   </section>
 
-  <ol id="pipeline" class="pipeline" aria-label="审计流程">
+  <nav class="workspace-modes" aria-label="工作台模式">
+    <button id="mode-sim" type="button" aria-pressed="true" aria-controls="simulator">配置练习 <span>先模拟，确认后应用</span></button>
+    <button id="mode-audit" type="button" aria-pressed="false" aria-controls="audit-workspace">按需审查 <span>检查当前配置的风险</span></button>
+  </nav>
+  <ol id="pipeline" class="pipeline" aria-label="审计流程" hidden>
     <li><strong>配置解析器</strong><span>等待配置</span></li>
     <li><strong>网络架构检查</strong><span>VLAN / STP / OSPF 等</span></li>
     <li><strong>安全规则引擎</strong><span>核对配置证据</span></li>
@@ -41,17 +46,18 @@
 
   <div id="workspace" class="layout">
     <section class="panel input" aria-labelledby="input-title">
-      <div class="panel-head"><div><span class="section-kicker">CONFIGURATION</span><h2 id="input-title">输入配置</h2></div><span class="panel-note">每次一台设备</span></div>
+      <div class="panel-head"><div><span class="section-kicker">CONFIGURATION</span><h2 id="input-title">原始配置备份</h2></div><span class="panel-note">每次一台设备</span></div>
       <div class="vendor-field"><label for="vendor">设备厂商</label><select id="vendor"><option value="auto">自动识别</option><option value="cisco">Cisco IOS / IOS XE</option><option value="huawei">Huawei VRP</option><option value="h3c">H3C Comware</option><option value="ruijie">Ruijie RGOS（已建模语法）</option></select></div>
       <p id="vendor-detection" class="hint" aria-live="polite">导入文件后按配置内容识别厂商，也可手动选择。</p>
-      <div class="row config-label-row"><label for="config">完整配置文本</label><label class="file-label" for="file"><span>导入配置文件</span><input type="file" id="file" accept=".cfg,.conf,.txt"></label></div>
+      <div class="row config-label-row"><label for="config">备份文本 · 可粘贴或拖入</label><label class="file-label" for="file"><span>导入配置文件</span><input type="file" id="file" accept=".cfg,.conf,.txt"></label></div>
       <div id="config-drop-zone" class="config-drop-zone" role="group" aria-label="配置文件拖入区">
         <p id="drop-hint" class="drop-hint">将一份配置文件拖到这里，自动读取并识别厂商</p>
         <textarea id="config" spellcheck="false" aria-describedby="config-meta config-hint drop-hint" placeholder="也可粘贴 show running-config 或 display current-configuration 输出…"></textarea>
       </div>
       <div id="config-meta" class="config-meta">尚未导入配置</div>
-      <p id="config-hint" class="hint config-hint">每次输入一台设备的 UTF-8 配置，最大 2 MiB。凭据在结果中自动隐藏。</p>
+      <p id="config-hint" class="hint config-hint">每次输入一台设备的 UTF-8 配置，最大 2 MiB。模拟副本独立修改，原始备份不会被覆盖。</p>
 
+      <div id="audit-settings" hidden>
       <div class="advanced-heading"><span>高级设置</span><span>按需填写</span></div>
       <details class="settings">
         <summary>设备版本与本地情报（可选）</summary>
@@ -75,13 +81,52 @@
         <input id="ai-model" type="text" autocomplete="off" spellcheck="false" placeholder="例如 qwen2.5:7b" disabled>
         <p class="hint">默认关闭。需自行安装模型并运行本机 Ollama（127.0.0.1:11434）。仅将结构化规则与情报事实发送给本机模型，不发送原始配置；模型输出不能替代证据核对。单次模型请求最多等待 30 秒。</p>
       </details>
+      </div>
       <div class="input-controls">
-        <div class="input-actions"><button id="run" type="button">开始审计 <span aria-hidden="true">→</span></button><button id="example" class="secondary" type="button">载入示例</button></div>
+        <div class="input-actions"><button id="sim-load" type="button">载入模拟 <span aria-hidden="true">→</span></button><button id="example" class="secondary" type="button">载入示例</button><button id="run" class="secondary" type="button">开始审计</button></div>
+        <p id="sim-source-state" class="hint">导入后点击「载入模拟」，建立独立的练习副本。</p>
         <p id="status" role="status" aria-live="polite">准备就绪。</p>
       </div>
     </section>
 
-    <section class="results" aria-labelledby="result-title">
+    <section id="simulator" class="simulator" aria-labelledby="sim-title">
+      <div class="sim-head"><div><span class="section-kicker">PRACTICE WORKSPACE</span><h2 id="sim-title">配置模拟练习</h2></div><span id="sim-session-label" class="sim-session-label">等待载入</span></div>
+      <p id="sim-status" class="sim-status" role="status" aria-live="polite">先导入备份，再点击「载入模拟」。也可以用左侧示例开始练习。</p>
+      <p class="sim-boundary">这是离线配置状态练习，不连接真实设备。不模拟 ping、数据包转发、物理链路、STP 收敛或 OSPF 邻居；「可应用」仅表示已支持的语法和配置前提满足。</p>
+      <div class="sim-session-actions"><button id="sim-undo" class="secondary" type="button" disabled>撤销上一步</button><button id="sim-reset" class="secondary" type="button" disabled>重置为原始备份</button><button id="sim-export" class="secondary" type="button" disabled>导出模拟配置 .cfg</button><button id="sim-audit" class="secondary" type="button" disabled>审查当前模拟配置</button></div>
+      <p id="sim-history" class="hint">仅保存在当前页面；关闭页面会清除练习。撤销最多 20 步，累计不超过 16 MiB。</p>
+      <p class="hint sim-sensitive">导出的配置保留原文和凭据，请按敏感文件保存；预览结果与差异会脱敏。</p>
+
+      <section class="sim-card" aria-labelledby="sim-goal-title">
+        <div class="sim-step-title"><span>01</span><h3 id="sim-goal-title">用中文说出目标</h3><small>可选，也可直接练命令</small></div>
+        <label for="sim-goal">我想完成的操作</label>
+        <textarea id="sim-goal" rows="2" maxlength="2000" placeholder="例如：创建 VLAN 20（每次一个目标）" disabled></textarea>
+        <div class="sim-action-row"><button id="sim-plan" type="button" disabled>生成命令草案</button><span class="hint">按已支持的目标生成，不自动执行，不调用 AI。</span></div>
+        <div id="sim-plan-result" class="sim-plan-result" aria-live="polite" hidden></div>
+        <button id="sim-use-plan" class="secondary" type="button" hidden disabled>将草案放入命令区</button>
+      </section>
+
+      <section class="sim-card" aria-labelledby="sim-cli-title">
+        <div class="sim-step-title"><span>02</span><h3 id="sim-cli-title">模拟命令行</h3><small>逐条练习，也可批量粘贴</small></div>
+        <div class="sim-cli-bar"><code id="sim-prompt">尚未载入配置</code><span id="sim-context">执行视图</span></div>
+        <label for="sim-commands" class="sr-only">待模拟命令，每行一条</label>
+        <textarea id="sim-commands" rows="6" spellcheck="false" aria-describedby="sim-command-hint" placeholder="先载入备份，再输入一条或多条命令…" disabled></textarea>
+        <p id="sim-command-hint" class="hint">每行一条，每批最多 200 行 / 64 KiB。先预览，再点击「应用本次预览」。单行可用 Ctrl+Enter 预览。</p>
+        <div class="sim-action-row"><button id="sim-preview" type="button" disabled>预览运行</button><button id="sim-apply" class="secondary" type="button" disabled>应用本次预览</button><span id="sim-preview-state" class="hint">尚无候选变更</span></div>
+        <details class="sim-capability-details"><summary>当前视图可以练哪些命令？</summary><p class="hint">点击示例加入命令区；含 &lt;参数&gt; 的模板需要先填写。设备型号及固件支持需另行核对。</p><div id="sim-capabilities"><p class="hint">载入模拟后，根据当前视图给出可用命令。</p></div></details>
+      </section>
+
+      <section id="sim-output" class="sim-card" aria-labelledby="sim-output-title" hidden>
+        <div class="sim-step-title"><span>03</span><h3 id="sim-output-title">看懂结果与理由</h3><small>预览不会自动改变练习副本</small></div>
+        <p id="sim-outcome" class="sim-outcome"></p>
+        <div id="sim-results" class="sim-results"></div>
+        <details id="sim-diff-details" open><summary>配置差异 · 已脱敏</summary><pre id="sim-diff"></pre></details>
+      </section>
+      <details class="sim-limitations"><summary>练习范围与当前配置摘要</summary><p class="hint">不能识别的原配置会原样保留；未知命令会拒绝修改。任一命令失败，整批配置与视图变更都不应用。</p><ul id="sim-limitations"></ul><pre id="sim-inventory">尚未载入配置。</pre></details>
+    </section>
+
+    <section id="audit-workspace" class="results" aria-labelledby="result-title" hidden>
+      <p id="audit-target-note" class="audit-target-note">审查对象：左侧原始备份。载入模拟后，将审查当前已应用的练习副本。</p>
       <div id="summary" class="stats" aria-label="审计摘要"><div><span>严重 / 高风险</span><strong>—</strong><small>优先核对</small></div><div><span>中 / 低风险</span><strong>—</strong><small>按场景评估</small></div><div><span>未建模行</span><strong>—</strong><small>补充人工检查</small></div></div>
       <div class="result-workspace">
         <div class="results-head"><div><span class="section-kicker">AUDIT RESULTS</span><h2 id="result-title">安全发现</h2><p id="result-context">审计后可切换分类，逐项核对配置证据。</p></div><div id="exports" class="exports" aria-label="导出完整报告" hidden><button data-format="json" class="secondary" type="button">JSON</button><button data-format="md" class="secondary" type="button">Markdown</button><button data-format="html" class="secondary" type="button">HTML</button></div></div>
@@ -133,7 +178,7 @@
       </div>
     </section>
   </div>
-  <footer><span>NetAudit · 本地配置审计</span><p>关闭程序：回到启动窗口按 Ctrl+C；关闭浏览器标签页不会停止服务。迁移到另一台 Windows 电脑：复制整个便携文件夹。<br>配置与情报处理在本机运行，普通使用无需管理员权限。实际影响需结合设备版本、拓扑和运行状态核对；修改建议需经过业务验证。</p></footer>
+  <footer><span>NetAudit · 本地配置学习与审查</span><p>关闭程序：回到启动窗口按 Ctrl+C；关闭浏览器标签页不会停止服务。迁移到另一台 Windows 电脑：复制整个便携文件夹。<br>配置与情报处理在本机运行，普通使用无需管理员权限。模拟仅涵盖已建模的配置状态。实际影响需结合设备版本、拓扑和运行状态核对；修改建议需经过业务验证。</p></footer>
 </main>
 </body>
 </html>
