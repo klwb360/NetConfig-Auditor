@@ -276,4 +276,31 @@ footer,footer p{font-size:11px;color:var(--muted)}
 @media(max-width:780px){.simulator{padding:21px}.sim-head h2{font-size:20px}.sim-step-title small{margin-left:auto;flex-basis:auto}.sim-card{padding:17px}.sim-session-actions button{font-size:12px}}
 @media(max-width:580px){.workspace-modes{gap:4px;margin-bottom:18px}.workspace-modes button{padding:9px 6px;font-size:13px}.workspace-modes button span{font-size:10px;flex-basis:100%}.simulator{padding:16px}.sim-head h2{font-size:19px}.sim-card{padding:14px;margin-top:14px}.sim-step-title small{margin-left:33px;flex-basis:100%}.sim-action-row button{flex:1 1 auto}.sim-action-row>.hint{flex-basis:100%}.sim-session-actions button{font-size:11px;flex:1 1 130px}.sim-cli-bar{padding:9px}.sim-cli-bar code{font-size:11px}.sim-command-result{padding:11px}.sim-command-result-head code{flex-basis:100%}#sim-goal{height:115px}.sim-plan-result li{margin:12px 0}}
 
+/* Only line backgrounds are mirrored; editable text always stays in the native textarea. */
+:root{--vendor-cisco-bg:#e0edff;--vendor-cisco-ink:#244e8b;--vendor-huawei-bg:#ffead6;--vendor-huawei-ink:#814208;--vendor-h3c-bg:#eee4ff;--vendor-h3c-ink:#65428e;--vendor-ruijie-bg:#dcf1e4;--vendor-ruijie-ink:#245c3b;--vendor-shared-bg:#e9edf0;--vendor-shared-ink:#4b5c66}
+:root[data-theme="dark"]{--vendor-cisco-bg:#223d5a;--vendor-cisco-ink:#b8d7ff;--vendor-huawei-bg:#4d3726;--vendor-huawei-ink:#ffcea1;--vendor-h3c-bg:#3d2e51;--vendor-h3c-ink:#dcc4ff;--vendor-ruijie-bg:#234936;--vendor-ruijie-ink:#b3e6c7;--vendor-shared-bg:#2c3835;--vendor-shared-ink:#bfcfc8}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]):not([data-theme="dark"]){--vendor-cisco-bg:#223d5a;--vendor-cisco-ink:#b8d7ff;--vendor-huawei-bg:#4d3726;--vendor-huawei-ink:#ffcea1;--vendor-h3c-bg:#3d2e51;--vendor-h3c-ink:#dcc4ff;--vendor-ruijie-bg:#234936;--vendor-ruijie-ink:#b3e6c7;--vendor-shared-bg:#2c3835;--vendor-shared-ink:#bfcfc8}}
+[data-vendor-category="cisco"]{--vendor-bg:var(--vendor-cisco-bg);--vendor-ink:var(--vendor-cisco-ink)}
+[data-vendor-category="huawei"]{--vendor-bg:var(--vendor-huawei-bg);--vendor-ink:var(--vendor-huawei-ink)}
+[data-vendor-category="h3c"]{--vendor-bg:var(--vendor-h3c-bg);--vendor-ink:var(--vendor-h3c-ink)}
+[data-vendor-category="ruijie"]{--vendor-bg:var(--vendor-ruijie-bg);--vendor-ink:var(--vendor-ruijie-ink)}
+[data-vendor-category="shared"]{--vendor-bg:var(--vendor-shared-bg);--vendor-ink:var(--vendor-shared-ink)}
+.vendor-editor{position:relative;min-width:0;max-width:100%;padding-left:68px;background:var(--control-bg);border:1px solid var(--control-border);border-radius:9px;overflow:hidden}
+.vendor-editor:focus-within{border-color:var(--focus)}
+.vendor-editor-cli{background:var(--code-bg);border-radius:0 0 7px 7px}
+.vendor-editor #config,.vendor-editor #sim-commands,.vendor-editor #sim-commands:disabled{position:relative;z-index:1;width:100%;border:0;border-radius:0;margin:0;background:transparent;white-space:pre;overflow-wrap:normal;word-break:normal;overflow:auto;padding:14px;line-height:24px;resize:vertical}
+.vendor-editor-overlay{position:absolute;z-index:0;pointer-events:none;overflow:hidden;user-select:none}
+.vendor-editor-line{position:absolute;left:0;width:100%;background:var(--vendor-bg)}
+.vendor-line-label{display:flex;align-items:center;justify-content:center;width:68px;height:100%;border-right:1px solid var(--line);font:10px/1 ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--vendor-ink);white-space:nowrap}
+.vendor-legend{display:flex;flex-wrap:wrap;gap:5px 10px;margin:9px 0 0;font-size:11px;color:var(--muted)}
+.vendor-key{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.vendor-key b{font-weight:500;font-variant-numeric:tabular-nums;color:var(--ink)}
+.vendor-swatch{width:12px;height:12px;background:var(--vendor-bg,transparent);border:1px solid var(--vendor-ink,var(--control-border));border-radius:3px}
+.vendor-summary{font-size:11px;line-height:1.7;color:var(--muted);margin:6px 0 0;overflow-wrap:anywhere}
+.vendor-current-line{font-size:11px;line-height:1.7;color:var(--muted);margin:3px 0 0;overflow-wrap:anywhere}
+.vendor-current-line:empty{display:none}
+.vendor-highlight-help{font-size:11px;margin:5px 0 7px}
+.vendor-command{background:var(--vendor-bg);border-radius:3px;padding:2px 5px}
+.vendor-command-label{display:inline-block;background:var(--vendor-bg);color:var(--vendor-ink);font-size:10px;line-height:1.8;padding:1px 5px;border-radius:3px;margin-left:5px;white-space:nowrap;vertical-align:middle}
+
 .audit-target-note{font-size:12px;line-height:1.8;margin:0 0 13px;padding:10px 13px;background:var(--soft);border:1px solid var(--line);border-radius:8px;color:var(--strong-text)}

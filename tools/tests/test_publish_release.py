@@ -70,6 +70,17 @@ def simulator_evidence(manifest, reports):
             check["shutdown"] = {"remaining_pids": [], "forced_cleanup": False, "port_closed": True}
 
 
+def highlighting_evidence(manifest, reports):
+    """Synthetic six-resource records used to check publication failures."""
+    simulator_evidence(manifest, reports)
+    names = ("index.html", "style.css", "app.js", "simulator.js", "vendor-syntax.js", "vendor-highlight.js")
+    manifest["web_resources"] = [{"file": "netaudit/web/" + name,
+                                  "sha256": "a" * 64, "size_bytes": 1} for name in names]
+    for report in reports.values():
+        for check in report["checks"][:6]:
+            check["resources_sha256"] = {name: "a" * 64 for name in names}
+
+
 class PublicationAPI:
     repository = "owner/repo"
 
@@ -245,6 +256,45 @@ class PublicationGuards(unittest.TestCase):
                             check["simulator_cli"][field] = False
                     with self.assertRaisesRegex(ValueError, "simulator CLI"):
                         self.verify(bundle(change, version="1.0.0", counts=(("source", 10), ("onedir", 9), ("onefile", 9))))
+
+    def test_highlighting_release_requires_exactly_six_manifest_resources(self):
+        counts = (("source", 10), ("onedir", 9), ("onefile", 9))
+        self.assertEqual(len(self.verify(bundle(highlighting_evidence, version="1.0.1", counts=counts))[0]), 9)
+        mutations = (
+            lambda m: m.pop("web_resources"),
+            lambda m: m["web_resources"].pop(),
+            lambda m: m["web_resources"].append(dict(m["web_resources"][0])),
+            lambda m: m["web_resources"][-1].update({"file": "netaudit/web/other.js"}),
+            lambda m: m["web_resources"][-1].update({"sha256": "invalid"}),
+            lambda m: m["web_resources"][-1].update({"size_bytes": 0}),
+            lambda m: m["web_resources"][-1].update({"size_bytes": True}),
+        )
+        for index, mutate in enumerate(mutations):
+            with self.subTest(mutation=index):
+                def change(manifest, reports):
+                    highlighting_evidence(manifest, reports)
+                    mutate(manifest)
+                with self.assertRaisesRegex(ValueError, "resource manifest"):
+                    self.verify(bundle(change, version="1.0.1", counts=counts))
+
+    def test_highlighting_release_requires_both_new_resources_on_every_server_path(self):
+        counts = (("source", 10), ("onedir", 9), ("onefile", 9))
+        for mode in ("source", "onedir", "onefile"):
+            for index in range(6):
+                for resource in ("vendor-syntax.js", "vendor-highlight.js"):
+                    with self.subTest(mode=mode, server_path=index, resource=resource):
+                        def change(manifest, reports):
+                            highlighting_evidence(manifest, reports)
+                            reports[mode]["checks"][index]["resources_sha256"].pop(resource)
+                        with self.assertRaisesRegex(ValueError, "web resources"):
+                            self.verify(bundle(change, version="1.0.1", counts=counts))
+
+    def test_highlighting_release_retains_required_simulator_state_evidence(self):
+        def change(manifest, reports):
+            highlighting_evidence(manifest, reports)
+            reports["onefile"]["checks"][0]["simulation"]["missing_vlan_rollback"] = False
+        with self.assertRaisesRegex(ValueError, "simulator state"):
+            self.verify(bundle(change, version="1.0.1", counts=(("source", 10), ("onedir", 9), ("onefile", 9))))
 
     def test_reject_failed_or_foreign_workflow(self):
         run = {"status": "completed", "conclusion": "success", "head_sha": COMMIT,
@@ -429,7 +479,9 @@ class ReleaseNotesTests(unittest.TestCase):
         def add_environment(manifest, reports):
             manifest["environment"].update({"os": "Windows-2022", "python": "3.12.10"})
             manifest["build_dependencies"] = {"pyinstaller": "6.12.0"}
-            if tuple(map(int, version.split("."))) >= (1, 0, 0):
+            if tuple(map(int, version.split("."))) >= (1, 0, 1):
+                highlighting_evidence(manifest, reports)
+            elif tuple(map(int, version.split("."))) >= (1, 0, 0):
                 simulator_evidence(manifest, reports)
         archive = bundle(add_environment, version=version,
                          counts=(("source", 10), ("onedir", 9), ("onefile", 9)))
@@ -501,7 +553,7 @@ class ReleaseNotesTests(unittest.TestCase):
         self.assertEqual(json.dumps(manifest, sort_keys=True), original)
 
     def test_all_legacy_notes_are_byte_identical(self):
-        # Captured before v1 implementation, with the same deterministic fixture.
+        # Captured before each feature addition, with the same deterministic fixture.
         hashes = {
             "0.1.0": "da584fb3eafb8bfac1b4af435ad942c7493b97d56c265cdd4ce7ef91808238a8",
             "0.2.0": "f9513461d464b3799ed6937af50583774b2366a1745550698e2f181fc63a8639",
@@ -509,6 +561,7 @@ class ReleaseNotesTests(unittest.TestCase):
             "0.2.2": "70c236c5f7bd34d5ea37c7b2bc51aeaf2776973fc3851e0fbb5d5945685554bf",
             "0.2.3": "ce31cc99bbe682854e19aa18f815f245cea6b99f16709a2d63be5f892f14bafa",
             "0.3.0": "1f5fb013df29539309baf77e2cc4dad4dbd6ef1156d38331dfb2e27b69074bab",
+            "1.0.0": "cae978f94b3b927a52a2fa5259769f1aa103c86399b6825d5ce8ca1fd1426262",
         }
         for version, expected in hashes.items():
             with self.subTest(version=version):
@@ -524,3 +577,19 @@ class ReleaseNotesTests(unittest.TestCase):
         self.assertEqual(len([line for line in rendered.splitlines() if line.startswith("| `NetAudit-")]), 3)
         for version in ("0.1.0", "0.2.0", "0.2.1", "0.2.2", "0.2.3", "0.3.0"):
             self.assertNotIn("配置模拟与学习练习", p.notes("owner/repo", "v" + version, self.manifest(version), "123"))
+
+    def test_highlighting_notes_describe_colors_context_and_semantic_limits(self):
+        for version in ("1.0.1", "1.1.0"):
+            with self.subTest(version=version):
+                manifest = self.manifest(version)
+                original = json.dumps(manifest, sort_keys=True)
+                rendered = p.notes("owner/repo", "v" + version, manifest, "123")
+                for expected in ("厂商指令底色高亮", "Cisco 蓝色", "华为橙色", "H3C 紫色", "锐捷绿色",
+                                 "共享语法", "当前厂商上下文", "中性灰", "注释不着色", "暗黑主题",
+                                 "不代表命令安全", "真实设备能够执行", "预览运行", "按需撤销",
+                                 "审查当前模拟配置", "完整网页资源"):
+                    self.assertIn(expected, rendered)
+                self.assertEqual(len([line for line in rendered.splitlines() if line.startswith("| `NetAudit-")]), 3)
+                self.assertEqual(json.dumps(manifest, sort_keys=True), original)
+        for version in ("0.1.0", "0.2.3", "1.0.0"):
+            self.assertNotIn("厂商指令底色高亮", p.notes("owner/repo", "v" + version, self.manifest(version), "123"))

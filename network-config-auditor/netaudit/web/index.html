@@ -6,12 +6,14 @@
   <meta name="color-scheme" content="light dark">
   <title>NetAudit · 配置学习与模拟</title>
   <link rel="stylesheet" href="/style.css">
+  <script src="/vendor-syntax.js" defer></script>
+  <script src="/vendor-highlight.js" defer></script>
   <script src="/app.js" defer></script>
   <script src="/simulator.js" defer></script>
 </head>
 <body>
 <header class="app-header">
-  <a class="brand" href="#workspace" aria-label="NetAudit 配置学习工作台"><b aria-hidden="true">N</b><span>NetAudit<small>配置学习与模拟 · v1.0</small></span></a>
+  <a class="brand" href="#workspace" aria-label="NetAudit 配置学习工作台"><b aria-hidden="true">N</b><span>NetAudit<small>配置学习与模拟 · v1.0.1</small></span></a>
   <div class="header-tools">
     <label class="theme-control" for="theme-select"><span>外观</span><select id="theme-select"><option value="system">跟随系统</option><option value="light">明亮风格</option><option value="dark">暗黑风格</option></select></label>
     <span class="local"><i aria-hidden="true"></i> 本地运行<span class="local-detail"> · 配置不出本机</span></span>
@@ -52,8 +54,11 @@
       <div class="row config-label-row"><label for="config">备份文本 · 可粘贴或拖入</label><label class="file-label" for="file"><span>导入配置文件</span><input type="file" id="file" accept=".cfg,.conf,.txt"></label></div>
       <div id="config-drop-zone" class="config-drop-zone" role="group" aria-label="配置文件拖入区">
         <p id="drop-hint" class="drop-hint">将一份配置文件拖到这里，自动读取并识别厂商</p>
-        <textarea id="config" spellcheck="false" aria-describedby="config-meta config-hint drop-hint" placeholder="也可粘贴 show running-config 或 display current-configuration 输出…"></textarea>
+        <div class="vendor-editor" data-vendor-editor="config"><div class="vendor-editor-overlay" aria-hidden="true"></div><textarea id="config" wrap="off" spellcheck="false" aria-describedby="config-meta config-hint drop-hint vendor-highlight-help config-vendor-summary" placeholder="也可粘贴 show running-config 或 display current-configuration 输出…"></textarea></div>
       </div>
+      <div id="config-vendor-legend" class="vendor-legend" aria-label="配置指令厂商颜色图例"></div>
+      <p id="config-vendor-summary" class="vendor-summary"></p>
+      <p id="vendor-highlight-help" class="hint vendor-highlight-help">底色区分指令语法：共享语法按当前厂商标注，无法确定的保持中性；颜色不代表安全或设备支持。长行可横向滚动查看。</p>
       <div id="config-meta" class="config-meta">尚未导入配置</div>
       <p id="config-hint" class="hint config-hint">每次输入一台设备的 UTF-8 配置，最大 2 MiB。模拟副本独立修改，原始备份不会被覆盖。</p>
 
@@ -110,7 +115,9 @@
         <div class="sim-step-title"><span>02</span><h3 id="sim-cli-title">模拟命令行</h3><small>逐条练习，也可批量粘贴</small></div>
         <div class="sim-cli-bar"><code id="sim-prompt">尚未载入配置</code><span id="sim-context">执行视图</span></div>
         <label for="sim-commands" class="sr-only">待模拟命令，每行一条</label>
-        <textarea id="sim-commands" rows="6" spellcheck="false" aria-describedby="sim-command-hint" placeholder="先载入备份，再输入一条或多条命令…" disabled></textarea>
+        <div class="vendor-editor vendor-editor-cli" data-vendor-editor="sim-commands"><div class="vendor-editor-overlay" aria-hidden="true"></div><textarea id="sim-commands" wrap="off" rows="6" spellcheck="false" aria-describedby="sim-command-hint vendor-highlight-help sim-commands-vendor-summary" placeholder="先载入备份，再输入一条或多条命令…" disabled></textarea></div>
+        <div id="sim-commands-vendor-legend" class="vendor-legend" aria-label="模拟命令厂商颜色图例"></div>
+        <p id="sim-commands-vendor-summary" class="vendor-summary"></p>
         <p id="sim-command-hint" class="hint">每行一条，每批最多 200 行 / 64 KiB。先预览，再点击「应用本次预览」。单行可用 Ctrl+Enter 预览。</p>
         <div class="sim-action-row"><button id="sim-preview" type="button" disabled>预览运行</button><button id="sim-apply" class="secondary" type="button" disabled>应用本次预览</button><span id="sim-preview-state" class="hint">尚无候选变更</span></div>
         <details class="sim-capability-details"><summary>当前视图可以练哪些命令？</summary><p class="hint">点击示例加入命令区；含 &lt;参数&gt; 的模板需要先填写。设备型号及固件支持需另行核对。</p><div id="sim-capabilities"><p class="hint">载入模拟后，根据当前视图给出可用命令。</p></div></details>

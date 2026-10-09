@@ -580,7 +580,9 @@ def exercise_web(port: int, reference: Path, examples: Path) -> dict:
     resources: dict[str, str] = {}
     for route, filename, mime in (("/", "index.html", "text/html"), ("/style.css", "style.css", "text/css"),
                                    ("/app.js", "app.js", "text/javascript"),
-                                   ("/simulator.js", "simulator.js", "text/javascript")):
+                                   ("/simulator.js", "simulator.js", "text/javascript"),
+                                   ("/vendor-syntax.js", "vendor-syntax.js", "text/javascript"),
+                                   ("/vendor-highlight.js", "vendor-highlight.js", "text/javascript")):
         text, headers = request(port, "GET", route)
         require(headers.get("Content-Type", "").startswith(mime), f"Wrong MIME type for {route}")
         require(text == (reference / filename).read_text(encoding="utf-8"), f"Packaged {filename} differs from source")

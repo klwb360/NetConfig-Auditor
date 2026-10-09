@@ -119,7 +119,7 @@ class PortableServerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="资源 空格 ") as directory:
             web = Path(directory) / "netaudit" / "web"
             web.mkdir(parents=True)
-            resources = {"/": ("index.html", "网页正文"), "/app.js": ("app.js", "// javascript"), "/simulator.js": ("simulator.js", "// simulator"), "/style.css": ("style.css", "body {}")}
+            resources = {"/": ("index.html", "网页正文"), "/app.js": ("app.js", "// javascript"), "/simulator.js": ("simulator.js", "// simulator"), "/vendor-syntax.js": ("vendor-syntax.js", "// syntax"), "/vendor-highlight.js": ("vendor-highlight.js", "// highlight"), "/style.css": ("style.css", "body {}")}
             for name, content in resources.values():
                 (web / name).write_text(content, encoding="utf-8")
             with patch("netaudit.server.WEB_DIR", web), server.LocalServer(("127.0.0.1", 0), server.make_handler("test")) as bound:

@@ -2,7 +2,7 @@
 
 导入一台 Cisco、华为、H3C 或锐捷 RGOS 交换机/路由器的备份，在独立副本中练习配置：**中文目标或设备命令 → 预览结果、理由与差异 → 明确应用 → 撤销 / 重置 / 导出配置 → 按需审计**。原有六域架构检查、35 个规则 ID、CVE / KEV 核对、可选本机 AI 与 JSON / Markdown / HTML 报告继续提供；运行时仅使用 Python 标准库。
 
-**本页对应 v1.0.0**。Windows 运行文件见 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest) 的 **Assets**：选择 `*-onefile.exe` 双击运行，或下载 `*-portable.zip` 解压后启动；使用本页模拟功能时请核对文件版本为 **1.0.0 或更新**，旧 v0.2.3 只有审计功能。实际发布状态、文件名、校验值与验收范围见在线 [仓库交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md)。
+**本页对应 v1.0.1 源码**。Windows 运行文件见 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest) 的 **Assets**：选择 `*-onefile.exe` 双击运行，或下载 `*-portable.zip` 解压后启动；模拟功能需要 **1.0.0 或更新**，厂商底色高亮需要 **1.0.1 或更新**，旧 v0.2.3 只有审计功能。实际发布状态、文件名、校验值与验收范围见在线 [仓库交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md)。
 
 本项目审计了 [pynipper-ng](https://github.com/syn-4ck/pynipper-ng)，保留并改写其插件基类，重建了三厂商解析、审计规则和报告模块。来源、固定提交和改动见 [NOTICE](NOTICE)；审计详情见 [代码审计报告](docs/UPSTREAM_AUDIT.md)。项目采用 GPL-3.0-only。
 
@@ -13,6 +13,8 @@ Windows 普通用户使用便携包：**下载 → 解压 → 双击 `Start-NetA
 将一份 UTF-8 配置文件拖入左侧文本区域，或使用“导入配置文件”；按内容自动识别四厂商，支持中文、空格及无扩展名文件。信息不足或混合厂商标记时提示手动选择。文件最大 2 MiB / 30000 行，每次一个文件，不支持文件夹；也可粘贴文本或“载入示例”。
 
 顶部提供“明亮风格”“暗黑风格”和“跟随系统”，默认跟随系统，浏览器仅保存主题偏好。审计后同类风险默认折叠，保留各自对象、证据与建议；可以“展开全部”或“收起全部”。折叠和严重度筛选不影响完整报告。
+
+原始备份和模拟命令区按已识别的语法显示底色与文字标签：**Cisco 蓝、华为橙、H3C 紫、锐捷绿**。多厂商共享的语法在“自动识别”选项下保持中性；指定兼容厂商后可按该厂商着色，并注明“共享语法”。未知行、普通注释和 banner 正文不据此猜测厂商。底色仅帮助读懂语法，不能证明命令安全或真实设备可执行；输入、复制及配置和报告导出不会加入颜色标记。长命令保持一行，左右滚动查看。详见 [高亮说明](docs/SIMULATOR.md#厂商底色高亮v101)。
 
 源码版 Windows 也可双击 `Start-NetAudit.bat`，需要 Python **3.10 或更新版本**。BAT 会优先运行同目录的 `NetAudit.exe`，否则检测 Python。
 
@@ -155,9 +157,10 @@ JSON 使用 `schema_version: "1.1"`，保留 `device`、`summary`、`findings`�
 
 ```bash
 python -m unittest discover -s tests -v
+node tests/vendor_syntax_cases.js
 python tools/reproduce_upstream.py
 ```
 
-测试覆盖四厂商解析、VLAN 范围与同类发现合并、命令前提和参数模板、ACL 覆盖顺序、NAT 选流语义、多个 VTY 范围、原始行号、脱敏、HTML 转义、CLI 退出码、文件权限及本地服务的来源/Host/令牌限制。v1.0.0 增加模拟视图、依赖阻止、整批回滚、原文保留、中文草案、API 和 CLI 验证；实际通过结果、环境与未实测范围以 [验证记录](docs/TESTING.md) 为准。上游复现脚本使用固定源码方法与只实现正则查询的解析替身，隔离复现三个已确认缺陷；不代表安装旧依赖后跑过完整上游程序。
+测试覆盖四厂商解析、VLAN 范围与同类发现合并、命令前提和参数模板、ACL 覆盖顺序、NAT 选流语义、多个 VTY 范围、原始行号、脱敏、HTML 转义、CLI 退出码、文件权限及本地服务的来源/Host/令牌限制。v1.0.0 增加模拟视图、依赖阻止、整批回滚、原文保留、中文草案、API 和 CLI 验证；v1.0.1 增加前端语法归属分类用例，开发验证需 Node.js，普通运行无需安装。实际通过结果、环境与未实测范围以 [验证记录](docs/TESTING.md) 为准。上游复现脚本使用固定源码方法与只实现正则查询的解析替身，隔离复现三个已确认缺陷；不代表安装旧依赖后跑过完整上游程序。
 
 新增规则可在 `netaudit/rules.py` 继承 `GenericPlugin`，并加入显式 `PLUGINS` 注册表。新增解析需补充能覆盖误报/漏报边界的 fixture 与测试。

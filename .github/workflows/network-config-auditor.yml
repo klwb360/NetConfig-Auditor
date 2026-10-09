@@ -25,5 +25,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - run: python -m unittest discover -s tests -v
+      - name: Verify vendor syntax classification
+        run: node tests/vendor_syntax_cases.js
       - run: python tools/reproduce_upstream.py
       - run: python -m pip wheel . --no-deps --wheel-dir dist

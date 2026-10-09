@@ -114,7 +114,12 @@ def verify_files(files, commit, run_id, run_attempt):
     manifest = json.loads(files["manifest.json"])
     version = manifest["application_version"]
     require(re.fullmatch(r"\d+\.\d+\.\d+", version), "Invalid application version")
-    has_simulator = tuple(map(int, version.split("."))) >= (1, 0, 0)
+    version_parts = tuple(map(int, version.split(".")))
+    has_simulator = version_parts >= (1, 0, 0)
+    has_vendor_highlighting = version_parts >= (1, 0, 1)
+    expected_web = {"index.html", "style.css", "app.js", "simulator.js"}
+    if has_vendor_highlighting:
+        expected_web |= {"vendor-syntax.js", "vendor-highlight.js"}
     prefix = f"NetAudit-{version}-windows-x64-{commit[:12]}"
     packages = {prefix + "-portable.zip", prefix + "-onefile.zip", prefix + "-onefile.exe",
                 f"NetAudit-{version}-source-{commit[:12]}.zip"}
@@ -141,6 +146,15 @@ def verify_files(files, commit, run_id, run_attempt):
     for item in items:
         data = files[item["file"]]
         require(item["sha256"] == digest(data) and item["size_bytes"] == len(data), "Package metadata mismatch")
+    if has_vendor_highlighting:
+        web_manifest = manifest.get("web_resources", [])
+        require(isinstance(web_manifest, list) and len(web_manifest) == len(expected_web)
+                and all(isinstance(item, dict) for item in web_manifest)
+                and {item.get("file") for item in web_manifest} == {"netaudit/web/" + name for name in expected_web}
+                and all(isinstance(item.get("sha256"), str)
+                        and re.fullmatch(r"[a-f0-9]{64}", item["sha256"])
+                        and type(item.get("size_bytes")) is int and item["size_bytes"] > 0
+                        for item in web_manifest), "Incomplete vendor highlighting resource manifest")
     counts = (("source", 9), ("onedir", 8), ("onefile", 8)) if version == "0.1.0" else (("source", 10), ("onedir", 9), ("onefile", 9))
     for mode, count in counts:
         report = json.loads(files[f"smoke-{mode}.json"])
@@ -175,7 +189,7 @@ def verify_files(files, commit, run_id, run_attempt):
                 "candidate_exports": ["json", "md", "html"]}
             for check in web_checks:
                 resources = check["resources_sha256"]
-                require(set(resources) == {"index.html", "style.css", "app.js", "simulator.js"}
+                require(set(resources) == expected_web
                         and all(isinstance(sha, str) and re.fullmatch(r"[a-f0-9]{64}", sha)
                                 for sha in resources.values()), "Incomplete simulator web resources")
                 simulation = check.get("simulation", {})
@@ -199,6 +213,7 @@ def notes(repository, tag, manifest, run_id, records_commit="main"):
     version_parts = tuple(map(int, version.split(".")))
     has_rgos_remediation = version_parts >= (0, 2, 2)
     has_simulator = version_parts >= (1, 0, 0)
+    has_vendor_highlighting = version_parts >= (1, 0, 1)
     vendor_choices = "Cisco、华为、H3C 或锐捷 RGOS" if has_rgos_remediation else "Cisco、华为或 H3C"
     vendor_coverage = "四厂商" if has_rgos_remediation else "三厂商"
     commit = manifest["source"]["commit"]
@@ -258,6 +273,14 @@ def notes(repository, tag, manifest, run_id, records_commit="main"):
 - 候选配置及备份导出会保留原有凭据，请按敏感文件保管；页面命令结果与差异脱敏，浏览器不持久保存配置。
 
 """
+    highlighting_features = "" if not has_vendor_highlighting else """
+### 厂商指令底色高亮
+
+- 配置输入和模拟命令区按行显示语法归属底色：Cisco 蓝色、华为橙色、H3C 紫色、锐捷绿色；带有文字图例，明亮与暗黑主题均可使用。
+- 共享语法在明确的当前厂商上下文中沿用厂商色并标注“共享”；上下文不明确时显示中性灰，未识别行与注释不着色，不强行猜测厂商。编辑、导入及切换厂商后自动更新。
+- 高亮只提示语法归属，不代表命令安全、参数正确或真实设备能够执行。继续使用“预览运行”查看模拟前提与理由，需要时再审计。
+
+"""
     start_steps = (f"3. 浏览器打开后导入 UTF-8 备份，确认 {vendor_choices}，点击“载入模拟”。\n"
                    "4. 输入中文目标并点击“生成命令草案”→“将草案放入命令区”；也可在模拟命令行直接输入命令。\n"
                    "5. 点击“预览运行”，阅读结果、理由与差异，再点击“应用本次预览”；按需撤销、重置或导出模拟配置。\n"
@@ -276,7 +299,7 @@ def notes(repository, tag, manifest, run_id, records_commit="main"):
 
 `-onefile.zip` 提供单 EXE 与配套说明、示例、许可证和源码；`-onefile.exe` 可独立启动。再次分发仍需保留 GPL-3.0-only 许可证、归属说明与对应源码。普通用户无需下载 GitHub 自动生成的 “Source code”。
 
-{simulator_features}{features}{ui_features}{remediation_features}{theme_features}
+{highlighting_features}{simulator_features}{features}{ui_features}{remediation_features}{theme_features}
 
 ### 验证与来源
 

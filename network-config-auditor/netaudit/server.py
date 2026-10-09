@@ -90,7 +90,14 @@ def make_handler(token: str):
                 if origin and origin not in (f"http://127.0.0.1:{self.server.server_port}", f"http://localhost:{self.server.server_port}"):
                     return self._error(403, "Origin 不允许")
                 return self._send(200, json.dumps({"token": token}))
-            paths = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("app.js", "text/javascript; charset=utf-8"), "/simulator.js": ("simulator.js", "text/javascript; charset=utf-8"), "/style.css": ("style.css", "text/css; charset=utf-8")}
+            paths = {
+                "/": ("index.html", "text/html; charset=utf-8"),
+                "/app.js": ("app.js", "text/javascript; charset=utf-8"),
+                "/simulator.js": ("simulator.js", "text/javascript; charset=utf-8"),
+                "/vendor-syntax.js": ("vendor-syntax.js", "text/javascript; charset=utf-8"),
+                "/vendor-highlight.js": ("vendor-highlight.js", "text/javascript; charset=utf-8"),
+                "/style.css": ("style.css", "text/css; charset=utf-8"),
+            }
             if self.path not in paths:
                 return self._error(404, "路径不存在")
             name, mime = paths[self.path]

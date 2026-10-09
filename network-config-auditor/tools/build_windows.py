@@ -220,6 +220,11 @@ def package(
 
 def build(output: Path, work: Path, identity: dict[str, object]) -> None:
     pins = ensure_build_environment()
+    expected_web = {"index.html", "style.css", "app.js", "simulator.js",
+                    "vendor-syntax.js", "vendor-highlight.js"}
+    actual_web = {path.name for path in (PROJECT / "netaudit" / "web").iterdir() if path.is_file()}
+    if actual_web != expected_web:
+        raise ValueError("Build requires the complete six-file web application")
     # Only this task's generated build directories are removed, never source.
     if work.exists():
         shutil.rmtree(work)

@@ -78,6 +78,7 @@
     byId("sim-history").textContent = `可撤销 ${history.length} 步 · 历史 ${(historyBytes / 1024 / 1024).toFixed(1)} / 16 MiB（最多 20 步）。仅保存在当前页面，关闭即清除。`;
   }
   function renderCurrent() {
+    window.NetAuditHighlights?.refresh("sim-commands",{vendor:current?.vendor || "auto"});
     byId("audit-target-note").textContent = current ? "审查对象：当前已应用的模拟副本。尚未应用的预览不会参与审查。" : "审查对象：左侧原始备份。载入模拟后，将审查当前已应用的练习副本。";
     byId("sim-session-label").textContent = current ? vendorNames[current.vendor] : "等待载入";
     byId("sim-prompt").textContent = current ? current.prompt : "尚未载入配置";
@@ -145,6 +146,7 @@
     });
   }
   function commandsChanged() {
+    window.NetAuditHighlights?.refresh("sim-commands",{vendor:current?.vendor || "auto"});
     commandRevision++;abortRequest("preview");
     clearCandidate("命令已更改，请重新预览。");status("命令已更改，请点击「预览运行」；当前练习副本未改变。");refresh();
   }
@@ -157,10 +159,13 @@
     const planLabels = {ready:"草案已准备好", "needs-input":"还需要补充信息",unsupported:"暂不支持这个目标",blocked:"当前条件不满足"};
     root.append(element("h4",planLabels[value.status] || "请核对目标"),element("p",value.summary || "请补充具体目标、接口名和参数。"));
     if(value.steps?.length) {
-      const list = element("ol");
+      const list = element("ol"), commands = [];
       for(const item of value.steps) {
-        const row = element("li");row.append(element("code",item.command),element("p",item.reason));list.append(row);
+        const row = element("li"), code = element("code",item.command);
+        row.append(code,element("p",item.reason));list.append(row);
+        commands.push(code);
       }
+      window.NetAuditHighlights?.decorateAll(commands,{vendor:current?.vendor || "auto"});
       root.append(list);
     }
     if(value.questions?.length) {
@@ -188,17 +193,20 @@
     const failed = Boolean(summary.rolled_back) || results.some(item => ["blocked","unsupported","invalid"].includes(item.status));
     const changed = proposed.config !== current.config || JSON.stringify(proposed.context) !== JSON.stringify(current.context);
     candidate = {state:proposed,epoch,commandRevision:version,commands,canApply:!failed && changed};
-    const root = byId("sim-results");root.replaceChildren();
+    const root = byId("sim-results"), commandNodes = [];root.replaceChildren();
     for(const item of results) {
       const card = element("article",undefined,"sim-command-result " + (Object.hasOwn(outcomeNames,item.status) ? item.status : "invalid"));
       const head = element("div",undefined,"sim-command-result-head");
-      head.append(element("span",outcomeNames[item.status] || "无法判断","sim-result-badge"),element("code",item.command));
+      const code = element("code",item.command);
+      head.append(element("span",outcomeNames[item.status] || "无法判断","sim-result-badge"),code);
+      commandNodes.push(code);
       card.append(head,element("p",item.reason || "请核对命令的适用条件。"));
       if(item.suggestion) card.append(element("p","建议：" + item.suggestion,"sim-suggestion"));
       if(item.output) card.append(element("pre",item.output));
       if(item.rolled_back) card.append(element("p","整批回滚：此行也不会应用。","sim-rolled-back"));
       root.append(card);
     }
+    window.NetAuditHighlights?.decorateAll(commandNodes,{vendor:current?.vendor || "auto"});
     const message = failed ? "本批有命令未通过，整批配置和视图变更都不会应用。请根据下方理由修改后重试。" : changed ? "预览完成，当前练习副本尚未改变。核对差异后，点击「应用本次预览」。" : "查看完成，没有配置或视图变化，无需应用。";
     byId("sim-outcome").textContent = message;
     byId("sim-outcome").dataset.state = failed ? "blocked" : "ready";
