@@ -258,9 +258,10 @@ def notes(repository, tag, manifest, run_id, records_commit="main"):
 - 候选配置及备份导出会保留原有凭据，请按敏感文件保管；页面命令结果与差异脱敏，浏览器不持久保存配置。
 
 """
-    start_steps = (f"3. 浏览器打开后导入 UTF-8 备份，确认 {vendor_choices}；进入模拟练习。\n"
-                   "4. 输入中文目标生成草案，或在模拟命令行练习；查看结果、理由与差异，按需导出候选配置。\n"
-                   "5. 如需审查，主动审计候选配置，再导出 JSON、Markdown 或 HTML 报告。") if has_simulator else (
+    start_steps = (f"3. 浏览器打开后导入 UTF-8 备份，确认 {vendor_choices}，点击“载入模拟”。\n"
+                   "4. 输入中文目标并点击“生成命令草案”→“将草案放入命令区”；也可在模拟命令行直接输入命令。\n"
+                   "5. 点击“预览运行”，阅读结果、理由与差异，再点击“应用本次预览”；按需撤销、重置或导出模拟配置。\n"
+                   "6. 如需审查，点击“审查当前模拟配置”，再导出 JSON、Markdown 或 HTML 报告。未应用的预览不参与导出和审查。") if has_simulator else (
                    f"3. 浏览器打开后导入 UTF-8 配置，选择 {vendor_choices}，点击“开始审计”；也可先载入示例。\n"
                    "4. 查看发现与严重度，导出 JSON、Markdown 或 HTML 报告。")
     return f"""下载后即可使用的 Windows x64 便携版，配置处理在本机完成。

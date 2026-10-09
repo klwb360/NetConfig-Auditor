@@ -23,10 +23,10 @@ if not errorlevel 1 goto python
 python3 -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)" >nul 2>nul
 if not errorlevel 1 goto python3
 
-echo 错误：源码版需要 Python 3.10 或更新版本，当前未检测到可用版本。
-echo 普通用户请下载 Windows 便携 EXE ZIP 包，解压后双击 Start-NetAudit.bat。
-echo 便携包获取入口：https://github.com/klwb360/NetAudit/releases/latest
-echo 私人仓库需要先登录具有访问权限的 GitHub 账号。详见同目录使用说明。
+1>&2 echo 错误：源码版需要 Python 3.10 或更新版本，当前未检测到可用版本。
+1>&2 echo 普通用户请下载 Windows 便携 EXE ZIP 包，解压后双击 Start-NetAudit.bat。
+1>&2 echo 便携包获取入口：https://github.com/klwb360/NetAudit/releases/latest
+1>&2 echo 私人仓库需要先登录具有访问权限的 GitHub 账号。详见同目录使用说明。
 set "NETAUDIT_EXIT=2"
 goto finish
 
@@ -51,17 +51,17 @@ set "NETAUDIT_EXIT=%ERRORLEVEL%"
 goto finish
 
 :directory_error
-echo 错误：无法进入 NetAudit 所在目录。请将整个文件夹解压到可访问的位置。
+1>&2 echo 错误：无法进入 NetAudit 所在目录。请将整个文件夹解压到可访问的位置。
 set "NETAUDIT_EXIT=2"
 goto finish
 
 :source_error
-echo 错误：未找到 NetAudit.exe 或完整源码。请完整解压 Windows 便携 ZIP 包。
-echo 下载入口：https://github.com/klwb360/NetAudit/releases/latest
+1>&2 echo 错误：未找到 NetAudit.exe 或完整源码。请完整解压 Windows 便携 ZIP 包。
+1>&2 echo 下载入口：https://github.com/klwb360/NetAudit/releases/latest
 set "NETAUDIT_EXIT=2"
 
 :finish
 if "%NETAUDIT_EXIT%"=="0" exit /b 0
-echo NetAudit 已退出，退出码：%NETAUDIT_EXIT%。
+1>&2 echo NetAudit 已退出，退出码：%NETAUDIT_EXIT%。
 if "%NETAUDIT_FROM_EXPLORER%"=="1" pause
 exit /b %NETAUDIT_EXIT%
