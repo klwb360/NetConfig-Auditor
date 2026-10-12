@@ -333,7 +333,10 @@ class _Session:
         elif name in (("ip interface brief", "interfaces") if self.ios else ("ip interface brief", "interface brief")):
             output = "\n".join(f"{i.name}: 管理配置={'shutdown' if i.shutdown is True else 'no shutdown' if i.shutdown is False else '未显式配置'}; IPv4={','.join(i.addresses) or '未配置'}; 链路状态=未模拟" for i in cfg.interfaces.values()) or "输入配置未见接口定义。"
         elif name == ("ip route" if self.ios else "ip routing-table"):
-            output = "仅显示备份中的静态路由配置，不代表活动路由表：\n" + "\n".join(f"{r.destination} -> {r.next_hop or r.interface} (VRF {r.vrf})" for r in cfg.routes)
+            output = "仅显示备份中的静态路由配置，不代表活动路由表：\n" + "\n".join(
+                f"{r.destination} -> {r.next_hop or r.interface} (VRF {r.vrf})"
+                + (" [参数未完整建模，需人工复核]" if not r.complete else "")
+                for r in cfg.routes)
         elif name == ("access-lists" if self.ios else "acl all"):
             output = json.dumps(cfg.to_dict()["acls"], ensure_ascii=False, indent=2)
         else:

@@ -142,15 +142,42 @@ def _acl_rule(text: str, vendor: str, kind: str, seq: int, evidence: Evidence) -
     return rule
 
 
+def _interface_name(value: str) -> str:
+    # An invalid dotted address must never become a guessed interface name.
+    # Requiring a numeric interface identifier also excludes route modifiers.
+    prefix = (r"(?:Null|Ethernet|Eth|Et|FastEthernet|Fa|GigabitEthernet|Gi|GE|XGE|"
+              r"TenGigabitEthernet|Te|TwentyFiveGigE|FortyGigabitEthernet|Fo|HundredGigE|Hu|"
+              r"Vlan|Vlanif|Vlan-interface|Loopback|Lo|Tunnel|Tu|Port-channel|Po|"
+              r"Bridge-Aggregation|Route-Aggregation|Serial|Se|Dialer|Cellular|"
+              r"Virtual-Template|Virtual-Access)")
+    if not re.fullmatch(prefix + r"\d[\w./:-]*", value, re.IGNORECASE):
+        raise ValueError("未支持的出口接口或不合法的 IPv4 下一跳")
+    return value
+
+
+def _netmask_prefix(value: str) -> int:
+    mask = ipaddress.IPv4Address(value)
+    network = ipaddress.IPv4Network("0.0.0.0/" + str(mask))
+    if network.netmask != mask:
+        raise ValueError("需要连续子网掩码；不能使用 wildcard")
+    return network.prefixlen
+
+
 def _route(text: str, vendor: str, e: Evidence) -> Route:
     t = text.split()[2:]
     vrf = "default"
-    if t[0] in ("vrf", "vpn-instance"):
+    vrf_keyword = "vrf" if vendor in IOS_VENDORS else "vpn-instance"
+    if t[0] == vrf_keyword:
         vrf = t[1]
         t = t[2:]
     if "/" in t[0]:
+        mask = t[0].split("/", 1)[1]
+        if "." in mask:
+            _netmask_prefix(mask)
         destination = str(ipaddress.IPv4Network(t.pop(0), strict=False))
     else:
+        if "." in t[1]:
+            _netmask_prefix(t[1])
         destination = str(ipaddress.IPv4Network(t[0] + "/" + t[1], strict=False))
         t = t[2:]
     interface = hop = None
@@ -160,19 +187,53 @@ def _route(text: str, vendor: str, e: Evidence) -> Route:
         hop = str(ipaddress.IPv4Address(t[0]))
         t = t[1:]
     except ipaddress.AddressValueError:
-        interface = t.pop(0)
-        if t:
+        interface = _interface_name(t.pop(0))
+        if t and re.fullmatch(r"[\d.]+", t[0]) and "." in t[0]:
             try:
                 hop = str(ipaddress.IPv4Address(t[0]))
                 t = t[1:]
             except ipaddress.AddressValueError:
-                pass
+                raise ValueError("不合法的 IPv4 下一跳") from None
     distance = None
     if t and t[0].isdigit():
         distance = int(t.pop(0))
-    if "preference" in t:
-        distance = int(t[t.index("preference") + 1])
-    return Route(destination, hop, interface, vrf, distance, e)
+    if distance is None and vendor not in IOS_VENDORS and t and t[0] == "preference":
+        distance = int(t[1])
+        t = t[2:]
+    if distance is not None and not 1 <= distance <= 255:
+        raise ValueError("静态路由距离必须在 1–255 范围内")
+    return Route(destination, hop, interface, vrf, distance, e,
+                 complete=not t, unparsed_tokens=t)
+
+
+def _nat_port(value: str) -> str:
+    if not value.isascii() or not value.isdigit() or not 1 <= int(value) <= 65535:
+        raise ValueError("NAT 端口必须是 1–65535 范围内的整数")
+    return str(int(value))
+
+
+def _nat_pool(text: str, e: Evidence) -> tuple[str, dict]:
+    t = text.split()
+    prefix_length = None
+    if t[:3] == ["ip", "nat", "pool"]:
+        if len(t) != 8 or t[6] not in ("netmask", "prefix-length"):
+            raise ValueError("未支持或不完整的 NAT 地址池参数")
+        name, start, end = t[3], t[4], t[5]
+        if t[6] == "netmask":
+            prefix_length = _netmask_prefix(t[7])
+        else:
+            prefix_length = int(t[7])
+            if not 0 <= prefix_length <= 32:
+                raise ValueError("NAT 地址池前缀超出范围")
+    else:
+        if len(t) != 5 or t[:2] != ["nat", "address-group"]:
+            raise ValueError("未支持或不完整的 NAT 地址池参数")
+        name, start, end = t[2], t[3], t[4]
+    start_ip, end_ip = ipaddress.IPv4Address(start), ipaddress.IPv4Address(end)
+    if start_ip > end_ip:
+        raise ValueError("NAT 地址池范围倒置")
+    return name, {"start": str(start_ip), "end": str(end_ip),
+                  "prefix_length": prefix_length, "evidence": e}
 
 
 def _nat(text: str, interface: str | None, e: Evidence) -> NAT:
@@ -180,36 +241,126 @@ def _nat(text: str, interface: str | None, e: Evidence) -> NAT:
     n = NAT("other", interface, None, None, None, None, None, None, e)
     if text.startswith("ip nat inside source static "):
         n.kind = "static"
-        if t[5] in ("tcp", "udp"):
-            n.protocol, n.inside = t[5], t[6] + ":" + t[7]
-            n.outside, n.outside_port = t[8], t[9]
-        elif t[5] == "network":
+        t = t[5:]
+        if t[0] == "network":
+            n.complete = False
+            n.unparsed_tokens = t
+            return n
+        if t[0] in ("tcp", "udp"):
+            n.protocol = t.pop(0)
+        n.inside = str(ipaddress.IPv4Address(t.pop(0)))
+        if n.protocol:
+            n.inside += ":" + _nat_port(t.pop(0))
+        if t[0] == "interface":
+            t.pop(0)
+            n.outside_interface = _interface_name(t.pop(0))
+            # The external address and its resolution are not modeled.
             n.complete = False
         else:
-            n.inside, n.outside = t[5], t[6]
+            n.outside = str(ipaddress.IPv4Address(t.pop(0)))
+        if n.protocol:
+            n.outside_port = _nat_port(t.pop(0))
     elif text.startswith("ip nat inside source list "):
         n.kind, n.acl = "outbound", t[5]
-        if "pool" in t:
-            n.pool = t[t.index("pool") + 1]
-    elif text.startswith("nat outbound"):
+        t = t[6:]
+        target = t.pop(0)
+        if target == "pool":
+            n.pool = t.pop(0)
+        elif target == "interface":
+            n.outside_interface = _interface_name(t.pop(0))
+        else:
+            n.complete = False
+            t.insert(0, target)
+        if t and t[0] == "overload":
+            t.pop(0)
+    elif t[:2] == ["nat", "outbound"]:
         n.kind = "outbound"
-        if len(t) > 2 and t[2].isdigit():
-            n.acl = t[2]
-        if "address-group" in t:
-            n.pool = t[t.index("address-group") + 1]
+        t = t[2:]
+        if t and t[0].isdigit():
+            n.acl = t.pop(0)
+        if t and t[0] == "address-group":
+            t.pop(0)
+            n.pool = t.pop(0)
     elif text.startswith("nat server "):
         n.kind = "server"
-        if "protocol" in t:
-            n.protocol = t[t.index("protocol") + 1]
-        j, k = t.index("global") + 1, t.index("inside") + 1
-        n.outside, n.inside = t[j], t[k]
-        if j + 1 < len(t) and t[j + 1] != "inside":
-            n.outside_port = t[j + 1]
-        if k + 1 < len(t) and t[k + 1].isdigit():
-            n.inside += ":" + t[k + 1]
+        t = t[2:]
+        if t and t[0].isdigit():
+            t.pop(0)
+        if t[0] == "protocol":
+            t.pop(0)
+            protocol = t.pop(0)
+            n.protocol = {"6": "tcp", "17": "udp"}.get(protocol, protocol)
+            if n.protocol not in ("tcp", "udp"):
+                n.complete = False
+                n.unparsed_tokens = t
+                return n
+        if t.pop(0) != "global":
+            raise ValueError("NAT server 缺少 global 地址")
+        outside = t.pop(0)
+        if outside == "current-interface":
+            n.outside_interface = interface
+            n.complete = False
+        else:
+            n.outside = str(ipaddress.IPv4Address(outside))
+        if n.protocol and t[0] != "inside":
+            n.outside_port = _nat_port(t.pop(0))
+        if t.pop(0) != "inside":
+            raise ValueError("NAT server 缺少 inside 地址")
+        n.inside = str(ipaddress.IPv4Address(t.pop(0)))
+        if n.protocol and n.outside_port:
+            port = _nat_port(t.pop(0)) if t and t[0].isdigit() else n.outside_port
+            n.inside += ":" + port
     else:
         n.complete = False
+    n.unparsed_tokens = t
+    if t:
+        n.complete = False
     return n
+
+
+def _remove_nat(text: str, owner: str | None, vendor: str,
+                e: Evidence, mappings: list[NAT]) -> list[NAT]:
+    """Validate the platform's undo grammar before selecting any objects."""
+    t = text.split()
+    if vendor == "h3c" and t[:2] in (["nat", "server"], ["nat", "outbound"]):
+        if owner is None:
+            raise ValueError("接口 NAT 撤销需要明确的接口视图")
+        kind, t = t[1], t[2:]
+        if kind == "outbound":
+            acl = None
+            if t and t[0].isascii() and t[0].isdigit():
+                acl = str(int(t.pop(0)))
+                if not 2000 <= int(acl) <= 3999:
+                    raise ValueError("H3C NAT ACL 编号超出范围")
+            if t:
+                raise ValueError("未支持的 H3C NAT outbound 撤销参数")
+            # Comware selects the rule by ACL, not by its forward-only pool.
+            # An omitted ACL selects the one unfiltered rule on this interface.
+            return [n for n in mappings if not (n.complete and n.kind == "outbound"
+                    and n.interface == owner and n.acl == acl)]
+        protocol = None
+        if t and t[0] == "protocol":
+            t.pop(0)
+            value = t.pop(0)
+            protocol = {"6": "tcp", "17": "udp"}.get(value, value)
+            if protocol not in ("tcp", "udp"):
+                raise ValueError("未支持的 H3C NAT server 撤销协议")
+        if t.pop(0) != "global":
+            raise ValueError("NAT server 撤销缺少 global 地址")
+        outside = str(ipaddress.IPv4Address(t.pop(0)))
+        port = _nat_port(t.pop(0)) if t and protocol is not None else None
+        if t:
+            raise ValueError("未支持的 H3C NAT server 撤销参数")
+        # Unlike Huawei, Comware's undo identifies the public endpoint only.
+        key = (owner, protocol, outside, port)
+        return [n for n in mappings if not (n.complete and n.kind == "server"
+                and (n.interface, n.protocol, n.outside, n.outside_port) == key)]
+    removed = _nat(text, owner, e)
+    if not removed.complete:
+        raise ValueError("NAT 撤销参数未完整建模；保留已有映射")
+    command = " ".join(t)
+    return [n for n in mappings if not (n.complete and n.interface == owner
+            and " ".join(n.evidence.text.split()) == command)]
 
 
 def _architecture_redact(text: str) -> str:
@@ -513,17 +664,25 @@ def _parse_config(text: str, vendor: str = "auto") -> Config:
                 continue
             if inverse and inverse.startswith(("ip nat pool ", "nat address-group ")):
                 t = inverse.split()
+                expected = 4 if t[0] == "ip" else 3
+                if len(t) != expected:
+                    _nat_pool(inverse, e)
                 cfg.nat_pools.pop(t[3] if t[0] == "ip" else t[2], None)
                 cfg.recognized_lines += 1
                 continue
             if inverse and inverse not in ("ip nat inside", "ip nat outside") and inverse.startswith(("ip nat ", "nat outbound", "nat server")):
                 owner = context[1].name if context and context[0] == "interface" else None
-                cfg.nat = [n for n in cfg.nat if not (n.interface == owner and n.evidence.text.startswith(inverse))]
+                cfg.nat = _remove_nat(inverse, owner, vendor, e, cfg.nat)
                 cfg.recognized_lines += 1
                 continue
             if inverse and inverse.startswith(("ip route ", "ip route-static ")):
                 removed = _route(inverse, vendor, e)
-                cfg.routes = [r for r in cfg.routes if (r.destination, r.next_hop, r.interface, r.vrf) != (removed.destination, removed.next_hop, removed.interface, removed.vrf)]
+                if not removed.complete:
+                    warn(e, "静态路由撤销参数未完整建模；保留已有路由")
+                    continue
+                key = (removed.destination, removed.next_hop, removed.interface, removed.vrf, removed.distance)
+                cfg.routes = [r for r in cfg.routes if not r.complete or
+                              (r.destination, r.next_hop, r.interface, r.vrf, r.distance) != key]
                 cfg.recognized_lines += 1
                 continue
             if s.startswith(("hostname ", "sysname ")):
@@ -584,11 +743,13 @@ def _parse_config(text: str, vendor: str = "auto") -> Config:
                 cfg.routing_processes.append(proc)
                 context = ("routing", proc)
             elif s.startswith(("ip route ", "ip route-static ")):
-                cfg.routes.append(_route(s, vendor, e))
+                route = _route(s, vendor, e)
+                cfg.routes.append(route)
+                if not route.complete:
+                    warn(e, "静态路由参数未完整建模；禁用此路由的配置推断")
             elif s.startswith("ip nat pool ") or s.startswith("nat address-group "):
-                t = s.split()
-                name = t[3] if t[0] == "ip" else t[2]
-                cfg.nat_pools[name] = {"evidence": e}
+                name, pool = _nat_pool(s, e)
+                cfg.nat_pools[name] = pool
             elif s.startswith("ip nat ") and context is None:
                 n = _nat(s, None, e)
                 cfg.nat.append(n)

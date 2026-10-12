@@ -166,6 +166,8 @@ class ACLChecks(GenericPlugin):
                              f"{v.name} 引用 ACL {name}，输入中未见定义。", "管理来源限制可能没有实现。",
                              "检查配置完整性与 ACL 引用。", v.evidence)
         for n in c.nat:
+            if not n.complete:
+                continue
             if n.acl:
                 refs.setdefault(n.acl, []).append(("nat-selection", n.evidence))
         for name, acl in c.acls.items():
@@ -236,12 +238,14 @@ class NetworkChecks(GenericPlugin):
                          "可能产生地址冲突或不可预期的选路；anycast/借用地址设计需单独核对。",
                          "确认冗余/anycast 设计后修正误配地址。", [x.evidence[0] for x in owners], "needs-review")
         for r in c.routes:
-            if r.next_hop and (r.vrf, r.next_hop) in address_owners:
+            if r.complete and r.next_hop and (r.vrf, r.next_hop) in address_owners:
                 self.add("ROUTE-SELF-NEXTHOP", "high", "routing", "静态路由下一跳指向本机",
                          f"{r.destination} 的下一跳 {r.next_hop} 等于同一 VRF 的本机接口地址。",
                          "路由可能无法生效或造成转发异常。", "根据拓扑核对正确邻居地址、递归解析与出口接口。", [r.evidence])
         # Multiple routes for one prefix can be valid ECMP/floating routes. No blanket alarm.
         for n in c.nat:
+            if not n.complete:
+                continue
             if n.acl and n.acl not in c.acls:
                 self.add("NAT-ACL-UNDEFINED", "high", "nat", "NAT 引用未定义 ACL",
                          f"NAT 引用 ACL {n.acl}，输入中未见定义。", "NAT 选流可能不符合预期或无法生效。",

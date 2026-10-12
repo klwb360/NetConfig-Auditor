@@ -67,6 +67,8 @@ class Route:
     vrf: str
     distance: int | None
     evidence: Evidence
+    complete: bool = True
+    unparsed_tokens: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -81,6 +83,8 @@ class NAT:
     outside_port: str | None
     evidence: Evidence
     complete: bool = True
+    outside_interface: str | None = None
+    unparsed_tokens: list[str] = field(default_factory=list)
 
 
 @dataclass
