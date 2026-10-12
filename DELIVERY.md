@@ -1,10 +1,39 @@
-# NetConfig Auditor v1.1.0 交付状态
+# NetConfig Auditor v1.1.0 交付
 
-2026-10-12：项目已迁入公开 [klwb360/NetConfig-Auditor](https://github.com/klwb360/NetConfig-Auditor)。本次新增批量CLI、多编码、来源追溯、独立金标准和量化CI，修复路由/NAT完整性、H3C短undo与Windows BAT执行问题。[PR #1](https://github.com/klwb360/NetConfig-Auditor/pull/1)列出新增、修复和保留模块。
+2026-10-12：[PR #1](https://github.com/klwb360/NetConfig-Auditor/pull/1)已合并，本轮新增、修复和验证说明均已标注。正式[v1.1.0 Release](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v1.1.0)已公开且为latest。
 
-最新源码及Windows冻结构建已验证，[验收记录](docs/acceptance/v1.1.0/README.md)保存真实计数、覆盖、50案例指标和环境边界。主分支正式1.1.0Release正在收尾，完成后此处更新下载入口；下方v1.0.1与更早章节是保留的历史记录，均不包含本次批量功能。
+**[推荐便携ZIP](https://github.com/klwb360/NetConfig-Auditor/releases/download/v1.1.0/NetAudit-1.1.0-windows-x64-db690b04742d-portable.zip)** · [单EXE配套ZIP](https://github.com/klwb360/NetConfig-Auditor/releases/download/v1.1.0/NetAudit-1.1.0-windows-x64-db690b04742d-onefile.zip) · [独立EXE](https://github.com/klwb360/NetConfig-Auditor/releases/download/v1.1.0/NetAudit-1.1.0-windows-x64-db690b04742d-onefile.exe)。
 
-旧版本七个Release和21附件已逐字节迁入[公开发行列表](https://github.com/klwb360/NetConfig-Auditor/releases)，历史章节的旧NetAudit下载地址可将仓库名替换为NetConfig-Auditor；旧Actions运行链接只作为历史出处保留。旧仓库清理状态见[项目状态](PROJECT_STATUS.md)，不能把迁移完成等同于删除完成。
+## 本轮新增和修复
+
+新增离线批量CLI、多编码严格导入、配置文件/哈希/编码/原行号追溯、逐设备及汇总JSON/HTML、50份独立合成金标准与量化门禁、408笔记和24项目问答。修复路由/NAT完整性与非法参数、接口NAT伪映射、精确no/undo和H3C短撤销、Windows BAT CRLF、py launcher隔离、gold源码打包与旧版本说明兼容。
+
+三厂商基础解析、锐捷扩展、35条现有规则、Web/单文件审计/模拟学习/STP/OSPF/情报/可选AI和许可证直接复用。[逐项完成度](docs/FEATURE_MATRIX.md) · [下一阶段](docs/NEXT_PHASE.md)。
+
+## 实际构建与验证
+
+- 标签及EXE固定源码：`db690b04742d953b8d067e50332d14bef0b2bccb`。
+- [Windows构建38263182407](https://github.com/klwb360/NetConfig-Auditor/actions/runs/38263182407)：Windows Server2022 x64、Python3.12.10、PyInstaller6.22.3；471应用测试/506子测试、28真实进程检查、独立clean-runtime两种包各50文件及多编码/报告/来源共6检查成功。
+- [Linux38263155318](https://github.com/klwb360/NetConfig-Auditor/actions/runs/38263155318)：3.10/3.12/3.13每版本470通过、1项Windows实际BAT执行跳过、506子测试；74发行工具守卫成功。
+- 核心Python行覆盖93.10%、分支88.17%、综合91.41%，80%门禁通过。50份冻结合成金标准字段1870/1870、TP26/FP0/FN0，精确率/召回率100%，仅说明已标注支持范围。
+- [正式发布38263905711](https://github.com/klwb360/NetConfig-Auditor/actions/runs/38263905711)：74守卫、九文件及源码/资源/SHA完整校验、永久归档回读、三个运行附件上传后的下载SHA回验通过。
+- [永久发行档案](docs/releases/v1.1.0/README.md)保留原始manifest/SHA/三份smoke；[独立运行与汇总](docs/acceptance/v1.1.0/final-main/)另行保存，原始档案未修改。
+
+| 运行文件 | SHA256 |
+|---|---|
+| `NetAudit-1.1.0-windows-x64-db690b04742d-portable.zip` | `28b3d7b206367d22f0ac2b49d37db9274ceab7289bf6aff378d8ea2d9ce6f159` |
+| `NetAudit-1.1.0-windows-x64-db690b04742d-onefile.zip` | `c0e5eb8672d263b82bd9b3398bf04a0e4f97dbeb88551c04056a5d32414245a1` |
+| `NetAudit-1.1.0-windows-x64-db690b04742d-onefile.exe` | `e9c76cec0e010d470e459d6b1e4acc6aac41630d59a4b95f82d63e7bd63ff569` |
+
+## 使用和边界
+
+解压便携ZIP，双击`Start-NetAudit.bat`或`NetAudit.exe`启动既有单文件网页；关闭服务需回到启动窗口Ctrl+C。新批量入口使用CLI：`NetAudit.exe audit-batch 配置目录 --out-dir 报告目录`，输入/输出目录须互不包含。网页导入仍是单文件UTF8。
+
+Windows11本机构建两种EXE各50金标准也已验证，准确源提交18f8550保留在验收记录。CI只证明移除标准CPython缓存并限制PATH，不能证明整个镜像没有其它解释器。真实Explorer/浏览器可视交互、普通非管理员账户、独立物理无Python桌面和真实设备效果仍待人工验收；未知配置保持需复核，无告警不等于安全。
+
+旧七个Release/21附件已按原字节迁入[公开发行列表](https://github.com/klwb360/NetConfig-Auditor/releases)并完整备份。用户选择自行删除旧NetAudit，工具未执行删除；Codex-code不属于清理范围。
+
+以下保留原v1.0.1和更早的历史记录。旧版本不包含本轮批量功能；旧NetAudit下载地址可将仓库名替换为NetConfig-Auditor，旧Actions链接仅作为当时出处。
 
 # NetAudit Windows 下载与交付检查点
 

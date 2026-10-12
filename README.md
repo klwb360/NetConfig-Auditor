@@ -13,7 +13,7 @@
 - **量化验收**：50 份独立人工标注合成配置，字段准确率、规则精确率/召回率与未知项单列；pytest 和覆盖率门禁。
 - **学习与恢复**：408 笔记、24 道项目问答、演示案例、状态文件与逐步恢复记录。
 
-当前源码版本为 1.1.0。历史 [v1.0.1 Windows 下载](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v1.0.1) 保留原字节，**不含本轮批量功能**。新版本运行包与实际验证结果以 [交付记录](DELIVERY.md) 和 [Windows 构建](https://github.com/klwb360/NetConfig-Auditor/actions/workflows/netaudit-windows.yml) 为准。
+**[正式v1.1.0 Windows下载](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v1.1.0)** 已发布，包含本轮批量功能。历史v1.0.1及更早版本保留原字节。实际验证、环境边界和校验值见[交付记录](DELIVERY.md)，[逐项完成度](docs/FEATURE_MATRIX.md)与[下一阶段](docs/NEXT_PHASE.md)可用于恢复工作。
 
 ## 源码与命令行
 

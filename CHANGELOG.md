@@ -2,6 +2,8 @@
 
 ## 1.1.0 — 2026-10-12
 
+已公开[正式发行](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v1.1.0)，源码db690b0固定；Windows38263182407、Linux38263155318、发布38263905711均成功，运行附件下载SHA回验通过。
+
 - 迁入公开NetConfig-Auditor，保留全部NetAudit历史、七个旧标签、七个旧Release与21原始运行附件。
 - 新增离线批量CLI、逐文件失败隔离、多编码严格导入、相对文件名/编码/SHA256/原始行号追溯、逐设备和汇总JSON/HTML。
 - 修复路由/NAT完整性、非法参数、接口NAT伪映射、no/undo精确处理与H3C短撤销；未知扩展保持需复核。

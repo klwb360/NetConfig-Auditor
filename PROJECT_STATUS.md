@@ -4,7 +4,7 @@
 
 - 日期：2026-10-12（Asia/Shanghai）。
 - 仓库：公开 `klwb360/NetConfig-Auditor`；PR [#1](https://github.com/klwb360/NetConfig-Auditor/pull/1)。
-- 实施分支（已合并至main）：`feat/audit-acceptance-and-migration`；应用最终验收提交 `caf3717a131f6ca7cd8c6b477628ba528a6b129e`。
+- PR分支已合并至main；正式v1.1.0构建源码 `db690b04742d953b8d067e50332d14bef0b2bccb`，固定发行档案归档提交45f3689。
 - 迁移基础：NetAudit `535653cd580dc497429fb83200e93a8349bc707d`，保留全部历史、七个标签、GPL 许可证和上游归属。
 - PR #1已合并（eae9be5）。用户最新选择自行删除旧 `klwb360/NetAudit`，工具不再执行删除；备份已保留。
 - `Codex-code` 不属于本次删除对象。
@@ -18,7 +18,7 @@
 | 批量CLI、编码、来源追溯 | 已实现并通过验证 | 50配置批量、单文件失败隔离、UTF8/GB18030/UTF16 BOM、来源/哈希/行号、JSON/HTML |
 | 独立标注与CI | 已实现并通过验证 | 50例、1870/1870字段、TP26/FP0/FN0；Windows471+506；Linux每版本470+1跳过+506 |
 | Windows冻结发行与学习材料 | 已实现并通过验证，人工桌面项待验收 | Windows Server28真实进程检查+清理CPython缓存后6检查；Windows11两种EXE各50例；408笔记、24问答与演示 |
-| PR、公开新版Release与旧仓库删除 | 交付收尾中 | PR已合并；公开1.1.0待最终主分支构建发布；旧仓库由用户自行删除 |
+| PR、公开新版Release与旧仓库清理 | 软件交付完成，清理由用户执行 | PR已合并；公开v1.1.0已正式发布，三个附件下载SHA回验；旧库由用户自行删除 |
 
 ## 指标边界
 
@@ -33,4 +33,4 @@
 
 全部处理离线，不连接或修改真实设备。保留原单文件报告兼容、许可证与来源，指标阈值不降低。每步运行适当测试、记录问题、更新本文件、保存检查点并提交。
 
-先读取本文件、`docs/IMPLEMENTATION_PLAN.md`、最新 `docs/checkpoints/`，以及 `docs/acceptance/v1.1.0/` 的固定验收证据；接着完成公开发行；旧仓库清理由用户自行执行。根目录发行工具74测试已通过，实际Linux守卫待运行。
+先读取本文件、最新检查点06及 `docs/NEXT_PHASE.md`。正式发行已完成：Windows38263182407、Linux38263155318、发布38263905711全部成功；74工具守卫已在三版本Linux实际通过。继续补人工Windows环境验收和独立复杂语法样本；旧仓库清理由用户自行执行。

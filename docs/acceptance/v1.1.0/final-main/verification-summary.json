@@ -1,0 +1,53 @@
+{
+  "source_commit": "db690b04742d953b8d067e50332d14bef0b2bccb",
+  "windows_run_id": 38263182407,
+  "linux_run_id": 38263155318,
+  "windows_artifact_id": 11752764338,
+  "windows_artifact_sha256": "1577e12cc6c605e47ab5a689e98775b8d52ad4b0127a69253e6835f7ae97bba2",
+  "clean_runtime_artifact_id": 11752954642,
+  "clean_runtime_artifact_sha256": "68d60cd862c858dd4ada5a4720cea4edb5b33369365b6ac3146bc362d81f0372",
+  "original_files_verified": 9,
+  "process_checks": {
+    "source": 10,
+    "onedir": 9,
+    "onefile": 9
+  },
+  "clean_runtime_checks": 6,
+  "windows_tests_passed": 471,
+  "subtests_passed": 506,
+  "linux_tests_per_python": {
+    "passed": 470,
+    "skipped": 1,
+    "subtests_passed": 506
+  },
+  "release_tools_tests_passed": 74,
+  "runtime_artifacts": [
+    {
+      "file": "NetAudit-1.1.0-windows-x64-db690b04742d-portable.zip",
+      "size_bytes": 10940702,
+      "sha256": "28b3d7b206367d22f0ac2b49d37db9274ceab7289bf6aff378d8ea2d9ce6f159"
+    },
+    {
+      "file": "NetAudit-1.1.0-windows-x64-db690b04742d-onefile.zip",
+      "size_bytes": 10834267,
+      "sha256": "c0e5eb8672d263b82bd9b3398bf04a0e4f97dbeb88551c04056a5d32414245a1"
+    },
+    {
+      "file": "NetAudit-1.1.0-windows-x64-db690b04742d-onefile.exe",
+      "size_bytes": 9422502,
+      "sha256": "e9c76cec0e010d470e459d6b1e4acc6aac41630d59a4b95f82d63e7bd63ff569"
+    },
+    {
+      "file": "NetAudit-1.1.0-source-db690b04742d.zip",
+      "size_bytes": 1302475,
+      "sha256": "68d7f2dbe899231c228a53f054e008465829d4580f8c03d63e72cfb304342ee6"
+    }
+  ],
+  "passed": true,
+  "limits": [
+    "Clean runner removed standard CPython cache and restricted child PATH; other installed runtimes were not audited.",
+    "Explorer/default-browser visual interaction, non-administrator account and separate physical Python-free desktop remain manual acceptance.",
+    "Windows11 local gold acceptance used18f8550; final source application runtime is unchanged.",
+    "Gold metrics only cover the frozen synthetic supported scope."
+  ]
+}

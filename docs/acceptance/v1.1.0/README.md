@@ -1,6 +1,6 @@
 # v1.1.0 实际验收记录
 
-本目录保存本次源码、冻结EXE和CI验收证据；正式Release由主分支成功构建另行生成固定的 `docs/releases/v1.1.0/` 档案。
+本目录保存本次源码、冻结EXE和CI验收证据；正式[公开v1.1.0](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v1.1.0)已完成主分支db690b0构建，原始档案固定在[docs/releases/v1.1.0](../../releases/v1.1.0/README.md)，新的独立运行和汇总在[final-main](final-main/)。下方保留PR阶段的精确源码与早期Windows11证据，不能把两次产物SHA混用。
 
 | 验证 | 实际结果 |
 |---|---|
