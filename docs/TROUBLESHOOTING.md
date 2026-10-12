@@ -1,10 +1,10 @@
 # 故障排查
 
-先确认从 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest) 的 **Assets** 下载了 `*-portable.zip`，并完整解压一次。若使用开发或备份用的 Actions 产物，需要先解压外层 ZIP，再解压内部便携 ZIP。完整下载步骤见 [常见问题](FAQ.md)，实际校验与验收范围见 [交付记录](../DELIVERY.md)。
+先确认从 [最新 Release](https://github.com/klwb360/NetConfig-Auditor/releases/latest) 的 **Assets** 下载了 `*-portable.zip`，并完整解压一次。若使用开发或备份用的 Actions 产物，需要先解压外层 ZIP，再解压内部便携 ZIP。完整下载步骤见 [常见问题](FAQ.md)，实际校验与验收范围见 [交付记录](../DELIVERY.md)。
 
 ## 无法下载或解压后没有程序
 
-私人仓库需要登录有访问权限的 GitHub 账号。优先在 [v0.1.0 发布页](https://github.com/klwb360/NetAudit/releases/tag/v0.1.0) 的 **Assets** 下载便携 ZIP；访问受限时检查当前账号权限，不能通过公开访问获取私人资产。GitHub 自动生成的 “Source code” 只包含源码，不包含 Windows EXE。
+私人仓库需要登录有访问权限的 GitHub 账号。优先在 [v0.1.0 发布页](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v0.1.0) 的 **Assets** 下载便携 ZIP；访问受限时检查当前账号权限，不能通过公开访问获取私人资产。GitHub 自动生成的 “Source code” 只包含源码，不包含 Windows EXE。
 
 ## 双击后没有正常启动
 
@@ -61,6 +61,6 @@ Start-NetAudit.bat serve --port 9000 --no-browser
 
 ## 仍无法解决时如何反馈
 
-在有访问权限的 [仓库 Issues](https://github.com/klwb360/NetAudit/issues) 提供 Windows 版本、使用的文件名或源码提交、启动方式、实际提示与复现步骤。可附 SHA-256 校验结果及脱敏的最小配置样例；不要提交真实凭据、完整内部配置或未经检查的报告。
+在有访问权限的 [仓库 Issues](https://github.com/klwb360/NetConfig-Auditor/issues) 提供 Windows 版本、使用的文件名或源码提交、启动方式、实际提示与复现步骤。可附 SHA-256 校验结果及脱敏的最小配置样例；不要提交真实凭据、完整内部配置或未经检查的报告。
 
 目前真实验收环境为 Windows Server 2022 x64。Windows 10/11、普通非管理员账户、物理无 Python 电脑、真实 Explorer 双击与可视浏览器交互尚未实测，不能把当前记录视为这些环境的验收结论。详细边界见 [交付记录](../DELIVERY.md)。

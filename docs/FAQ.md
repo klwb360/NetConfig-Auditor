@@ -4,7 +4,7 @@
 
 ## 如何下载并开始使用？
 
-使用有访问权限的 GitHub 账号登录，点击 [v1.0.1 单 EXE](https://github.com/klwb360/NetAudit/releases/download/v1.0.1/NetAudit-1.0.1-windows-x64-fb5a64016f45-onefile.exe)，下载后双击即可打开本地网页。需要配套资料时下载 [便携 ZIP](https://github.com/klwb360/NetAudit/releases/download/v1.0.1/NetAudit-1.0.1-windows-x64-fb5a64016f45-portable.zip)，解压一次，进入文件夹双击 `Start-NetAudit.bat` 或 `NetAudit.exe`；不要在 ZIP 预览窗口内运行。网页默认进入配置练习，按下面步骤载入备份；也可切到“按需审查”直接审计原始备份。
+使用有访问权限的 GitHub 账号登录，点击 [v1.0.1 单 EXE](https://github.com/klwb360/NetConfig-Auditor/releases/download/v1.0.1/NetAudit-1.0.1-windows-x64-fb5a64016f45-onefile.exe)，下载后双击即可打开本地网页。需要配套资料时下载 [便携 ZIP](https://github.com/klwb360/NetConfig-Auditor/releases/download/v1.0.1/NetAudit-1.0.1-windows-x64-fb5a64016f45-portable.zip)，解压一次，进入文件夹双击 `Start-NetAudit.bat` 或 `NetAudit.exe`；不要在 ZIP 预览窗口内运行。网页默认进入配置练习，按下面步骤载入备份；也可切到“按需审查”直接审计原始备份。
 
 普通使用无需下载 GitHub 自动生成的 “Source code”。两个运行 ZIP 内的 `*-source-*.zip` 是分发所对应的完整源码，供查阅、修改与重建；Release 已移除重复的独立源码附件，版本标签仍固定到构建提交。
 
@@ -71,7 +71,7 @@ v1.0.1、v1.0.0、v0.2.3、v0.2.2、v0.2.1、v0.2.0、v0.1.0 均提供 `portable
 
 ## 为什么有的下载包需要解压两次？
 
-从 Release 下载的便携 ZIP 只需解压一次。开发或备份使用的 [Windows Actions 产物](https://github.com/klwb360/NetAudit/actions/workflows/netaudit-windows.yml) 有外层 ZIP，需先解压外层，再解压其中的 `portable.zip`，才能找到 EXE。Actions 产物有保留期限；Release 下载仍需要私人仓库访问权限。
+从 Release 下载的便携 ZIP 只需解压一次。开发或备份使用的 [Windows Actions 产物](https://github.com/klwb360/NetConfig-Auditor/actions/workflows/netaudit-windows.yml) 有外层 ZIP，需先解压外层，再解压其中的 `portable.zip`，才能找到 EXE。Actions 产物有保留期限；Release 下载仍需要私人仓库访问权限。
 
 ## portable 和 onefile 有什么区别？
 

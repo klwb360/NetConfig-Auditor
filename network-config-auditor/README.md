@@ -1,8 +1,12 @@
+# 1.1.0 批量审计与解析完整性更新
+
+本项目已迁入公开 NetConfig-Auditor。新增 audit-batch、严格多编码导入、文件路径/哈希/行号追溯、独立50配置金标准；修复路由/NAT条件丢失、NAT伪映射和H3C撤销语法。包名与 NetAudit 启动器保持兼容。使用与验证见 [公开仓库说明](../README.md)、[验收方法](../docs/ACCEPTANCE.md)和[检查点](../docs/checkpoints/)。
+
 # NetAudit · 网络配置学习与审计
 
 导入一台 Cisco、华为、H3C 或锐捷 RGOS 交换机/路由器的备份，在独立副本中练习配置：**中文目标或设备命令 → 预览结果、理由与差异 → 明确应用 → 撤销 / 重置 / 导出配置 → 按需审计**。原有六域架构检查、35 个规则 ID、CVE / KEV 核对、可选本机 AI 与 JSON / Markdown / HTML 报告继续提供；运行时仅使用 Python 标准库。
 
-**本页对应 v1.0.1 源码**。Windows 运行文件见 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest) 的 **Assets**：选择 `*-onefile.exe` 双击运行，或下载 `*-portable.zip` 解压后启动；模拟功能需要 **1.0.0 或更新**，厂商底色高亮需要 **1.0.1 或更新**，旧 v0.2.3 只有审计功能。实际发布状态、文件名、校验值与验收范围见在线 [仓库交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md)。
+**本页对应 v1.0.1 源码**。Windows 运行文件见 [最新 Release](https://github.com/klwb360/NetConfig-Auditor/releases/latest) 的 **Assets**：选择 `*-onefile.exe` 双击运行，或下载 `*-portable.zip` 解压后启动；模拟功能需要 **1.0.0 或更新**，厂商底色高亮需要 **1.0.1 或更新**，旧 v0.2.3 只有审计功能。实际发布状态、文件名、校验值与验收范围见在线 [仓库交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md)。
 
 本项目审计了 [pynipper-ng](https://github.com/syn-4ck/pynipper-ng)，保留并改写其插件基类，重建了三厂商解析、审计规则和报告模块。来源、固定提交和改动见 [NOTICE](NOTICE)；审计详情见 [代码审计报告](docs/UPSTREAM_AUDIT.md)。项目采用 GPL-3.0-only。
 

@@ -1,8 +1,8 @@
 # NetAudit Windows 使用说明
 
-**本页对应 v1.0.1 源码的使用说明**。在 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest) 的 **Assets** 选择 `*-onefile.exe`，下载后双击，无需解压或安装 Python；模拟功能需要 **1.0.0 或更新**，厂商底色高亮需要 **1.0.1 或更新**。实际发布状态、文件名和校验值以在线 [交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md) 为准。需要 BAT、说明和示例时使用便携 ZIP：
+**本页对应 v1.0.1 源码的使用说明**。在 [最新 Release](https://github.com/klwb360/NetConfig-Auditor/releases/latest) 的 **Assets** 选择 `*-onefile.exe`，下载后双击，无需解压或安装 Python；模拟功能需要 **1.0.0 或更新**，厂商底色高亮需要 **1.0.1 或更新**。实际发布状态、文件名和校验值以在线 [交付记录](https://github.com/klwb360/NetConfig-Auditor/blob/main/DELIVERY.md) 为准。需要 BAT、说明和示例时使用便携 ZIP：
 
-1. **下载**：登录有权访问私人仓库的 GitHub 账号，打开 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest)，在 **Assets** 下载名称含 `windows-x64` 和 `portable` 的 ZIP。各个正式版本的构建与验收记录保留在发布页，旧版本也保留下载。
+1. **下载**：登录有权访问私人仓库的 GitHub 账号，打开 [最新 Release](https://github.com/klwb360/NetConfig-Auditor/releases/latest)，在 **Assets** 下载名称含 `windows-x64` 和 `portable` 的 ZIP。各个正式版本的构建与验收记录保留在发布页，旧版本也保留下载。
 2. **解压**：从 Release 下载的便携 ZIP **解压一次**，找到 `Start-NetAudit.bat` 与 `NetAudit.exe`。建议选择自己的桌面或文档文件夹；中文和带空格的路径均支持。不要在 ZIP 预览窗口内直接运行。
 3. **双击**：打开解压后的文件夹，双击 `Start-NetAudit.bat` 或 `NetAudit.exe`。程序自动打开默认浏览器。若没有自动打开，复制启动窗口显示的 `http://127.0.0.1:端口` 地址到浏览器。
 4. **拖入配置**：将一份 UTF-8 配置拖入左侧配置文本区域，或点击“导入配置文件”。程序按内容识别 Cisco、华为、H3C 或锐捷 RGOS；无法可靠识别时手动选择。支持中文、空格与无扩展名文件，最大 2 MiB / 30000 行，一次只导入一个文件。也可粘贴配置，或先使用“载入示例”。
@@ -55,9 +55,9 @@ v0.2.2 Windows 包已包含以下修复：可选择“锐捷 RGOS”，识别已
 
 **单 EXE**：名称含 `windows-x64` 和 `onefile` 的 ZIP 内提供独立 `NetAudit.exe`，也有 BAT、示例、许可证及对应源码。该 EXE 可以单独运行；再次分发时请同时提供 ZIP 中的许可证、归属说明与对应源码。优先选择便携文件夹版本，启动更快，也便于排查问题。
 
-**Actions 备份下载**：[Windows 构建列表](https://github.com/klwb360/NetAudit/actions/workflows/netaudit-windows.yml) 仍提供成功构建的产物，有保留期限。Actions 下载包含外层 ZIP，先解压外层，再解压其中 `portable.zip`；Release 直接提供内部 ZIP，只需解压一次。两种入口以对应清单的源码提交和 SHA-256 为准。
+**Actions 备份下载**：[Windows 构建列表](https://github.com/klwb360/NetConfig-Auditor/actions/workflows/netaudit-windows.yml) 仍提供成功构建的产物，有保留期限。Actions 下载包含外层 ZIP，先解压外层，再解压其中 `portable.zip`；Release 直接提供内部 ZIP，只需解压一次。两种入口以对应清单的源码提交和 SHA-256 为准。
 
-**校验下载**：仓库 [发布档案](https://github.com/klwb360/NetAudit/tree/main/docs/releases) 中的 `SHA256SUMS.txt` 记录各版本文件的 SHA-256，构建清单记录源提交与实际环境；Actions 原始产物也包含这些资料。可在 PowerShell 使用 `Get-FileHash .\文件名.zip -Algorithm SHA256` 对比。
+**校验下载**：仓库 [发布档案](https://github.com/klwb360/NetConfig-Auditor/tree/main/docs/releases) 中的 `SHA256SUMS.txt` 记录各版本文件的 SHA-256，构建清单记录源提交与实际环境；Actions 原始产物也包含这些资料。可在 PowerShell 使用 `Get-FileHash .\文件名.zip -Algorithm SHA256` 对比。
 
 **源码包提示 Python 缺失**：源码版 BAT 需要 Python 3.10 或更新版本；若不希望安装 Python，请按第 1 步获取成功构建的便携 EXE 包。无需安装 Git、pip 或 PyInstaller。
 
@@ -73,4 +73,4 @@ NetAudit.exe audit "D:\网络配置\设备.cfg" --format json --out "D:\审计�
 
 `plan` / `simulate` 需 v1.0.0 或更新，标准输出为 JSON；模拟响应的 `config` 含完整原文和凭据，请勿记入公开日志。命令批次失败全部回滚，不写 `--out`，原始备份不会覆盖。`--context context.json` 可载入上次结果中的视图对象；继续练习需要同时使用上次接受的配置。
 
-传入参数时 BAT 不会暂停。退出码：0 成功，审计 1 表示达到指定严重度，2 表示输入/参数/文件错误、严格模式发现未建模行、模拟失败或草案尚未就绪。实际 Windows 环境与验证边界见 [交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md)，不能用源码测试代替 EXE 验收。支持范围和 GPL-3.0-only 来源说明见 README、LICENSE 与 NOTICE。
+传入参数时 BAT 不会暂停。退出码：0 成功，审计 1 表示达到指定严重度，2 表示输入/参数/文件错误、严格模式发现未建模行、模拟失败或草案尚未就绪。实际 Windows 环境与验证边界见 [交付记录](https://github.com/klwb360/NetConfig-Auditor/blob/main/DELIVERY.md)，不能用源码测试代替 EXE 验收。支持范围和 GPL-3.0-only 来源说明见 README、LICENSE 与 NOTICE。

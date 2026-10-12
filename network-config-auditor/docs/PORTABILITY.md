@@ -4,11 +4,11 @@
 
 v0.2.0 在原有便携入口上扩展六域架构、离线 CVE / KEV 和可选本机 AI，源码、onedir、onefile 三种运行形式使用相同审计流程。网页、情报快照和来源资料均需随包保留；资源路径不依赖当前目录，默认不联网、不向安装目录写运行数据。显式情报更新保存到用户指定路径或用户缓存/临时目录，Ollama 是可选外部本机服务，不影响无需 Python 的便携配置审计。
 
-[v0.2.0 Release](https://github.com/klwb360/NetAudit/releases/tag/v0.2.0) 已提供 9 个附件，实际 EXE 对应源码 `8a9840601d6c51dbdaff1fbbf62aeaf84cc0b490`。Windows Server 2022 x64 / Python 3.12.10 / PyInstaller 6.22.3 的 [构建 37120272682](https://github.com/klwb360/NetAudit/actions/runs/37120272682) 通过 **192 项单元测试和 28 项真实进程验收**（源码 10、onedir 9、onefile 9）。[Linux 构建 37120272642](https://github.com/klwb360/NetAudit/actions/runs/37120272642) 的 Python 3.10 / 3.12 / 3.13 检查通过，另有 Linux Chromium 24 项网页自动检查通过。[发布运行 37120600936](https://github.com/klwb360/NetAudit/actions/runs/37120600936) 通过 14 项发布保护测试，9 个附件上传后逐个下载回验。
+[v0.2.0 Release](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v0.2.0) 已提供 9 个附件，实际 EXE 对应源码 `8a9840601d6c51dbdaff1fbbf62aeaf84cc0b490`。Windows Server 2022 x64 / Python 3.12.10 / PyInstaller 6.22.3 的 [构建 37120272682](https://github.com/klwb360/NetAudit/actions/runs/37120272682) 通过 **192 项单元测试和 28 项真实进程验收**（源码 10、onedir 9、onefile 9）。[Linux 构建 37120272642](https://github.com/klwb360/NetAudit/actions/runs/37120272642) 的 Python 3.10 / 3.12 / 3.13 检查通过，另有 Linux Chromium 24 项网页自动检查通过。[发布运行 37120600936](https://github.com/klwb360/NetAudit/actions/runs/37120600936) 通过 14 项发布保护测试，9 个附件上传后逐个下载回验。
 
 真实 Ollama 模型推理与真实 NVD 产品适用记录尚未实测；AI 使用本机协议替身、NVD 使用合成格式用例验证。普通非管理员账户、物理无 Python 电脑、Windows 10/11、ARM64 和 Windows 真人桌面交互仍待验证，不能从自动进程测试推定通过。
 
-本页下方的旧提交、78 / 88 项测试和 25 项进程记录是 v0.1.0 历史验收。新版文件、环境、校验值与未测项以 [当前交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md) 和该构建报告为准；v0.1.0 保留下载，不覆盖已发布字节。
+本页下方的旧提交、78 / 88 项测试和 25 项进程记录是 v0.1.0 历史验收。新版文件、环境、校验值与未测项以 [当前交付记录](https://github.com/klwb360/NetConfig-Auditor/blob/main/DELIVERY.md) 和该构建报告为准；v0.1.0 保留下载，不覆盖已发布字节。
 
 ## 开始时的状态
 
@@ -53,7 +53,7 @@ Linux 源码单元测试、静态检查或打包入口检查不能代替 Windows
 - 原仓库源码提交 `741bb5a70e675e28735da1182ab0cc9f1de33773` 在 [Windows 构建 37100067081](https://github.com/klwb360/Codex-code/actions/runs/37100067081) 通过 78 项单元测试与 25 项实际进程验收。
 - 独立仓库迁移后源码提交 `16fb4254150f0cfd48014b3b628efc805dec0095` 在 [Windows 构建 37101723226](https://github.com/klwb360/NetAudit/actions/runs/37101723226) 再次通过 78 项单元测试与 25 项实际进程验收（源码 9、onedir 8、onefile 8）。环境为 Windows Server 2022 10.0.20348 AMD64、Python 3.12.10 x64、PyInstaller 6.22.3，runner image 20260927.320.1。
 - 独立仓库的 [Linux 构建 37101723192](https://github.com/klwb360/NetAudit/actions/runs/37101723192) 在 Python 3.10 / 3.12 / 3.13 上全部通过。
-- EXE、两个分发 ZIP 和对应源码已实际生成并下载校验，文件名、SHA-256、下载入口见 [交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md)。这份记录对应上述构建提交，后续文档更新不改变既有 EXE。
+- EXE、两个分发 ZIP 和对应源码已实际生成并下载校验，文件名、SHA-256、下载入口见 [交付记录](https://github.com/klwb360/NetConfig-Auditor/blob/main/DELIVERY.md)。这份记录对应上述构建提交，后续文档更新不改变既有 EXE。
 
 尚未实测普通非管理员 Windows 账户、物理无 Python 的独立电脑、Windows 10/11、ARM64、资源管理器真实双击、系统默认浏览器可视交互与文件选择/下载对话框。源码与自动化进程检查通过，不代表这些人工或设备环境已验收。
 
@@ -64,4 +64,4 @@ Linux 源码单元测试、静态检查或打包入口检查不能代替 Windows
 - 便携化源码初期检查：原有 58 项与新增 9 项无需 socket 的测试合计 67 项通过；当时沙箱未运行 HTTP 测试。这是初期部分测试记录，后续 Windows 完整测试集为 78 项。
 - 最终 Windows 环境、结果、产物名称和 SHA-256 已记录在对应产物的验收 JSON、`manifest.json`、`SHA256SUMS.txt` 与上列 Actions 日志中。
 
-普通用户操作见 [Windows 使用说明](WINDOWS.md)。下载私人仓库产物需要相应 GitHub 权限。旧 PR #1 已由仓库所有者合并；独立仓库迁移记录见 [MIGRATION.md](https://github.com/klwb360/NetAudit/blob/main/MIGRATION.md)。
+普通用户操作见 [Windows 使用说明](WINDOWS.md)。下载私人仓库产物需要相应 GitHub 权限。旧 PR #1 已由仓库所有者合并；独立仓库迁移记录见 [MIGRATION.md](https://github.com/klwb360/NetConfig-Auditor/blob/main/MIGRATION.md)。

@@ -2,7 +2,7 @@
 
 ## v1.0.1 Windows 构建与正式发布验收（2026-10-09）
 
-实际构建源码与标签为 `fb5a64016f4502666b1394ef57238f1518d8799b`，[v1.0.1](https://github.com/klwb360/NetAudit/releases/tag/v1.0.1) 已正式发布。分别核验源码、浏览器、Windows 冻结 EXE 与发布器，不能以源码通过推定 EXE 验收。
+实际构建源码与标签为 `fb5a64016f4502666b1394ef57238f1518d8799b`，[v1.0.1](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v1.0.1) 已正式发布。分别核验源码、浏览器、Windows 冻结 EXE 与发布器，不能以源码通过推定 EXE 验收。
 
 | 环境与检查 | 结果与证据 |
 |---|---|
@@ -35,7 +35,7 @@ Chromium 151 / Playwright 1.62 在 Linux 完成 185 项实际网页检查，含�
 
 ## v1.0.0 Windows 构建与正式发布验收（2026-10-09）
 
-实际构建源码与 Release 标签为 `e2b4efecdc2682db8cef49d369c6fb0c9114b8b0`，[v1.0.0](https://github.com/klwb360/NetAudit/releases/tag/v1.0.0) 已正式发布。源码、本地浏览器、Windows 冻结 EXE 与发布器分别核验，结果如下。
+实际构建源码与 Release 标签为 `e2b4efecdc2682db8cef49d369c6fb0c9114b8b0`，[v1.0.0](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v1.0.0) 已正式发布。源码、本地浏览器、Windows 冻结 EXE 与发布器分别核验，结果如下。
 
 | 环境与检查 | 结果与证据 |
 |---|---|
@@ -84,9 +84,9 @@ Linux / Python 3.12.14 的 272 项应用测试与 57 项发布工具测试通过
 
 同类风险在网页按规则、严重度、分类、确认程度与标题折叠，显示组数、发现项数和涉及处数。检查验证默认折叠、展开 / 收起全部、筛选后状态、不同 VLAN 的独立对象 / 证据 / 命令、已有后端合并结果、恶意文本安全显示、四厂商文件拖入及 JSON / Markdown / HTML 完整导出。原始发现、审计统计和报告数据保持完整；仅使用合成配置，无 JavaScript 错误或外部请求，测试服务正常退出且端口关闭。
 
-[正式发布运行](https://github.com/klwb360/NetAudit/actions/runs/37773236976) 通过 57 项保护测试、永久工程归档及三个运行附件上传后的下载回验，[v0.2.3](https://github.com/klwb360/NetAudit/releases/tag/v0.2.3) 已发布。独立核验九个原始产物、全部 ZIP CRC/SHA、onedir 129 / onefile 66 个包内校验、AMD64 PE、运行库、许可证、官方情报及 onefile CArchive 嵌入资源。124 个源码文件对应构建提交，其中 35 个逐字节一致、89 个文本仅发生 Windows CRLF 转换。三个网页资源与 Windows 实际服务及 Linux 浏览器检查使用的规范化文件一致。
+[正式发布运行](https://github.com/klwb360/NetAudit/actions/runs/37773236976) 通过 57 项保护测试、永久工程归档及三个运行附件上传后的下载回验，[v0.2.3](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v0.2.3) 已发布。独立核验九个原始产物、全部 ZIP CRC/SHA、onedir 129 / onefile 66 个包内校验、AMD64 PE、运行库、许可证、官方情报及 onefile CArchive 嵌入资源。124 个源码文件对应构建提交，其中 35 个逐字节一致、89 个文本仅发生 Windows CRLF 转换。三个网页资源与 Windows 实际服务及 Linux 浏览器检查使用的规范化文件一致。
 
-浏览器自动化和独立文件核验在 Linux 执行；EXE 运行检查来自真实 Windows runner。Windows 10/11、ARM64、普通非管理员账户、物理上未安装 Python 的独立电脑，以及 Windows Explorer 人工双击、系统默认浏览器可视交互与实际拖入仍未实测。冻结版通过限制 PATH、移除 Python 环境验证随包运行库，构建 runner 本身仍安装 Python。建议命令没有在真实设备执行；真实 Ollama 模型和实际产品 NVD 适用性仍待验证。 文件、SHA 与详细边界见[交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md)。
+浏览器自动化和独立文件核验在 Linux 执行；EXE 运行检查来自真实 Windows runner。Windows 10/11、ARM64、普通非管理员账户、物理上未安装 Python 的独立电脑，以及 Windows Explorer 人工双击、系统默认浏览器可视交互与实际拖入仍未实测。冻结版通过限制 PATH、移除 Python 环境验证随包运行库，构建 runner 本身仍安装 Python。建议命令没有在真实设备执行；真实 Ollama 模型和实际产品 NVD 适用性仍待验证。 文件、SHA 与详细边界见[交付记录](https://github.com/klwb360/NetConfig-Auditor/blob/main/DELIVERY.md)。
 
 ## v0.2.2 Windows 构建与发布验收（2026-10-08）
 
@@ -94,9 +94,9 @@ Linux / Python 3.12.14 的 272 项应用测试与 57 项发布工具测试通过
 
 三种运行形式验证四厂商和三格式报告、按内容识别与模糊时 `needs-manual`、RGOS VLAN 范围和同类聚合、完整命令脚本与独立模板、中文/空格路径、BAT/CLI 退出码及无暂停、端口冲突回退、静态资源、默认启动/浏览器调用、只读目录、完整流程及本机 AI 协议替身。18 份停服记录均无剩余进程、无强制清理且端口关闭；onefile 临时目录清理通过。
 
-[发布运行 37712979040](https://github.com/klwb360/NetAudit/actions/runs/37712979040) 通过 55 项保护测试、永久工程归档与三个运行附件上传后的下载回验；[v0.2.2](https://github.com/klwb360/NetAudit/releases/tag/v0.2.2) 正式发布。随后独立核验九个原始产物、全部 ZIP CRC/SHA、包内完整对应源码、运行库、AMD64 PE、许可与情报原字节，并直接提取 onefile CArchive 网页/情报/base_library。117 个源码文件与提交一致，其中 89 个文本仅发生 Windows CRLF 转换；冻结资源与实际 HTTP 服务字节按相同转换核对。
+[发布运行 37712979040](https://github.com/klwb360/NetAudit/actions/runs/37712979040) 通过 55 项保护测试、永久工程归档与三个运行附件上传后的下载回验；[v0.2.2](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v0.2.2) 正式发布。随后独立核验九个原始产物、全部 ZIP CRC/SHA、包内完整对应源码、运行库、AMD64 PE、许可与情报原字节，并直接提取 onefile CArchive 网页/情报/base_library。117 个源码文件与提交一致，其中 89 个文本仅发生 Windows CRLF 转换；冻结资源与实际 HTTP 服务字节按相同转换核对。
 
-Linux Chromium 的 85 项拖入追加检查使用与本次 EXE 相同的规范化网页和服务端源文件；此前 RGOS / 聚合为 184 项网页检查。浏览器自动化在 Linux 执行，独立产物核验不运行 Windows EXE。真正的 Windows EXE 进程验证由上方 runner 完成。建议命令仅经[官方参考核对](REMEDIATION.md)和离线回归，没有在真实设备执行。Windows 10/11、ARM64、普通账户、物理无 Python 电脑、Explorer 人工双击和实际 Windows 浏览器拖入仍未实测；真实 Ollama 模型与实际 NVD 产品适用性也待验证。详细文件、SHA 和边界见[交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md)。
+Linux Chromium 的 85 项拖入追加检查使用与本次 EXE 相同的规范化网页和服务端源文件；此前 RGOS / 聚合为 184 项网页检查。浏览器自动化在 Linux 执行，独立产物核验不运行 Windows EXE。真正的 Windows EXE 进程验证由上方 runner 完成。建议命令仅经[官方参考核对](REMEDIATION.md)和离线回归，没有在真实设备执行。Windows 10/11、ARM64、普通账户、物理无 Python 电脑、Explorer 人工双击和实际 Windows 浏览器拖入仍未实测；真实 Ollama 模型与实际 NVD 产品适用性也待验证。详细文件、SHA 和边界见[交付记录](https://github.com/klwb360/NetConfig-Auditor/blob/main/DELIVERY.md)。
 
 以下两节保留发布前在 Linux 的分阶段检查记录，当前 Windows 验收以上节为准。
 
@@ -132,13 +132,13 @@ Linux Chromium headless 的 **65 项实际网页检查**通过：六页签和 AR
 
 实际源码及 Release 标签对应 `befb38bbecbbaa9d0d97c48c922e50e18c42f462`。[Windows 构建 37136065995](https://github.com/klwb360/NetAudit/actions/runs/37136065995) 在 Windows Server 2022 10.0.20348 AMD64 / Python 3.12.10 x64 / PyInstaller 6.22.3 / runner image 20260927.320.1 通过 **192 项应用测试、28 项真实进程验收**（源码 10、onedir 9、onefile 9）。[Linux CI 37136065998](https://github.com/klwb360/NetAudit/actions/runs/37136065998) 的 Python 3.10 / 3.12 / 3.13 全部通过。
 
-[发布运行 37136432263](https://github.com/klwb360/NetAudit/actions/runs/37136432263) 的 14 项保护测试与全部 9 个附件下载回验通过，[v0.2.1](https://github.com/klwb360/NetAudit/releases/tag/v0.2.1) 已正式发布。实际下载后另行核对全部 ZIP CRC/SHA、78 个完整对应源码文件和 PNG、原许可证与官方情报字节、运行库、AMD64 PE；直接提取 onefile 内嵌的三个网页资源并确认与源码、onedir 和实际服务内容一致。Windows 继续检查路径、BAT/CLI、端口回退、只读目录、报告与流程、默认启动、退出和临时目录；全部停服无剩余进程/无强制清理/端口关闭。
+[发布运行 37136432263](https://github.com/klwb360/NetAudit/actions/runs/37136432263) 的 14 项保护测试与全部 9 个附件下载回验通过，[v0.2.1](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v0.2.1) 已正式发布。实际下载后另行核对全部 ZIP CRC/SHA、78 个完整对应源码文件和 PNG、原许可证与官方情报字节、运行库、AMD64 PE；直接提取 onefile 内嵌的三个网页资源并确认与源码、onedir 和实际服务内容一致。Windows 继续检查路径、BAT/CLI、端口回退、只读目录、报告与流程、默认启动、退出和临时目录；全部停服无剩余进程/无强制清理/端口关闭。
 
-新版本不覆盖 v0.2.0 或 v0.1.0。后续发布元数据及文档提交不改变对应 EXE；最终文件、SHA-256 与未测边界见 [交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md)。
+新版本不覆盖 v0.2.0 或 v0.1.0。后续发布元数据及文档提交不改变对应 EXE；最终文件、SHA-256 与未测边界见 [交付记录](https://github.com/klwb360/NetConfig-Auditor/blob/main/DELIVERY.md)。
 
 ## v0.2.0 已发布版本验收（2026-10-03）
 
-实际 EXE 源码与 Release 标签对应 `8a9840601d6c51dbdaff1fbbf62aeaf84cc0b490`；[v0.2.0 Release](https://github.com/klwb360/NetAudit/releases/tag/v0.2.0) 提供源码、onedir 与 onefile，共 9 个原始附件。后续发布元数据和文档提交不改变这次构建。
+实际 EXE 源码与 Release 标签对应 `8a9840601d6c51dbdaff1fbbf62aeaf84cc0b490`；[v0.2.0 Release](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v0.2.0) 提供源码、onedir 与 onefile，共 9 个原始附件。后续发布元数据和文档提交不改变这次构建。
 
 | 环境与检查 | 实际结果与证据 |
 |---|---|
@@ -154,7 +154,7 @@ Linux Chromium headless 的 24 项实际网页检查通过：文件导入、示�
 
 真实 CISA KEV 快照为 2026.10.02 / 1733 条，原始文件 SHA、来源和 CC0 许可证已核对。NVD 官方 API 在本次环境被网络代理返回 403；NVD 测试采用明确标注的合成适用条件，不能作为真实设备漏洞适用证明。AI 使用真实 loopback HTTP 协议测试服务，尚未运行实际 Ollama 模型；模型解释质量与真实设备整改均需另行验证。
 
-标准 0.2.0 wheel 构建与资源核对、Python 编译、JavaScript 语法和 3 项上游复现检查通过。上述本地检查与实际 Windows EXE 验收分别记录；最终文件、SHA-256 与未测项见 [交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md)。
+标准 0.2.0 wheel 构建与资源核对、Python 编译、JavaScript 语法和 3 项上游复现检查通过。上述本地检查与实际 Windows EXE 验收分别记录；最终文件、SHA-256 与未测项见 [交付记录](https://github.com/klwb360/NetConfig-Auditor/blob/main/DELIVERY.md)。
 
 首次 [Windows 检查 37119894388](https://github.com/klwb360/NetAudit/actions/runs/37119894388) 因 Git 检出转换 KEV 换行而触发官方文件 SHA 校验失败，未生成分发 EXE。项目 `.gitattributes` 保持情报数据及许可证的原始字节，并用 Windows `core.autocrlf=true` 检出模拟回归。数据校验继续要求完整原始 SHA；最终 EXE 验收以修复后的成功构建为准。
 
@@ -167,7 +167,7 @@ Linux Chromium headless 的 24 项实际网页检查通过：文件导入、示�
 | Windows Server 2022 10.0.20348 AMD64；Python 3.12.10 x64、PyInstaller 6.22.3；runner image 20260927.320.1 | 78 项单元测试、25 项实际进程验收通过（源码 9、onedir 8、onefile 8） | [Windows 构建 37101723226](https://github.com/klwb360/NetAudit/actions/runs/37101723226) |
 | Linux；Python 3.10 / 3.12 / 3.13 | 三个版本的 CI 检查全部通过 | [Linux 构建 37101723192](https://github.com/klwb360/NetAudit/actions/runs/37101723192) |
 
-Windows 验收覆盖三厂商、三种报告、中文与空格路径、BAT/CLI 退出码及无暂停、端口冲突回退、完整网页资源、无参数启动和浏览器调用、只读应用目录、退出后无遗留服务，以及 onefile 临时目录清理。下载后还核对了外层 ZIP 和所有产物 SHA-256、ZIP CRC、包内文件哈希、Windows x64 PE、对应源码与许可证。文件名、下载入口和校验值见 [交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md)。
+Windows 验收覆盖三厂商、三种报告、中文与空格路径、BAT/CLI 退出码及无暂停、端口冲突回退、完整网页资源、无参数启动和浏览器调用、只读应用目录、退出后无遗留服务，以及 onefile 临时目录清理。下载后还核对了外层 ZIP 和所有产物 SHA-256、ZIP CRC、包内文件哈希、Windows x64 PE、对应源码与许可证。文件名、下载入口和校验值见 [交付记录](https://github.com/klwb360/NetConfig-Auditor/blob/main/DELIVERY.md)。
 
 冻结版进程通过移除 Python 相关环境变量并限制 PATH，验证使用随包运行库；构建 runner 本身仍安装 Python。这不能等同于物理无 Python 电脑的实测。普通非管理员 Windows 账户、Windows 10/11、ARM64、资源管理器真实双击、系统默认浏览器可视交互及文件选择/下载对话框尚未实测。真实设备型号、软件版本和转发行为也未验收。
 

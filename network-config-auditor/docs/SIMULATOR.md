@@ -1,6 +1,6 @@
 # 配置模拟与学习练习
 
-NetAudit 自 v1.0.0 起可以在导入备份的副本上练习命令，解释当前能否执行、会改变什么，以及下一步应做什么。支持 Cisco、华为、H3C、锐捷 RGOS 已建模的配置语法，处理在本机完成。本页同时说明 v1.0.1 新增的厂商底色；可下载版本及实际验收范围以 [最新 Release](https://github.com/klwb360/NetAudit/releases/latest) 和[交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md)为准。
+NetAudit 自 v1.0.0 起可以在导入备份的副本上练习命令，解释当前能否执行、会改变什么，以及下一步应做什么。支持 Cisco、华为、H3C、锐捷 RGOS 已建模的配置语法，处理在本机完成。本页同时说明 v1.0.1 新增的厂商底色；可下载版本及实际验收范围以 [最新 Release](https://github.com/klwb360/NetConfig-Auditor/releases/latest) 和[交付记录](https://github.com/klwb360/NetConfig-Auditor/blob/main/DELIVERY.md)为准。
 
 ## 五步开始
 
