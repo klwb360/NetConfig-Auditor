@@ -130,7 +130,7 @@ class PublicationAPI:
 
 
 class BuildAPI:
-    repository = "owner/repo"
+    repository = "klwb360/NetConfig-Auditor"
 
     def __init__(self, expired=False):
         self.archive = bundle()
@@ -150,7 +150,7 @@ class BuildAPI:
         if kwargs.get("method"):
             raise AssertionError("Delivery preparation must not mutate Release or tags")
         if path == "":
-            return {"private": True}
+            return {"private": False, "full_name": self.repository}
         if path == "actions/runs/123":
             return self.run
         if path == "actions/runs/123/artifacts?per_page=100":

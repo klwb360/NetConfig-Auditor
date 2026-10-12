@@ -1,22 +1,17 @@
 name: NetAudit release
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/netaudit-release.yml
-      - .github/release-source.json
   workflow_dispatch:
     inputs:
       tag:
         description: Version tag matching the verified manifest; blank uses release-source.json
-        required: false
+        required: true
       run_id:
         description: Successful Windows workflow run ID; blank uses release-source.json
-        required: false
+        required: true
       source_commit:
         description: Full source commit of that Windows build; blank uses release-source.json
-        required: false
+        required: true
 
 permissions:
   contents: read

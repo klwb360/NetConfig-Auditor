@@ -66,7 +66,9 @@ class PipelinePackagingTests(unittest.TestCase):
             # The release source uses git archive. The same tracked attributes
             # and unchanged intelligence bytes must also reach that archive.
             tree = git("write-tree").decode().strip()
-            with zipfile.ZipFile(io.BytesIO(git("archive", "--format=zip", tree))) as archive:
+            # Keep archive byte expectations independent of system/global
+            # autocrlf; the checkout control above still explicitly tests true.
+            with zipfile.ZipFile(io.BytesIO(git("-c", "core.autocrlf=false", "archive", "--format=zip", tree))) as archive:
                 self.assertEqual(archive.read(".gitattributes"), attributes)
                 for name, expected in resources.items():
                     self.assertEqual(archive.read("netaudit/data/" + name), expected)

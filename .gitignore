@@ -5,10 +5,15 @@ __pycache__/
 *.egg-info/
 .coverage
 htmlcov/
+.pytest_cache/
+.superpowers/
+coverage.json
+coverage.xml
 
 # Local data and root-level generated output
 /configs/
 /reports/
+/network-config-auditor/reports/
 /build/
 /dist/
 

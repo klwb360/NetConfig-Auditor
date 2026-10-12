@@ -4,12 +4,26 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "network-config-auditor"
-version = "1.0.1"
+version = "1.1.0"
 description = "Offline network configuration learning simulator and evidence-based auditor"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "GPL-3.0-only"}
 dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest==9.1.1", "coverage==7.16.2"]
+
+[tool.coverage.run]
+branch = true
+source = ["netaudit"]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [project.scripts]
 netaudit = "netaudit.cli:main"

@@ -291,7 +291,7 @@ def notes(repository, tag, manifest, run_id, records_commit="main"):
 
 **推荐下载：[便携 ZIP]({base}/releases/download/{tag}/{portable})**（下方 Assets 中名称以 `-portable.zip` 结尾的文件）。
 
-1. 使用有权访问本私人仓库的 GitHub 账号下载便携 ZIP。
+1. 直接从本公开仓库下载便携 ZIP。
 2. 解压一次，双击文件夹中的 `Start-NetAudit.bat` 或 `NetAudit.exe`。
 {start_steps}
 
@@ -427,6 +427,13 @@ def prepare_delivery(api, config, tag, commit, run_id):
     return runtime, manifest, records_commit, from_records
 
 
+def validate_public_repository(api):
+    require(api.repository == "klwb360/NetConfig-Auditor", "Expected the authorized NetConfig-Auditor repository")
+    info = api.repo("")
+    require(info and info.get("full_name") == api.repository and info.get("private") is False,
+            "Expected the authorized public repository")
+
+
 def main():
     config = json.loads((Path(__file__).resolve().parents[1] / ".github/release-source.json").read_text())
     repository = os.environ.get("GITHUB_REPOSITORY", config["repository"])
@@ -437,7 +444,7 @@ def main():
     require(re.fullmatch(r"v\d+\.\d+\.\d+", tag) and re.fullmatch(r"[a-f0-9]{40}", commit)
             and re.fullmatch(r"\d+", run_id), "Invalid release inputs")
     api = GitHub(repository, os.environ.get("GITHUB_TOKEN", ""))
-    require(api.repo("")["private"] is True, "Expected the existing private repository")
+    validate_public_repository(api)
     runtime, manifest, records_commit, from_records = prepare_delivery(api, config, tag, commit, run_id)
     url = publish(api, tag, commit, runtime, notes(repository, tag, manifest, run_id, records_commit))
     print("Release: " + url)

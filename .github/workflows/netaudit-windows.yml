@@ -1,6 +1,11 @@
 name: NetAudit Windows portable
 
 on:
+  pull_request:
+    paths:
+      - network-config-auditor/**
+      - tools/clean_windows_runtime.ps1
+      - .github/workflows/netaudit-windows.yml
   push:
     branches: [main]
     paths:
@@ -37,7 +42,11 @@ jobs:
           python-version: "3.12.10"
           architecture: x64
       - name: Run source regression tests
-        run: python -m unittest discover -s tests -v
+        run: |
+          python -m pip install -e ".[test]"
+          python -m coverage run -m pytest -q
+          python -m coverage report --fail-under=80
+          python tools/benchmark_acceptance.py --out reports/acceptance.json
       - name: Verify vendor syntax classification
         run: node tests/vendor_syntax_cases.js
       - name: Build and verify source, onedir, then onefile
@@ -64,3 +73,26 @@ jobs:
           "Download: ${{ steps.upload.outputs.artifact-url }}" >> $env:GITHUB_STEP_SUMMARY
           "Artifact ID: ${{ steps.upload.outputs.artifact-id }}" >> $env:GITHUB_STEP_SUMMARY
           "GitHub artifact digest: ${{ steps.upload.outputs.artifact-digest }}" >> $env:GITHUB_STEP_SUMMARY
+
+  clean-runtime:
+    needs: windows-portable
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: NetAudit-windows-x64-${{ github.sha }}
+          path: ${{ runner.temp }}/netaudit-packages
+      - name: Verify frozen packages after removing runner CPython installs
+        shell: pwsh
+        run: ./tools/clean_windows_runtime.ps1 -PackageDirectory "$env:RUNNER_TEMP/netaudit-packages" -ReportPath "$env:RUNNER_TEMP/clean-runtime.json"
+      - name: Preserve clean runtime evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: clean-runtime-${{ github.sha }}
+          path: ${{ runner.temp }}/clean-runtime.json
+          if-no-files-found: warn
