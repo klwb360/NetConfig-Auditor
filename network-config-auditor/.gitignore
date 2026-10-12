@@ -5,6 +5,6 @@ __pycache__/
 build/
 dist/
 reports/
-configs/
+/configs/
 .coverage
 htmlcov/
