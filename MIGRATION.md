@@ -5,7 +5,7 @@
 - 七个历史Release、21运行附件共206493668字节已复制，并对旧附件、本地备份、新附件及新下载逐一核对SHA256。[固定迁移收据](docs/migration/legacy-release-receipt.json)可追溯旧/新asset ID。
 - 本地完整Git bundle、21附件和issues(0)/pulls(0)/branches(1)/Actions runs(34)元数据已备份在用户工作区outputs。Git bundle无外部前置依赖且已验证。
 - GPL许可证、NOTICE、上游归属、历史源码与验收档案保留。公开仓库只包含合成配置和审计测试，真实设备备份仍被忽略。
-- 用户已授权交付验证后删除旧NetAudit；当前删除未完成，需要GitHub删除权限或正常登录。Codex-code不属于删除范围。
+- 用户最新选择自行删除旧NetAudit，因此工具不再执行删除；备份已保留。Codex-code不属于删除范围。
 - PR [#1](https://github.com/klwb360/NetConfig-Auditor/pull/1)标注本次新增和修复；新验收见[固定证据](docs/acceptance/v1.1.0/README.md)。
 
 以下保留2026-10-03迁移历史。旧提交、校验值和运行地址只说明当时状态，最新公开迁移与交付以上方及PROJECT_STATUS为准。

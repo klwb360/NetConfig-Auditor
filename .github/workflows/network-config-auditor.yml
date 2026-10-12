@@ -3,10 +3,12 @@ on:
   push:
     paths:
       - 'network-config-auditor/**'
+      - 'tools/**'
       - '.github/workflows/network-config-auditor.yml'
   pull_request:
     paths:
       - 'network-config-auditor/**'
+      - 'tools/**'
       - '.github/workflows/network-config-auditor.yml'
 permissions:
   contents: read
@@ -32,6 +34,9 @@ jobs:
           python -m coverage json -o reports/coverage.json
       - name: Independent 50-configuration acceptance
         run: python tools/benchmark_acceptance.py --out reports/acceptance.json
+      - name: Publication and immutable legacy-record guards
+        working-directory: .
+        run: python -m unittest discover -s tools/tests -v
       - name: Verify vendor syntax classification
         run: node tests/vendor_syntax_cases.js
       - run: python tools/reproduce_upstream.py

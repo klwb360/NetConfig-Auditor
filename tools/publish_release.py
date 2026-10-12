@@ -214,6 +214,7 @@ def notes(repository, tag, manifest, run_id, records_commit="main"):
     has_rgos_remediation = version_parts >= (0, 2, 2)
     has_simulator = version_parts >= (1, 0, 0)
     has_vendor_highlighting = version_parts >= (1, 0, 1)
+    has_batch_auditing = version_parts >= (1, 1, 0)
     vendor_choices = "Cisco、华为、H3C 或锐捷 RGOS" if has_rgos_remediation else "Cisco、华为或 H3C"
     vendor_coverage = "四厂商" if has_rgos_remediation else "三厂商"
     commit = manifest["source"]["commit"]
@@ -281,6 +282,28 @@ def notes(repository, tag, manifest, run_id, records_commit="main"):
 - 高亮只提示语法归属，不代表命令安全、参数正确或真实设备能够执行。继续使用“预览运行”查看模拟前提与理由，需要时再审计。
 
 """
+    batch_features = "" if not has_batch_auditing else """
+### 批量审计、编码与解析完整性
+
+- CLI 新增 `audit-batch INPUT_DIR --out-dir OUTPUT_DIR`：逐文件失败隔离，导出逐设备与汇总 JSON / HTML；报告保留相对路径、原始文件 SHA-256、实际解码编码与证据原始行号。
+- 单文件审计和批量 CLI 按 BOM 识别 UTF-8 / UTF-16，再严格尝试 UTF-8 / GB18030；可用 `--encoding` 明确指定编码。无法解码的字节不替换或忽略。网页和模拟继续使用 UTF-8 备份，尚未加入网页批量导入或多编码文件导入。
+- 路由 / NAT 的未知尾部保留原文、标记待复核并禁用相关配置推断；地址、端口与 H3C 撤销命令按已支持语法校验，未建模变体需人工核对。工具不连接真实设备，不模拟转发结果；无告警不表示安全。
+
+### 独立金标准与 CI 范围
+
+- 50 份人工标注的合成配置包含 Cisco 18、Huawei 16、H3C 16；按冻结支持字段和对象级风险计分。字段准确率门槛 95%，风险 precision 门槛 90%，recall 与未知结论单列；有限合成样例的指标不能推广为全部配置或设备的覆盖率。
+- CI 配置 Python 3.10 / 3.12 / 3.13 回归与核心覆盖率 80% 门禁。Windows 托管验收另检查移除标准 CPython 缓存后的两种 EXE，在 System32-only PATH 下运行批量与 UTF-16 / GB18030 导入；具体执行结果和环境以该构建记录为准，受限 PATH 不能证明整机物理上未安装 Python。
+
+"""
+    download_step = ("1. 直接从本公开仓库下载便携 ZIP。" if has_batch_auditing else
+                     "1. 使用有权访问本私人仓库的 GitHub 账号下载便携 ZIP。")
+    validation_limits = (
+        "- 尚未人工验收资源管理器双击及系统默认浏览器可视交互、物理上未安装 Python 的独立电脑、普通非管理员账户或其他架构；真实设备命令接受性、运行状态及业务效果仍需设备验收。"
+        f"详细范围见[永久归档的构建与验收记录]({archive})中的 `manifest.json` 和三份 `smoke-*.json`，以及该次 CI 的独立验收记录。"
+        if has_batch_auditing else
+        "- 尚未人工验收资源管理器双击及默认浏览器界面、独立未安装 Python 的电脑、普通非管理员账户，也未实测 Windows 10/11 或其他架构。"
+        f"详细范围见[永久归档的构建与验收记录]({archive})中的 `manifest.json` 和三份 `smoke-*.json`。"
+    )
     start_steps = (f"3. 浏览器打开后导入 UTF-8 备份，确认 {vendor_choices}，点击“载入模拟”。\n"
                    "4. 输入中文目标并点击“生成命令草案”→“将草案放入命令区”；也可在模拟命令行直接输入命令。\n"
                    "5. 点击“预览运行”，阅读结果、理由与差异，再点击“应用本次预览”；按需撤销、重置或导出模拟配置。\n"
@@ -291,7 +314,7 @@ def notes(repository, tag, manifest, run_id, records_commit="main"):
 
 **推荐下载：[便携 ZIP]({base}/releases/download/{tag}/{portable})**（下方 Assets 中名称以 `-portable.zip` 结尾的文件）。
 
-1. 直接从本公开仓库下载便携 ZIP。
+{download_step}
 2. 解压一次，双击文件夹中的 `Start-NetAudit.bat` 或 `NetAudit.exe`。
 {start_steps}
 
@@ -299,14 +322,14 @@ def notes(repository, tag, manifest, run_id, records_commit="main"):
 
 `-onefile.zip` 提供单 EXE 与配套说明、示例、许可证和源码；`-onefile.exe` 可独立启动。再次分发仍需保留 GPL-3.0-only 许可证、归属说明与对应源码。普通用户无需下载 GitHub 自动生成的 “Source code”。
 
-{highlighting_features}{simulator_features}{features}{ui_features}{remediation_features}{theme_features}
+{batch_features}{highlighting_features}{simulator_features}{features}{ui_features}{remediation_features}{theme_features}
 
 ### 验证与来源
 
 - 源码提交：[`{commit}`]({base}/commit/{commit})；标签指向该构建提交。
 - [实际 Windows 构建与回归测试]({base}/actions/runs/{run_id})：{env['os']} / {env['architecture']}，Python {env['python']}，PyInstaller {manifest['build_dependencies']['pyinstaller']}。
 - 源码、onedir、onefile 共 {check_count} 项真实进程检查通过：中文及空格路径、端口回退、完整网页资源、{vendor_coverage}及三种报告、退出码、无暂停与服务清理。EXE 子进程 PATH 排除 Python；构建主机仍安装构建 Python。
-- 尚未人工验收资源管理器双击及默认浏览器界面、独立未安装 Python 的电脑、普通非管理员账户，也未实测 Windows 10/11 或其他架构。详细范围见[永久归档的构建与验收记录]({archive})中的 `manifest.json` 和三份 `smoke-*.json`。
+{validation_limits}
 - 发布复用已验收原始文件，下载回验通过后才公开 Release；没有重新构建或替换 EXE。
 
 ### 文件校验

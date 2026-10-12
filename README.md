@@ -52,7 +52,7 @@ node tests/vendor_syntax_cases.js
 
 验收阈值保持：支持字段准确率 >=95%、规则 precision >=90%、核心 Python 覆盖率 >=80%，recall 单列。合成数据上的分数不代表真实配置的普遍性能。[验收方法与范围](docs/ACCEPTANCE.md) · [数据集](network-config-auditor/benchmarks/) · [演示](docs/DEMO.md) · [408 笔记](docs/LEARNING_408.md) · [24 道问答](docs/PROJECT_QA.md)。
 
-Windows 构建分别验收源码、onedir 和 onefile；另外在独立 hosted Windows runner 中清除标准 CPython 安装缓存后检查冻结 EXE 的版本、50 文件批量、JSON/HTML 和来源追溯。实际执行结果以 CI 与交付记录为准；人工 Explorer 双击、Windows 10/11 桌面和普通账户仍需分别记录。
+Windows 构建分别验收源码、onedir 和 onefile；另外在独立 hosted Windows runner 中清除标准 CPython 安装缓存后检查冻结 EXE 的版本、50 文件批量、JSON/HTML 和来源追溯。实际执行结果以 CI 与交付记录为准；Windows Server CI 和 Windows11 冻结CLI已实测；人工 Explorer 双击、真实浏览器交互、普通账户及独立物理无Python桌面仍需分别验收。
 
 ## 数据保护与文档
 

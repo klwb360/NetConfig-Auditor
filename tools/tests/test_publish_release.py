@@ -568,6 +568,43 @@ class ReleaseNotesTests(unittest.TestCase):
                 rendered = p.notes("owner/repo", "v" + version, self.manifest(version), "123")
                 self.assertEqual(hashlib.sha256(rendered.encode()).hexdigest(), expected)
 
+    def test_legacy_highlighting_notes_preserve_the_original_bytes(self):
+        # Derived from fb5a640's original publisher with the same fixed fixture.
+        rendered = p.notes("owner/repo", "v1.0.1", self.manifest("1.0.1"), "123")
+        self.assertEqual(hashlib.sha256(rendered.encode()).hexdigest(),
+                         "b8e7688560649b27ca91b067ecd8d88d33deb30ec0dbba270abc40a720844450")
+
+    def test_new_auditor_notes_explain_public_batch_decoding_and_metrics(self):
+        for version in ("1.1.0", "1.2.0"):
+            with self.subTest(version=version):
+                manifest = self.manifest(version)
+                original = json.dumps(manifest, sort_keys=True)
+                text = p.notes("klwb360/NetConfig-Auditor", "v" + version, manifest, "123")
+                for expected in ("直接从本公开仓库下载", "audit-batch INPUT_DIR --out-dir OUTPUT_DIR",
+                                 "逐文件失败隔离", "UTF-16", "GB18030", "--encoding", "相对路径",
+                                 "SHA-256", "原始行号", "JSON / HTML", "未知尾部", "禁用相关配置推断",
+                                 "50", "人工标注", "字段准确率", "95%", "precision", "90%",
+                                 "recall", "80%", "CLI", "网页和模拟", "UTF-8"):
+                    self.assertIn(expected, text)
+                self.assertNotIn("使用有权访问本私人仓库", text)
+                self.assertEqual(json.dumps(manifest, sort_keys=True), original)
+
+    def test_new_auditor_runtime_notes_keep_validation_boundaries_explicit(self):
+        text = p.notes("owner/repo", "v1.1.0", self.manifest("1.1.0"), "123")
+        for expected in ("标准 CPython 缓存", "System32", "构建记录", "物理上未安装 Python",
+                         "普通非管理员账户", "真实设备", "无告警不表示安全"):
+            self.assertIn(expected, text)
+        self.assertNotIn("也未实测 Windows 10/11", text)
+        self.assertEqual(len([line for line in text.splitlines() if line.startswith("| `NetAudit-")]), 3)
+
+    def test_legacy_notes_do_not_gain_new_auditor_feature_claims(self):
+        for version in ("0.1.0", "0.2.0", "0.2.1", "0.2.2", "0.2.3", "0.3.0", "1.0.0", "1.0.1"):
+            with self.subTest(version=version):
+                text = p.notes("owner/repo", "v" + version, self.manifest(version), "123")
+                self.assertIn("使用有权访问本私人仓库", text)
+                for new_feature in ("audit-batch", "GB18030", "标准 CPython 缓存", "公开仓库"):
+                    self.assertNotIn(new_feature, text)
+
     def test_simulator_notes_explain_learning_flow_and_limits(self):
         rendered = p.notes("owner/repo", "v1.0.0", self.manifest("1.0.0"), "123")
         for expected in ("配置模拟与学习练习", "中文目标", "模拟命令行", "整批配置与视图原子回滚",

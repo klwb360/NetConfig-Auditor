@@ -1,3 +1,20 @@
+# 公开NetConfig Auditor发行流程
+
+当前授权目标是公开 `klwb360/NetConfig-Auditor`，发布器会核验仓库名称及public状态。Windows版本仍沿用 `NetAudit.exe` 和 `netaudit` 命令名以兼容已有用户。
+
+1. 在主分支更新应用版本，完成pytest、覆盖率>=80%、50例独立金标准和Windows构建。
+2. 等待 `netaudit-windows.yml` 的windows-portable与clean-runtime全部成功；记录source commit、run ID和artifact SHA。
+3. 手动运行 `netaudit-release.yml`，明确填写tag、成功run ID及40位source commit。首次发布必须使用同一仓库主分支push或workflow_dispatch构建；不得使用PR产物。
+4. 发布器运行工具保护测试，核对九个原始文件、源码/资源、CRC和SHA，将记录按原字节固定到 `docs/releases/<tag>/`，并回读核对。
+5. 发布器只上传便携ZIP、单EXE配套ZIP与独立EXE三个运行附件；逐个下载回验后才将草稿公开并设为latest。运行ZIP保留对应源码和许可。
+6. 更新README、DELIVERY、CHANGELOG、PROJECT_STATUS及检查点，注明新增/修复、实际证据和人工边界。
+
+旧 `.github/release-source.json` 的v1.0.1来源留作历史标记，首次1.1.0须显式提供本公开仓库新的三项输入，不沿用旧私有run/artifact。历史 `curate_releases.py` 及配置仅保留旧版本的资产保护规则；curation工作流已改为仅手动且只允许原私有仓库，不自动作用于新公开仓库，不能用它整理迁入后的新asset ID。
+
+正式发布只证明已记录范围：冻结EXE的独立运行、批量、报告及来源追溯已验证；物理无Python桌面、普通账户、人工Explorer及实际浏览器交互仍需单独验收。CI清理标准CPython缓存和限制PATH不等于证明整机所有解释器不存在。
+
+以下保留旧NetAudit发行流程历史，当中的“私人仓库”、资产ID和旧运行地址仅描述原版本。
+
 # 发布 Windows 便携版
 
 发布使用 [`NetAudit release` 工作流](../.github/workflows/netaudit-release.yml)和 [`tools/publish_release.py`](../tools/publish_release.py)，校验已经通过 Windows 验收的完整原始产物，将工程记录永久归档，再把三个运行文件上传为 Release。发布不重新构建或替换 EXE。仓库现为公开，下载 Release 运行附件无需仓库访问授权。
