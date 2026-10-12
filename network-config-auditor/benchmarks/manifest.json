@@ -1,0 +1,734 @@
+{
+  "dataset_id": "campus-synthetic-gold-v1.1",
+  "schema_version": "1.0",
+  "scope": "50份按厂商真实CLI语法人工合成的校园网络配置片段；未采集、未连接或验证实设备。仅衡量冻结支持字段与列出的规则，不能外推为所有平台、版本或生产网络的普适性能。",
+  "gold_provenance": "author_fixtures.py逐场景人工指定配置和语义值；不导入、调用或复制当前parser/rules输出。expected JSON在首次测量前写入并由SHA256冻结。",
+  "frozen_supported_paths": [
+    "hostname",
+    "interfaces.*.name",
+    "interfaces.*.shutdown",
+    "interfaces.*.description",
+    "interfaces.*.mode",
+    "interfaces.*.access_vlan",
+    "interfaces.*.native_vlan",
+    "interfaces.*.allowed_vlan_ranges",
+    "interfaces.*.addresses",
+    "interfaces.*.vrf",
+    "interfaces.*.acl_bindings",
+    "interfaces.*.nat_role",
+    "interfaces.*.stp_enabled",
+    "interfaces.*.stp_edge",
+    "interfaces.*.bpdu_guard",
+    "interfaces.*.bpdu_filter",
+    "interfaces.*.protected",
+    "vlans.*.name",
+    "routes[].destination",
+    "routes[].next_hop",
+    "routes[].interface",
+    "routes[].vrf",
+    "routes[].distance",
+    "acls.*.name",
+    "acls.*.kind",
+    "acls.*.ordered",
+    "acls.*.rules[].sequence",
+    "acls.*.rules[].action",
+    "acls.*.rules[].protocol",
+    "acls.*.rules[].source",
+    "acls.*.rules[].destination",
+    "acls.*.rules[].source_port",
+    "acls.*.rules[].destination_port",
+    "acls.*.rules[].complete",
+    "nat[].kind",
+    "nat[].interface",
+    "nat[].acl",
+    "nat[].pool",
+    "nat[].protocol",
+    "nat[].inside",
+    "nat[].outside",
+    "nat[].outside_port",
+    "nat[].complete",
+    "nat_pools.*",
+    "management_lines[].name",
+    "management_lines[].transport",
+    "management_lines[].authentication",
+    "management_lines[].idle_seconds",
+    "management_lines[].acl_bindings",
+    "stp.enabled",
+    "stp.mode",
+    "stp.edge_default",
+    "stp.bpdu_guard_default",
+    "stp.bpdu_filter_default",
+    "stp.vlan_enabled"
+  ],
+  "unknown_rule_ids": [
+    "PARSE-INCOMPLETE",
+    "PARSE-NUMBER",
+    "MGMT-VTY-UNKNOWN",
+    "MGMT-VTY-SOURCE",
+    "ACL-UNBOUND",
+    "OSPF-AUTH-REVIEW"
+  ],
+  "change_history": [
+    {
+      "version": "1.1",
+      "date": "2026-10-12",
+      "case": "h3c-08-nat-inbound-control",
+      "reason": "官方语法复核发现普通H3C undo nat server不得机械复制inside参数；修正合法输入，保留独立nat=[]预期及不应报NAT-INBOUND-MAPPING断言。",
+      "old_config_sha256": "712cdc53ff02bf7e4748918fdd25a4015f1e9f60683536690206f403eba27e3b",
+      "old_expected_sha256": "3b31a898aafb5ba1068832eaff19904a6603b7843f052061c304e3936ead61b9",
+      "source": "https://www.h3c.com/en/d_202511/2698500_294551_0.htm"
+    }
+  ],
+  "cases": [
+    {
+      "id": "cisco-01-http-risk",
+      "vendor": "cisco",
+      "scenario": "http",
+      "polarity": "risk",
+      "focus_rule": "MGMT-HTTP",
+      "config": "configs/cisco-01-http-risk.cfg",
+      "expected": "expected/cisco-01-http-risk.json",
+      "sha256": {
+        "configs/cisco-01-http-risk.cfg": "1c2445d6080247531f43c3589cbe90d2d78d9839538b28685bbe622b3ddb9663",
+        "expected/cisco-01-http-risk.json": "eec1d073d96e59ee395bd3ba5017e4e9364b5b2d6c4e85ecd6b18ce0bdc30605"
+      }
+    },
+    {
+      "id": "cisco-02-http-control",
+      "vendor": "cisco",
+      "scenario": "http",
+      "polarity": "control",
+      "focus_rule": "MGMT-HTTP",
+      "config": "configs/cisco-02-http-control.cfg",
+      "expected": "expected/cisco-02-http-control.json",
+      "sha256": {
+        "configs/cisco-02-http-control.cfg": "6f4063d4db59c11738ad096f826bc70ab3af897278f7cbe64f7187ca90c1ed6c",
+        "expected/cisco-02-http-control.json": "9ea777f25edeaff7d87699522d4ec1b4133babd7a8af18ab19fcf4b5e983f700"
+      }
+    },
+    {
+      "id": "cisco-03-ssh-retries-risk",
+      "vendor": "cisco",
+      "scenario": "ssh-retries",
+      "polarity": "risk",
+      "focus_rule": "MGMT-SSH-RETRIES",
+      "config": "configs/cisco-03-ssh-retries-risk.cfg",
+      "expected": "expected/cisco-03-ssh-retries-risk.json",
+      "sha256": {
+        "configs/cisco-03-ssh-retries-risk.cfg": "7c7ed0067f4dcc5380269fbcfbf8a83deb6322fbaef0cf5a75f80318018cae80",
+        "expected/cisco-03-ssh-retries-risk.json": "1e7880ddef9cdaf7bd0358fccef00858fdaf11163592d93475875e2c67da920f"
+      }
+    },
+    {
+      "id": "cisco-04-ssh-retries-control",
+      "vendor": "cisco",
+      "scenario": "ssh-retries",
+      "polarity": "control",
+      "focus_rule": "MGMT-SSH-RETRIES",
+      "config": "configs/cisco-04-ssh-retries-control.cfg",
+      "expected": "expected/cisco-04-ssh-retries-control.json",
+      "sha256": {
+        "configs/cisco-04-ssh-retries-control.cfg": "8d521485e8fca7fbc187a19e5e3b476cca3ab27587bd12e117cf5aaa92058669",
+        "expected/cisco-04-ssh-retries-control.json": "0191b31c4303559ab85601c388bb29787aae8f20d1fc2184a4e69abb292723c3"
+      }
+    },
+    {
+      "id": "cisco-05-vty-telnet-risk",
+      "vendor": "cisco",
+      "scenario": "vty-telnet",
+      "polarity": "risk",
+      "focus_rule": "MGMT-VTY-TELNET",
+      "config": "configs/cisco-05-vty-telnet-risk.cfg",
+      "expected": "expected/cisco-05-vty-telnet-risk.json",
+      "sha256": {
+        "configs/cisco-05-vty-telnet-risk.cfg": "3c99f0f815002b686926a357a3ec8a35162b70eaf67bca964df617422fdb79ff",
+        "expected/cisco-05-vty-telnet-risk.json": "650498af2546ea9635ae56f2f9ddbfe857017a79bd287483b0a78de63d4f5cba"
+      }
+    },
+    {
+      "id": "cisco-06-vty-telnet-control",
+      "vendor": "cisco",
+      "scenario": "vty-telnet",
+      "polarity": "control",
+      "focus_rule": "MGMT-VTY-TELNET",
+      "config": "configs/cisco-06-vty-telnet-control.cfg",
+      "expected": "expected/cisco-06-vty-telnet-control.json",
+      "sha256": {
+        "configs/cisco-06-vty-telnet-control.cfg": "3e9706ad14a1bfed500a98554f61f9f847b1b4e68a349b941f2e7bc48e2b9c92",
+        "expected/cisco-06-vty-telnet-control.json": "52f81a7adde77a0496395609f52b6b93f0ab7f8a2b7a4b0c7d9b9f0589d9aad8"
+      }
+    },
+    {
+      "id": "cisco-07-vty-noauth-risk",
+      "vendor": "cisco",
+      "scenario": "vty-noauth",
+      "polarity": "risk",
+      "focus_rule": "MGMT-VTY-NOAUTH",
+      "config": "configs/cisco-07-vty-noauth-risk.cfg",
+      "expected": "expected/cisco-07-vty-noauth-risk.json",
+      "sha256": {
+        "configs/cisco-07-vty-noauth-risk.cfg": "8d91fcad7859ade099ed12fe24b3dfcae50638011adc7b291df18fb8e2604909",
+        "expected/cisco-07-vty-noauth-risk.json": "dab26531f8512179364f1fa4a1842f23e9c920d9584e3b745eb59bc51468810a"
+      }
+    },
+    {
+      "id": "cisco-08-vty-noauth-control",
+      "vendor": "cisco",
+      "scenario": "vty-noauth",
+      "polarity": "control",
+      "focus_rule": "MGMT-VTY-NOAUTH",
+      "config": "configs/cisco-08-vty-noauth-control.cfg",
+      "expected": "expected/cisco-08-vty-noauth-control.json",
+      "sha256": {
+        "configs/cisco-08-vty-noauth-control.cfg": "1721f680a0a0c82e605f915762559cfe46ec57db5b83acb5cdf92b1f3916f8d0",
+        "expected/cisco-08-vty-noauth-control.json": "f85123b288d99de09d5ef0ff82e8d30b26c846f9146d3ce599e455d9c79e159f"
+      }
+    },
+    {
+      "id": "cisco-09-vty-timeout-risk",
+      "vendor": "cisco",
+      "scenario": "vty-timeout",
+      "polarity": "risk",
+      "focus_rule": "MGMT-VTY-TIMEOUT",
+      "config": "configs/cisco-09-vty-timeout-risk.cfg",
+      "expected": "expected/cisco-09-vty-timeout-risk.json",
+      "sha256": {
+        "configs/cisco-09-vty-timeout-risk.cfg": "5199002ffed210b71cd3e992d3c09d9cbd117443d7925aee79c3631761453d65",
+        "expected/cisco-09-vty-timeout-risk.json": "16652991d3e5190719256cdf60e0d0e3e0f301988b6de5a6e48703a1427b7218"
+      }
+    },
+    {
+      "id": "cisco-10-vty-timeout-control",
+      "vendor": "cisco",
+      "scenario": "vty-timeout",
+      "polarity": "control",
+      "focus_rule": "MGMT-VTY-TIMEOUT",
+      "config": "configs/cisco-10-vty-timeout-control.cfg",
+      "expected": "expected/cisco-10-vty-timeout-control.json",
+      "sha256": {
+        "configs/cisco-10-vty-timeout-control.cfg": "e9760b17a411050a260ab427bfb9e8b20f0d1783df22b388a55b37565f21f347",
+        "expected/cisco-10-vty-timeout-control.json": "7a8ec8a087f55ab3cdf973811b9da6af5199ec7976ed520c689b9311d07f20c7"
+      }
+    },
+    {
+      "id": "cisco-11-credential-risk",
+      "vendor": "cisco",
+      "scenario": "credential",
+      "polarity": "risk",
+      "focus_rule": "MGMT-CREDENTIAL",
+      "config": "configs/cisco-11-credential-risk.cfg",
+      "expected": "expected/cisco-11-credential-risk.json",
+      "sha256": {
+        "configs/cisco-11-credential-risk.cfg": "a826b08a28241c68be8a83abc8082f0141417a7b0067a8a75755f38db3b9e5b6",
+        "expected/cisco-11-credential-risk.json": "3493197fd39ee5aed5a916b3e22f386eb4136e46d82b6c8afe017f2309ea3f63"
+      }
+    },
+    {
+      "id": "cisco-12-credential-control",
+      "vendor": "cisco",
+      "scenario": "credential",
+      "polarity": "control",
+      "focus_rule": "MGMT-CREDENTIAL",
+      "config": "configs/cisco-12-credential-control.cfg",
+      "expected": "expected/cisco-12-credential-control.json",
+      "sha256": {
+        "configs/cisco-12-credential-control.cfg": "dc86bc50091822190dac71d8e2f8d293fe65df3f76d95ad73de0dc3037972a7a",
+        "expected/cisco-12-credential-control.json": "7b63c617b3b47ecd904b9b3cd6d692fab235d7232f0ee99768ddaf3085b3b0fa"
+      }
+    },
+    {
+      "id": "cisco-13-snmp-risk",
+      "vendor": "cisco",
+      "scenario": "snmp",
+      "polarity": "risk",
+      "focus_rule": "MGMT-SNMP-COMMUNITY",
+      "config": "configs/cisco-13-snmp-risk.cfg",
+      "expected": "expected/cisco-13-snmp-risk.json",
+      "sha256": {
+        "configs/cisco-13-snmp-risk.cfg": "3af6b64c9b7d13da54f8e63dc86802dca4825c1eca9b3f40cc2b628a7f211743",
+        "expected/cisco-13-snmp-risk.json": "b24dc685319c85464bb94f1e764d88e61bb7bd71cb05922494d7036e38913213"
+      }
+    },
+    {
+      "id": "cisco-14-snmp-control",
+      "vendor": "cisco",
+      "scenario": "snmp",
+      "polarity": "control",
+      "focus_rule": "MGMT-SNMP-COMMUNITY",
+      "config": "configs/cisco-14-snmp-control.cfg",
+      "expected": "expected/cisco-14-snmp-control.json",
+      "sha256": {
+        "configs/cisco-14-snmp-control.cfg": "47e429419fabe8b80d92a4769604d2fb5e21c3d40b34e66ce2e0ce82fc151ffe",
+        "expected/cisco-14-snmp-control.json": "3c5dd76c763717ff1e8566c95eeb50bb23dc5b5fb799f79d4136484b4c8f7767"
+      }
+    },
+    {
+      "id": "cisco-15-ssh-version-risk",
+      "vendor": "cisco",
+      "scenario": "ssh-version",
+      "polarity": "risk",
+      "focus_rule": "MGMT-SSHV1",
+      "config": "configs/cisco-15-ssh-version-risk.cfg",
+      "expected": "expected/cisco-15-ssh-version-risk.json",
+      "sha256": {
+        "configs/cisco-15-ssh-version-risk.cfg": "b817976edd51386db9a150e761758ffa4f755738572fe5f543b6eb2dff48291d",
+        "expected/cisco-15-ssh-version-risk.json": "cb35348d31cb619b20f93832941491dfe7be02fcab7ade27b20c888a3b5c05c1"
+      }
+    },
+    {
+      "id": "cisco-16-ssh-version-control",
+      "vendor": "cisco",
+      "scenario": "ssh-version",
+      "polarity": "control",
+      "focus_rule": "MGMT-SSHV1",
+      "config": "configs/cisco-16-ssh-version-control.cfg",
+      "expected": "expected/cisco-16-ssh-version-control.json",
+      "sha256": {
+        "configs/cisco-16-ssh-version-control.cfg": "922b1eb71d32941c3c518058bd621638abf0bcdc1899d2f26a4037a2b1de824e",
+        "expected/cisco-16-ssh-version-control.json": "f2e225683f313b1d6732b6a7950aa30b0d1ee31c8bdf50b699d3a320117dd537"
+      }
+    },
+    {
+      "id": "cisco-17-acl-shadow-risk",
+      "vendor": "cisco",
+      "scenario": "acl-shadow",
+      "polarity": "risk",
+      "focus_rule": "ACL-SHADOW",
+      "config": "configs/cisco-17-acl-shadow-risk.cfg",
+      "expected": "expected/cisco-17-acl-shadow-risk.json",
+      "sha256": {
+        "configs/cisco-17-acl-shadow-risk.cfg": "73ec275703fea7f0173b976e0f9e3dc1e0ee13f14ef426f66899876edf851f75",
+        "expected/cisco-17-acl-shadow-risk.json": "a133d97b48876111435c3c61daeedae0850cf5674d9ed37f93ab7859bc6d068c"
+      }
+    },
+    {
+      "id": "cisco-18-acl-shadow-control",
+      "vendor": "cisco",
+      "scenario": "acl-shadow",
+      "polarity": "control",
+      "focus_rule": "ACL-SHADOW",
+      "config": "configs/cisco-18-acl-shadow-control.cfg",
+      "expected": "expected/cisco-18-acl-shadow-control.json",
+      "sha256": {
+        "configs/cisco-18-acl-shadow-control.cfg": "163813492f3a09b64f3838623e791809eaec5122bd2459355e9ec95ff2d79a8d",
+        "expected/cisco-18-acl-shadow-control.json": "50e8a6d263f042ffdfe49af2cfdbfed7792d68b9665b0706546f6fa7e06e392e"
+      }
+    },
+    {
+      "id": "huawei-01-telnet-server-risk",
+      "vendor": "huawei",
+      "scenario": "telnet-server",
+      "polarity": "risk",
+      "focus_rule": "MGMT-TELNET-SERVER",
+      "config": "configs/huawei-01-telnet-server-risk.cfg",
+      "expected": "expected/huawei-01-telnet-server-risk.json",
+      "sha256": {
+        "configs/huawei-01-telnet-server-risk.cfg": "3d973359dd00b12b5e0199920c9e3b9571985f90f128f74deccc07f1bd82720e",
+        "expected/huawei-01-telnet-server-risk.json": "4013351dde986523911602ca89a6714655baf2739bcf1e791c197961352eee43"
+      }
+    },
+    {
+      "id": "huawei-02-telnet-server-control",
+      "vendor": "huawei",
+      "scenario": "telnet-server",
+      "polarity": "control",
+      "focus_rule": "MGMT-TELNET-SERVER",
+      "config": "configs/huawei-02-telnet-server-control.cfg",
+      "expected": "expected/huawei-02-telnet-server-control.json",
+      "sha256": {
+        "configs/huawei-02-telnet-server-control.cfg": "1f733cbc1ba032cde8b633452d69e466d50d4823e3445d1f02fffd1f1bfc3244",
+        "expected/huawei-02-telnet-server-control.json": "a002c0327827065085b91be872b79c49d2cee7f0039c9494a39b8f071e889354"
+      }
+    },
+    {
+      "id": "huawei-03-acl-undefined-risk",
+      "vendor": "huawei",
+      "scenario": "acl-undefined",
+      "polarity": "risk",
+      "focus_rule": "ACL-UNDEFINED",
+      "config": "configs/huawei-03-acl-undefined-risk.cfg",
+      "expected": "expected/huawei-03-acl-undefined-risk.json",
+      "sha256": {
+        "configs/huawei-03-acl-undefined-risk.cfg": "2ff9e2acd6e8622c11ccae1dfcd3f717925a405a0f300c9603f919f3441c52f0",
+        "expected/huawei-03-acl-undefined-risk.json": "d5cd67295611ecd39d221306b48b40fa182f4708c6697247a98f282924ff087c"
+      }
+    },
+    {
+      "id": "huawei-04-acl-undefined-control",
+      "vendor": "huawei",
+      "scenario": "acl-undefined",
+      "polarity": "control",
+      "focus_rule": "ACL-UNDEFINED",
+      "config": "configs/huawei-04-acl-undefined-control.cfg",
+      "expected": "expected/huawei-04-acl-undefined-control.json",
+      "sha256": {
+        "configs/huawei-04-acl-undefined-control.cfg": "adff9b0c6757145784cf921dd239d3834d021b648c72527d22063bcb44ad0b3b",
+        "expected/huawei-04-acl-undefined-control.json": "c8f495d15aa84cbe42cb7e790609bae3577bacd11044f7144625ab1a1a629cf2"
+      }
+    },
+    {
+      "id": "huawei-05-vty-acl-undefined-risk",
+      "vendor": "huawei",
+      "scenario": "vty-acl-undefined",
+      "polarity": "risk",
+      "focus_rule": "ACL-VTY-UNDEFINED",
+      "config": "configs/huawei-05-vty-acl-undefined-risk.cfg",
+      "expected": "expected/huawei-05-vty-acl-undefined-risk.json",
+      "sha256": {
+        "configs/huawei-05-vty-acl-undefined-risk.cfg": "f5512a1701be4c031298e431b4fa3900aae34e186ea583bab8e3945305e6605f",
+        "expected/huawei-05-vty-acl-undefined-risk.json": "41957738dcb41817e02e64b3bee8a3244c438eee80e042edfa7f36025eb8a361"
+      }
+    },
+    {
+      "id": "huawei-06-vty-acl-undefined-control",
+      "vendor": "huawei",
+      "scenario": "vty-acl-undefined",
+      "polarity": "control",
+      "focus_rule": "ACL-VTY-UNDEFINED",
+      "config": "configs/huawei-06-vty-acl-undefined-control.cfg",
+      "expected": "expected/huawei-06-vty-acl-undefined-control.json",
+      "sha256": {
+        "configs/huawei-06-vty-acl-undefined-control.cfg": "61daaf8c17aef3508cdb79b48239e524d376110aba01c431a11c3c71c1c1101a",
+        "expected/huawei-06-vty-acl-undefined-control.json": "d03adb8dd9b9f788c54c2a5861d038d2c1af01047955e1f163fc81f34e570a37"
+      }
+    },
+    {
+      "id": "huawei-07-vlan-undefined-risk",
+      "vendor": "huawei",
+      "scenario": "vlan-undefined",
+      "polarity": "risk",
+      "focus_rule": "VLAN-UNDEFINED",
+      "config": "configs/huawei-07-vlan-undefined-risk.cfg",
+      "expected": "expected/huawei-07-vlan-undefined-risk.json",
+      "sha256": {
+        "configs/huawei-07-vlan-undefined-risk.cfg": "a44cfb1be8e8c345f4e039ed71494e0e0ae568e52858168d52df20808c2133af",
+        "expected/huawei-07-vlan-undefined-risk.json": "d7c83399e9795be05fcf343dde3965f6959f37b8966fd46b10a2b38a9df7edbf"
+      }
+    },
+    {
+      "id": "huawei-08-vlan-undefined-control",
+      "vendor": "huawei",
+      "scenario": "vlan-undefined",
+      "polarity": "control",
+      "focus_rule": "VLAN-UNDEFINED",
+      "config": "configs/huawei-08-vlan-undefined-control.cfg",
+      "expected": "expected/huawei-08-vlan-undefined-control.json",
+      "sha256": {
+        "configs/huawei-08-vlan-undefined-control.cfg": "113c492703f9f210d011938cbda976d4b5ec05342e4d941441c59cac99da724e",
+        "expected/huawei-08-vlan-undefined-control.json": "64520712cf9a56d256b88291c0b7d8f5779609f4992c7cbdcf712625caaab542"
+      }
+    },
+    {
+      "id": "huawei-09-native-vlan-risk",
+      "vendor": "huawei",
+      "scenario": "native-vlan",
+      "polarity": "risk",
+      "focus_rule": "VLAN-NATIVE-1",
+      "config": "configs/huawei-09-native-vlan-risk.cfg",
+      "expected": "expected/huawei-09-native-vlan-risk.json",
+      "sha256": {
+        "configs/huawei-09-native-vlan-risk.cfg": "8133aeccef24ba86d6d3c87aba10363ab479b936f9070dc6f2c9ff140999762f",
+        "expected/huawei-09-native-vlan-risk.json": "eb8924155f840dc3b43b2f92a866ff62a428e6ce32045fb3277db960fd574dee"
+      }
+    },
+    {
+      "id": "huawei-10-native-vlan-control",
+      "vendor": "huawei",
+      "scenario": "native-vlan",
+      "polarity": "control",
+      "focus_rule": "VLAN-NATIVE-1",
+      "config": "configs/huawei-10-native-vlan-control.cfg",
+      "expected": "expected/huawei-10-native-vlan-control.json",
+      "sha256": {
+        "configs/huawei-10-native-vlan-control.cfg": "121754b58eaf12e2926c9f565ceb7d2783f136e30b5b96f346e2699412b6191b",
+        "expected/huawei-10-native-vlan-control.json": "1eee5b8465c3ad59081200d2d36858cbac8e1788e65337fd18934d13df452e3f"
+      }
+    },
+    {
+      "id": "huawei-11-pvid-list-risk",
+      "vendor": "huawei",
+      "scenario": "pvid-list",
+      "polarity": "risk",
+      "focus_rule": "VLAN-PVID-NOT-ALLOWED",
+      "config": "configs/huawei-11-pvid-list-risk.cfg",
+      "expected": "expected/huawei-11-pvid-list-risk.json",
+      "sha256": {
+        "configs/huawei-11-pvid-list-risk.cfg": "7a155255e99119af0f42a2d27dc0e3f95524c1962666c544c8f2ed68a31e26ef",
+        "expected/huawei-11-pvid-list-risk.json": "1ffdb920ebab43d35cde7281b861d146f0d049bfce1ff0409d324ce7d20df223"
+      }
+    },
+    {
+      "id": "huawei-12-pvid-list-control",
+      "vendor": "huawei",
+      "scenario": "pvid-list",
+      "polarity": "control",
+      "focus_rule": "VLAN-PVID-NOT-ALLOWED",
+      "config": "configs/huawei-12-pvid-list-control.cfg",
+      "expected": "expected/huawei-12-pvid-list-control.json",
+      "sha256": {
+        "configs/huawei-12-pvid-list-control.cfg": "b7721c17d65c06750ba62ed154a888b0d9649ae17e4c8c90875f87437e9fed57",
+        "expected/huawei-12-pvid-list-control.json": "5e55ee3b3e36a4944832789cd4b6062243d3b7f46daec311efc38a05e919ba60"
+      }
+    },
+    {
+      "id": "huawei-13-duplicate-ip-risk",
+      "vendor": "huawei",
+      "scenario": "duplicate-ip",
+      "polarity": "risk",
+      "focus_rule": "IF-DUPLICATE-IP",
+      "config": "configs/huawei-13-duplicate-ip-risk.cfg",
+      "expected": "expected/huawei-13-duplicate-ip-risk.json",
+      "sha256": {
+        "configs/huawei-13-duplicate-ip-risk.cfg": "dc899394f551101aa7afa93938e1d7c4b6468e43f3999bf43426e077bc3acd67",
+        "expected/huawei-13-duplicate-ip-risk.json": "d18f285904ac64773ad62aa073c209b2adc0c60ba1d8f59debf264b8554586ff"
+      }
+    },
+    {
+      "id": "huawei-14-duplicate-ip-control",
+      "vendor": "huawei",
+      "scenario": "duplicate-ip",
+      "polarity": "control",
+      "focus_rule": "IF-DUPLICATE-IP",
+      "config": "configs/huawei-14-duplicate-ip-control.cfg",
+      "expected": "expected/huawei-14-duplicate-ip-control.json",
+      "sha256": {
+        "configs/huawei-14-duplicate-ip-control.cfg": "542184721a62ed86859c948e0e0af343489482a4be3f7e7fb77cf6695573da7e",
+        "expected/huawei-14-duplicate-ip-control.json": "caafb1a5d165e86b8b101fc6aaf6050998201720480d5d8bf7b86f6ff2d6fcd3"
+      }
+    },
+    {
+      "id": "huawei-15-self-nexthop-risk",
+      "vendor": "huawei",
+      "scenario": "self-nexthop",
+      "polarity": "risk",
+      "focus_rule": "ROUTE-SELF-NEXTHOP",
+      "config": "configs/huawei-15-self-nexthop-risk.cfg",
+      "expected": "expected/huawei-15-self-nexthop-risk.json",
+      "sha256": {
+        "configs/huawei-15-self-nexthop-risk.cfg": "e14df5a409cbfec01c8f3319932d0834cb6da4f0e46238c34c7be02e06ebb3f6",
+        "expected/huawei-15-self-nexthop-risk.json": "70d544aafe6595844379d8dcc2ebcd0f5c13d50f251cd7f8060801eb5ccb63e6"
+      }
+    },
+    {
+      "id": "huawei-16-self-nexthop-control",
+      "vendor": "huawei",
+      "scenario": "self-nexthop",
+      "polarity": "control",
+      "focus_rule": "ROUTE-SELF-NEXTHOP",
+      "config": "configs/huawei-16-self-nexthop-control.cfg",
+      "expected": "expected/huawei-16-self-nexthop-control.json",
+      "sha256": {
+        "configs/huawei-16-self-nexthop-control.cfg": "33921ffc403973c637415ba1c5f593b7f8d5580e8119f58d7262789fd620c73d",
+        "expected/huawei-16-self-nexthop-control.json": "292b06c50031ab1d2620be6e7433bdbc11b4a0b57a167f223ffb680f447e3172"
+      }
+    },
+    {
+      "id": "h3c-01-trunk-all-risk",
+      "vendor": "h3c",
+      "scenario": "trunk-all",
+      "polarity": "risk",
+      "focus_rule": "VLAN-TRUNK-ALL",
+      "config": "configs/h3c-01-trunk-all-risk.cfg",
+      "expected": "expected/h3c-01-trunk-all-risk.json",
+      "sha256": {
+        "configs/h3c-01-trunk-all-risk.cfg": "986538d4f9d39313450727ac680f5b9805bc033484d3ed9dd417e036b07ff2ae",
+        "expected/h3c-01-trunk-all-risk.json": "afdf7b29e63ee032d1b944433b05742bb59b50628c246ce8d3cc898e7aa0c113"
+      }
+    },
+    {
+      "id": "h3c-02-trunk-all-control",
+      "vendor": "h3c",
+      "scenario": "trunk-all",
+      "polarity": "control",
+      "focus_rule": "VLAN-TRUNK-ALL",
+      "config": "configs/h3c-02-trunk-all-control.cfg",
+      "expected": "expected/h3c-02-trunk-all-control.json",
+      "sha256": {
+        "configs/h3c-02-trunk-all-control.cfg": "1c14a938b3c851b2b96922a12b102ad1c05bc7671748cc86392e2fe04c073021",
+        "expected/h3c-02-trunk-all-control.json": "a82bd7f9fadb399fccd22d9005242aeff3c6f114ea74b23266c80f46e7f93d70"
+      }
+    },
+    {
+      "id": "h3c-03-nat-acl-risk",
+      "vendor": "h3c",
+      "scenario": "nat-acl",
+      "polarity": "risk",
+      "focus_rule": "NAT-ACL-UNDEFINED",
+      "config": "configs/h3c-03-nat-acl-risk.cfg",
+      "expected": "expected/h3c-03-nat-acl-risk.json",
+      "sha256": {
+        "configs/h3c-03-nat-acl-risk.cfg": "0c69cb64fec5a39aa275f31e74986352cbb171218302834fb0b4ddf36cf35aad",
+        "expected/h3c-03-nat-acl-risk.json": "7dbda64cdb6d3e43cef10270ece29a24def336a01fca45cd74646566d7a12b60"
+      }
+    },
+    {
+      "id": "h3c-04-nat-acl-control",
+      "vendor": "h3c",
+      "scenario": "nat-acl",
+      "polarity": "control",
+      "focus_rule": "NAT-ACL-UNDEFINED",
+      "config": "configs/h3c-04-nat-acl-control.cfg",
+      "expected": "expected/h3c-04-nat-acl-control.json",
+      "sha256": {
+        "configs/h3c-04-nat-acl-control.cfg": "ba8c50ec50eec7117461b77eb5d231004efa5bf7413efbdd28d91ebe8e0aa2a2",
+        "expected/h3c-04-nat-acl-control.json": "36f02f44603773b248c3d5a70edc1202fadb8bac1be63681e4789e569a082c7c"
+      }
+    },
+    {
+      "id": "h3c-05-nat-pool-risk",
+      "vendor": "h3c",
+      "scenario": "nat-pool",
+      "polarity": "risk",
+      "focus_rule": "NAT-POOL-UNDEFINED",
+      "config": "configs/h3c-05-nat-pool-risk.cfg",
+      "expected": "expected/h3c-05-nat-pool-risk.json",
+      "sha256": {
+        "configs/h3c-05-nat-pool-risk.cfg": "92432df90487ced59aae95cc8d59c36ea73c61c07fb47e0ba3de2c898f14e68f",
+        "expected/h3c-05-nat-pool-risk.json": "290564037cf4323ff2760f0749b5919e728835adfd1f5ed80c6bc72698e4c1e7"
+      }
+    },
+    {
+      "id": "h3c-06-nat-pool-control",
+      "vendor": "h3c",
+      "scenario": "nat-pool",
+      "polarity": "control",
+      "focus_rule": "NAT-POOL-UNDEFINED",
+      "config": "configs/h3c-06-nat-pool-control.cfg",
+      "expected": "expected/h3c-06-nat-pool-control.json",
+      "sha256": {
+        "configs/h3c-06-nat-pool-control.cfg": "6b9a8b5f2896e13a4f10fce44b06e726dee15028c0b77c806408258fb1977950",
+        "expected/h3c-06-nat-pool-control.json": "a06bf788483fdc3e6d64657e73e2c3c52da28049f5d480ef326ca8900e268e85"
+      }
+    },
+    {
+      "id": "h3c-07-nat-inbound-risk",
+      "vendor": "h3c",
+      "scenario": "nat-inbound",
+      "polarity": "risk",
+      "focus_rule": "NAT-INBOUND-MAPPING",
+      "config": "configs/h3c-07-nat-inbound-risk.cfg",
+      "expected": "expected/h3c-07-nat-inbound-risk.json",
+      "sha256": {
+        "configs/h3c-07-nat-inbound-risk.cfg": "ffd20e1b4669db9f34db6c717d573d3c6c012f6cc04749b36b00f4d835ade1fc",
+        "expected/h3c-07-nat-inbound-risk.json": "b36fe4284aaff426c0838446cd981144ce8350dcc57e4fb5d4333f39acd2123f"
+      }
+    },
+    {
+      "id": "h3c-08-nat-inbound-control",
+      "vendor": "h3c",
+      "scenario": "nat-inbound",
+      "polarity": "control",
+      "focus_rule": "NAT-INBOUND-MAPPING",
+      "config": "configs/h3c-08-nat-inbound-control.cfg",
+      "expected": "expected/h3c-08-nat-inbound-control.json",
+      "sha256": {
+        "configs/h3c-08-nat-inbound-control.cfg": "67892f85e3c0c0dc751d5269a0c031385c29a2269205d7c20cfb3b5d83e6868e",
+        "expected/h3c-08-nat-inbound-control.json": "97c0504b0afdaa89409450dec4fda0b419754302902293def71a4efbc6c074b3"
+      }
+    },
+    {
+      "id": "h3c-09-stp-disabled-risk",
+      "vendor": "h3c",
+      "scenario": "stp-disabled",
+      "polarity": "risk",
+      "focus_rule": "STP-DISABLED",
+      "config": "configs/h3c-09-stp-disabled-risk.cfg",
+      "expected": "expected/h3c-09-stp-disabled-risk.json",
+      "sha256": {
+        "configs/h3c-09-stp-disabled-risk.cfg": "3f20d48c7af684eac8ab65f277b4ca86247e07d8600c80470b617289a52a5955",
+        "expected/h3c-09-stp-disabled-risk.json": "8985fe6b193a8d77ff083d01973fd71e71f49ab271044965a4d2b009c71b295c"
+      }
+    },
+    {
+      "id": "h3c-10-stp-disabled-control",
+      "vendor": "h3c",
+      "scenario": "stp-disabled",
+      "polarity": "control",
+      "focus_rule": "STP-DISABLED",
+      "config": "configs/h3c-10-stp-disabled-control.cfg",
+      "expected": "expected/h3c-10-stp-disabled-control.json",
+      "sha256": {
+        "configs/h3c-10-stp-disabled-control.cfg": "c3eb9f5d4a3eb7dc221a984294fe935c8c807b6569fe768057fe3dfb11e29766",
+        "expected/h3c-10-stp-disabled-control.json": "2f1fb3ef3290e8498d20c97f610dd169ff61037d213b7ef9259f1d82b6b1ee00"
+      }
+    },
+    {
+      "id": "h3c-11-edge-trunk-risk",
+      "vendor": "h3c",
+      "scenario": "edge-trunk",
+      "polarity": "risk",
+      "focus_rule": "STP-EDGE-TRUNK",
+      "config": "configs/h3c-11-edge-trunk-risk.cfg",
+      "expected": "expected/h3c-11-edge-trunk-risk.json",
+      "sha256": {
+        "configs/h3c-11-edge-trunk-risk.cfg": "d968aa28bb7ffb1ef0d61c56ad9a35809cd18261af39b5f1958309110e2ae59d",
+        "expected/h3c-11-edge-trunk-risk.json": "30af2e3f57e7c2ec0f94427786f3833b9435a7f7637b48135fc2cf13c7d2ac50"
+      }
+    },
+    {
+      "id": "h3c-12-edge-trunk-control",
+      "vendor": "h3c",
+      "scenario": "edge-trunk",
+      "polarity": "control",
+      "focus_rule": "STP-EDGE-TRUNK",
+      "config": "configs/h3c-12-edge-trunk-control.cfg",
+      "expected": "expected/h3c-12-edge-trunk-control.json",
+      "sha256": {
+        "configs/h3c-12-edge-trunk-control.cfg": "d3fb3241c69213d7ddf654a131d7eb96494828466b9d1fac476ce57f38784a68",
+        "expected/h3c-12-edge-trunk-control.json": "2360b12af7bb0bfb0d66d1f61f12722322e8b3d312e43db8c9300c1f100fd126"
+      }
+    },
+    {
+      "id": "h3c-13-bpdu-filter-risk",
+      "vendor": "h3c",
+      "scenario": "bpdu-filter",
+      "polarity": "risk",
+      "focus_rule": "STP-BPDU-FILTER",
+      "config": "configs/h3c-13-bpdu-filter-risk.cfg",
+      "expected": "expected/h3c-13-bpdu-filter-risk.json",
+      "sha256": {
+        "configs/h3c-13-bpdu-filter-risk.cfg": "2a2e4e2f6a7c39127412a6dda63a0dc8c06f898df80981e1c6b1eb048f0f6c77",
+        "expected/h3c-13-bpdu-filter-risk.json": "ae06467a5ae03c168732550d0fc5476951310925deb1173b9d3d2da36508cd78"
+      }
+    },
+    {
+      "id": "h3c-14-bpdu-filter-control",
+      "vendor": "h3c",
+      "scenario": "bpdu-filter",
+      "polarity": "control",
+      "focus_rule": "STP-BPDU-FILTER",
+      "config": "configs/h3c-14-bpdu-filter-control.cfg",
+      "expected": "expected/h3c-14-bpdu-filter-control.json",
+      "sha256": {
+        "configs/h3c-14-bpdu-filter-control.cfg": "5ab92678583b786a49ba1febab558a6511ef5955998417064c8b7eca81fe5f01",
+        "expected/h3c-14-bpdu-filter-control.json": "919a7d54c74813ab3b63da7c1c7db45adc2599c81c90f66f83228a189cc1d86c"
+      }
+    },
+    {
+      "id": "h3c-15-ospf-broad-risk",
+      "vendor": "h3c",
+      "scenario": "ospf-broad",
+      "polarity": "risk",
+      "focus_rule": "OSPF-BROAD-NETWORK",
+      "config": "configs/h3c-15-ospf-broad-risk.cfg",
+      "expected": "expected/h3c-15-ospf-broad-risk.json",
+      "sha256": {
+        "configs/h3c-15-ospf-broad-risk.cfg": "22c232d07cebb034b98a7ae03320dbcf12d81ddb29448e09afecb78d6b186c0c",
+        "expected/h3c-15-ospf-broad-risk.json": "31ff8f662453d2684a0fbdd0a1554a8a797c940d1c0a0ee96f600a770716e51c"
+      }
+    },
+    {
+      "id": "h3c-16-ospf-broad-control",
+      "vendor": "h3c",
+      "scenario": "ospf-broad",
+      "polarity": "control",
+      "focus_rule": "OSPF-BROAD-NETWORK",
+      "config": "configs/h3c-16-ospf-broad-control.cfg",
+      "expected": "expected/h3c-16-ospf-broad-control.json",
+      "sha256": {
+        "configs/h3c-16-ospf-broad-control.cfg": "c61475e99b6f52726124e55238c1a7b8668cd036f1bdd58ed37f2934ba46b28a",
+        "expected/h3c-16-ospf-broad-control.json": "15adff4193baf21d92a5ca0f276553666dbf70fdd049a8d51346d24413fefe2f"
+      }
+    }
+  ]
+}

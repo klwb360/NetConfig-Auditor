@@ -1,0 +1,83 @@
+{
+  "inventory": {
+    "hostname": "cisco-17-acl-shadow-risk",
+    "interfaces": {
+      "GigabitEthernet0/1": {
+        "name": "GigabitEthernet0/1",
+        "shutdown": false,
+        "description": "Campus-uplink",
+        "mode": "routed",
+        "access_vlan": null,
+        "native_vlan": null,
+        "allowed_vlan_ranges": null,
+        "addresses": [
+          "10.17.0.1/24"
+        ],
+        "vrf": "default",
+        "acl_bindings": {
+          "in": "CAMPUS"
+        },
+        "nat_role": null,
+        "stp_enabled": null,
+        "stp_edge": null,
+        "bpdu_guard": null,
+        "bpdu_filter": null,
+        "protected": null
+      }
+    },
+    "vlans": {},
+    "routes": [],
+    "acls": {
+      "CAMPUS": {
+        "name": "CAMPUS",
+        "kind": "extended",
+        "ordered": true,
+        "rules": [
+          {
+            "sequence": 10,
+            "action": "deny",
+            "protocol": "tcp",
+            "source": "any",
+            "destination": "any",
+            "source_port": null,
+            "destination_port": "eq 23",
+            "complete": true
+          },
+          {
+            "sequence": 20,
+            "action": "permit",
+            "protocol": "tcp",
+            "source": "any",
+            "destination": "any",
+            "source_port": null,
+            "destination_port": "eq 23",
+            "complete": true
+          }
+        ]
+      }
+    },
+    "nat": [],
+    "nat_pools": {},
+    "management_lines": [],
+    "stp": {
+      "enabled": null,
+      "mode": null,
+      "edge_default": null,
+      "bpdu_guard_default": null,
+      "bpdu_filter_default": null,
+      "vlan_enabled": {}
+    }
+  },
+  "risk_findings": [
+    {
+      "rule_id": "ACL-SHADOW",
+      "affected_objects": [
+        "ACL CAMPUS"
+      ]
+    }
+  ],
+  "unknown_findings": [],
+  "unknown_commands": [],
+  "must_not_report": [],
+  "annotation": "手工根据显式命令、匹配顺序和对象作用域标注；不代表实设备运行状态。"
+}
