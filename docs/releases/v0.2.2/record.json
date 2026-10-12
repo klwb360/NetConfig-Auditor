@@ -1,0 +1,67 @@
+{
+  "artifact": {
+    "digest": "sha256:e5eedba268a1e28a9f82467ebf923ecf10862e2abb5d1fda09a3eed54ee9c0dc",
+    "id": 11522815408,
+    "name": "NetAudit-windows-x64-8015ed5ed3d2abbd6e70e7f10775724c7aafe265"
+  },
+  "files": {
+    "NetAudit-0.2.2-source-8015ed5ed3d2.zip": {
+      "sha256": "e9ce9f944d7c95be0223ea21ceda44f2f22fde3e6023f7ea47eb846e8238fedf",
+      "size_bytes": 746838
+    },
+    "NetAudit-0.2.2-windows-x64-8015ed5ed3d2-onefile.exe": {
+      "sha256": "28fed42ae6243e7364dd51d6ef02c017ee7b0417cf304ac7b23206d90461b58c",
+      "size_bytes": 9301948
+    },
+    "NetAudit-0.2.2-windows-x64-8015ed5ed3d2-onefile.zip": {
+      "sha256": "f3865ce9012c174c51c99faa7cb0f43d319710f383e4f376fb27d41ff134aa4a",
+      "size_bytes": 10178903
+    },
+    "NetAudit-0.2.2-windows-x64-8015ed5ed3d2-portable.zip": {
+      "sha256": "59d18d31d81e3bdc5e5875d77c5d0d0aa515dd90d0fef6ab7edf1c6b6625f9c2",
+      "size_bytes": 10282343
+    },
+    "SHA256SUMS.txt": {
+      "sha256": "c97ab122c6d0c60ad12a8e4a2a7bbf32a67d60402d9e2349e3bc5faafacfe34b",
+      "size_bytes": 801
+    },
+    "manifest.json": {
+      "sha256": "648db26ce5c476ffa017082454b6d32ae42904be3d567d69ee2f665d1852d85f",
+      "size_bytes": 90836
+    },
+    "smoke-onedir.json": {
+      "sha256": "ca00d60171d290d189161c67bf206db932d8fa3b4e1bbfffb20ad5023d1b80d8",
+      "size_bytes": 24556
+    },
+    "smoke-onefile.json": {
+      "sha256": "fca1f1165ed3bacd05e60cd1fb0c3f0efa847cc17eee260697f1bdd9fae352fb",
+      "size_bytes": 26108
+    },
+    "smoke-source.json": {
+      "sha256": "6886431c4f7a645c996d508456b8cdaab039f4c45eaccfc31de0b27c2d4a382d",
+      "size_bytes": 26004
+    }
+  },
+  "repository": "klwb360/NetAudit",
+  "run_attempt": 1,
+  "run_id": "37712559596",
+  "runtime_names": [
+    "NetAudit-0.2.2-windows-x64-8015ed5ed3d2-onefile.exe",
+    "NetAudit-0.2.2-windows-x64-8015ed5ed3d2-onefile.zip",
+    "NetAudit-0.2.2-windows-x64-8015ed5ed3d2-portable.zip"
+  ],
+  "schema_version": 1,
+  "source_commit": "8015ed5ed3d2abbd6e70e7f10775724c7aafe265",
+  "source_locations": [
+    {
+      "archive": "NetAudit-0.2.2-windows-x64-8015ed5ed3d2-portable.zip",
+      "member": "NetAudit/NetAudit-0.2.2-source-8015ed5ed3d2.zip"
+    },
+    {
+      "archive": "NetAudit-0.2.2-windows-x64-8015ed5ed3d2-onefile.zip",
+      "member": "NetAudit-onefile/NetAudit-0.2.2-source-8015ed5ed3d2.zip"
+    }
+  ],
+  "source_name": "NetAudit-0.2.2-source-8015ed5ed3d2.zip",
+  "tag": "v0.2.2"
+}

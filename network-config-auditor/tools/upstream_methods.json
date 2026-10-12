@@ -1,0 +1,32 @@
+{
+  "repository": "syn-4ck/pynipper-ng",
+  "commit": "58957659205bcf656f1f209b26be51d1d508b9f9",
+  "license": "GPL-3.0-only",
+  "author": "Syn-4ck",
+  "methods": {
+    "_has_http": {
+      "path": "src/analyze/cisco/ios/plugins/http_plugin.py",
+      "lines": [
+        13,
+        22
+      ],
+      "source": "def _has_http(self, filename: str) -> bool:\n    parser = self.parse_cisco_ios_config_file(filename)\n    http_enable = parser.find_objects('ip http server')\n    http_disable = parser.find_objects('no ip http server')\n    if len(http_enable) > 0:\n        return True\n    elif len(http_disable) > 0:\n        return False\n    else:\n        return True"
+    },
+    "get_cisco_ios_ssh_reties": {
+      "path": "src/analyze/cisco/ios/plugins/ssh_plugin.py",
+      "lines": [
+        58,
+        68
+      ],
+      "source": "def get_cisco_ios_ssh_reties(self, filename: str):\n    retries = self._get_cisco_ios_ssh_retries(filename)\n    if retries == '' or retries > 5:\n        return CiscoIOSIssue('SSH retries misconfiguration', 'The SSH service must have a defined number of retries, the recommended is between 0 and 5.', 'Set a retries number allows to reduce the bruteforce and dictionary attacks. If a retry number is defined, the attacker can not test with an user multiple passwords.', 'This issue improve the hardening of passwords in the network device.', 'This can be configured with the following command: ip ssh authentication-retries <retry-number>.')\n    return None"
+    },
+    "get_cisco_ios_telnet": {
+      "path": "src/analyze/cisco/ios/cisco_parser/parse_config.py",
+      "lines": [
+        121,
+        129
+      ],
+      "source": "def get_cisco_ios_telnet(filename: str) -> bool:\n    parser = parse_cisco_ios_config_file(filename)\n    transport_disable = parser.find_objects('transport input none')\n    ssh_enable = parser.find_objects('transport input ssh')\n    telnet_disable = parser.find_objects('no transport input telnet')\n    if len(transport_disable) > 0 or len(ssh_enable) > 0 or len(telnet_disable) > 0:\n        return False\n    else:\n        return True"
+    }
+  }
+}

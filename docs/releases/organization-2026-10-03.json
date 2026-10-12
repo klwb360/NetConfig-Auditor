@@ -1,0 +1,146 @@
+{
+  "repository": "klwb360/NetAudit",
+  "evidence_commit": "cf80d36e60201900368a3d2a86dca6d1f11d7efa",
+  "phase": "completed",
+  "passed": true,
+  "releases": [
+    {
+      "tag": "v0.2.1",
+      "release_id": 402591198,
+      "preflight": "passed",
+      "body_updated": true,
+      "deleted_asset_ids": [
+        608120775,
+        608120580,
+        608120753,
+        608120812,
+        608120838,
+        608120859
+      ],
+      "live_before": [
+        608120580,
+        608120615,
+        608120648,
+        608120697,
+        608120753,
+        608120775,
+        608120812,
+        608120838,
+        608120859
+      ],
+      "retained": [
+        {
+          "id": 608120615,
+          "name": "NetAudit-0.2.1-windows-x64-befb38bbecbb-onefile.exe",
+          "size": 9278501,
+          "digest": "sha256:a20572e92de8891b6f4f27204a4a7fccef3ebe0facc907a2d7aeb1dba013e3d8"
+        },
+        {
+          "id": 608120648,
+          "name": "NetAudit-0.2.1-windows-x64-befb38bbecbb-onefile.zip",
+          "size": 10030171,
+          "digest": "sha256:4498444bdbc5f36816fe71b1fa730c3440b92d1937b3e49a21759ab632ad55a4"
+        },
+        {
+          "id": 608120697,
+          "name": "NetAudit-0.2.1-windows-x64-befb38bbecbb-portable.zip",
+          "size": 10132679,
+          "digest": "sha256:67e207dc67a6ce0d3c09fb6f69f0fb7de62ab46ca2273673c6034ca9014d7f9d"
+        }
+      ],
+      "verified": true
+    },
+    {
+      "tag": "v0.2.0",
+      "release_id": 402487028,
+      "preflight": "passed",
+      "body_updated": true,
+      "deleted_asset_ids": [
+        607718618,
+        607718438,
+        607718600,
+        607718632,
+        607718647,
+        607718668
+      ],
+      "live_before": [
+        607718438,
+        607718467,
+        607718511,
+        607718551,
+        607718600,
+        607718618,
+        607718632,
+        607718647,
+        607718668
+      ],
+      "retained": [
+        {
+          "id": 607718467,
+          "name": "NetAudit-0.2.0-windows-x64-8a9840601d6c-onefile.exe",
+          "size": 9271125,
+          "digest": "sha256:bc0ae2627bd1baca884a4b1cc9950e912beaa9a0f0ff9b012c9a5d46539e70ab"
+        },
+        {
+          "id": 607718511,
+          "name": "NetAudit-0.2.0-windows-x64-8a9840601d6c-onefile.zip",
+          "size": 9828485,
+          "digest": "sha256:77f4849a3ca90b5d1ca7b5698ddf92b29d9d1bb7e08d741be94204b482b98e92"
+        },
+        {
+          "id": 607718551,
+          "name": "NetAudit-0.2.0-windows-x64-8a9840601d6c-portable.zip",
+          "size": 9932219,
+          "digest": "sha256:72eb86ba6b99b8bef964c388b84bc9ad251e5e181dadfd537b082b73299bb794"
+        }
+      ],
+      "verified": true
+    },
+    {
+      "tag": "v0.1.0",
+      "release_id": 402468203,
+      "preflight": "passed",
+      "body_updated": true,
+      "deleted_asset_ids": [
+        607654511,
+        607654383,
+        607654484,
+        607654526,
+        607654541,
+        607654552
+      ],
+      "live_before": [
+        607654383,
+        607654402,
+        607654428,
+        607654448,
+        607654484,
+        607654511,
+        607654526,
+        607654541,
+        607654552
+      ],
+      "retained": [
+        {
+          "id": 607654402,
+          "name": "NetAudit-0.1.0-windows-x64-f2002b79bd6d-onefile.exe",
+          "size": 8897426,
+          "digest": "sha256:a1b7f309a5f98e8139cfd99dde446ff0466f1ad846196c977abc5c3756571010"
+        },
+        {
+          "id": 607654428,
+          "name": "NetAudit-0.1.0-windows-x64-f2002b79bd6d-onefile.zip",
+          "size": 8947219,
+          "digest": "sha256:645cc8b90956c82e870d671c0c09698336e288de10eb3672da4722385ad97aa3"
+        },
+        {
+          "id": 607654448,
+          "name": "NetAudit-0.1.0-windows-x64-f2002b79bd6d-portable.zip",
+          "size": 9047714,
+          "digest": "sha256:66f0400a0522395c3cf3cf19aa1294aed0f8243de7c10a6e04c658edff44090d"
+        }
+      ],
+      "verified": true
+    }
+  ]
+}

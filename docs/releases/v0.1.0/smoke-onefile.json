@@ -1,0 +1,601 @@
+{
+  "schema": 1,
+  "mode": "onefile",
+  "platform": "Windows-2022Server-10.0.20348-SP0",
+  "machine": "AMD64",
+  "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "checks": [
+    {
+      "name": "CLI vendors, three exports and exit codes 0/1/2; no pause",
+      "target": "onefile-EXE-no-Python",
+      "runs": [
+        {
+          "vendor": "cisco",
+          "format": "json",
+          "exit_code": 0
+        },
+        {
+          "vendor": "cisco",
+          "format": "md",
+          "exit_code": 0
+        },
+        {
+          "vendor": "cisco",
+          "format": "html",
+          "exit_code": 0
+        },
+        {
+          "vendor": "huawei",
+          "format": "json",
+          "exit_code": 0
+        },
+        {
+          "vendor": "huawei",
+          "format": "md",
+          "exit_code": 0
+        },
+        {
+          "vendor": "huawei",
+          "format": "html",
+          "exit_code": 0
+        },
+        {
+          "vendor": "h3c",
+          "format": "json",
+          "exit_code": 0
+        },
+        {
+          "vendor": "h3c",
+          "format": "md",
+          "exit_code": 0
+        },
+        {
+          "vendor": "h3c",
+          "format": "html",
+          "exit_code": 0
+        },
+        {
+          "arguments": [
+            "--fail-on",
+            "high"
+          ],
+          "exit_code": 1
+        },
+        {
+          "arguments": [
+            "--strict"
+          ],
+          "exit_code": 2
+        },
+        {
+          "arguments": [
+            "--vendor",
+            "invalid"
+          ],
+          "exit_code": 2
+        }
+      ],
+      "stdin": "DEVNULL",
+      "timeout_seconds": 90,
+      "external_cwd": true,
+      "unicode_and_spaces_in_paths": true,
+      "status": "passed",
+      "seconds": 7.453
+    },
+    {
+      "name": "occupied default port, resources, audit API and process cleanup",
+      "target": "onefile-EXE-no-Python",
+      "resources_sha256": {
+        "index.html": "916d24641fa15d743d5972e4ddf7ba6ec0b3f6b3ad9c2da61b18c8d1163b4efd",
+        "style.css": "2689159e44f76b58a69439f39d8b1255aaddedb5cfce2982c192792a5b57951d",
+        "app.js": "2c2f0280279e8a0f6e8b38ce4273ba9246a2eceaee89b7c5f1b27bacadc6b3ac"
+      },
+      "vendors_findings": {
+        "cisco": 14,
+        "huawei": 9,
+        "h3c": 8
+      },
+      "exports": [
+        "json",
+        "md",
+        "html"
+      ],
+      "session_token": "validated; omitted",
+      "actual_port": 62865,
+      "requested_port": 8765,
+      "no_browser": true,
+      "arguments": [
+        "serve",
+        "--port",
+        "8765",
+        "--no-browser"
+      ],
+      "extraction_directories_observed": [
+        "_MEI0000130c2"
+      ],
+      "shutdown": {
+        "exit_code": 0,
+        "forced_cleanup": false,
+        "signal_error": null,
+        "process_inspection_error": null,
+        "observed_pids": [
+          4876,
+          7664
+        ],
+        "remaining_pids": [],
+        "processes": [
+          {
+            "pid": 4876,
+            "parent_pid": 7392,
+            "image": "NetAudit.exe",
+            "created_ticks": 134354970222103240,
+            "alive": false,
+            "exit_code": 0
+          },
+          {
+            "pid": 7664,
+            "parent_pid": 4876,
+            "image": "NetAudit.exe",
+            "created_ticks": 134354970223358123,
+            "alive": false,
+            "exit_code": 0
+          }
+        ],
+        "excluded_historical_pid_links": [],
+        "taskkill": [],
+        "port_closed": true,
+        "interrupt_code_accepted_as_native_cmd_status": false
+      },
+      "extraction_cleanup": "verified",
+      "status": "passed",
+      "seconds": 1.875
+    },
+    {
+      "name": "no arguments start web and dispatch browser at actual port",
+      "target": "onefile-EXE-no-Python",
+      "browser_dispatch": "actual subprocess dispatched configured stub; OS default GUI not tested",
+      "resources_sha256": {
+        "index.html": "916d24641fa15d743d5972e4ddf7ba6ec0b3f6b3ad9c2da61b18c8d1163b4efd",
+        "style.css": "2689159e44f76b58a69439f39d8b1255aaddedb5cfce2982c192792a5b57951d",
+        "app.js": "2c2f0280279e8a0f6e8b38ce4273ba9246a2eceaee89b7c5f1b27bacadc6b3ac"
+      },
+      "vendors_findings": {
+        "cisco": 14,
+        "huawei": 9,
+        "h3c": 8
+      },
+      "exports": [
+        "json",
+        "md",
+        "html"
+      ],
+      "session_token": "validated; omitted",
+      "actual_port": 62876,
+      "requested_port": 8765,
+      "no_browser": false,
+      "arguments": [],
+      "extraction_directories_observed": [
+        "_MEI00001b902"
+      ],
+      "shutdown": {
+        "exit_code": 0,
+        "forced_cleanup": false,
+        "signal_error": null,
+        "process_inspection_error": null,
+        "observed_pids": [
+          7056,
+          7100
+        ],
+        "remaining_pids": [],
+        "processes": [
+          {
+            "pid": 7056,
+            "parent_pid": 7392,
+            "image": "NetAudit.exe",
+            "created_ticks": 134354970240656846,
+            "alive": false,
+            "exit_code": 0
+          },
+          {
+            "pid": 7100,
+            "parent_pid": 7056,
+            "image": "NetAudit.exe",
+            "created_ticks": 134354970241849964,
+            "alive": false,
+            "exit_code": 0
+          }
+        ],
+        "excluded_historical_pid_links": [],
+        "taskkill": [],
+        "port_closed": true,
+        "interrupt_code_accepted_as_native_cmd_status": false
+      },
+      "extraction_cleanup": "verified",
+      "status": "passed",
+      "seconds": 1.891
+    },
+    {
+      "name": "CLI vendors, three exports and exit codes 0/1/2; no pause",
+      "target": "onefile-BAT-no-Python",
+      "runs": [
+        {
+          "vendor": "cisco",
+          "format": "json",
+          "exit_code": 0
+        },
+        {
+          "vendor": "cisco",
+          "format": "md",
+          "exit_code": 0
+        },
+        {
+          "vendor": "cisco",
+          "format": "html",
+          "exit_code": 0
+        },
+        {
+          "vendor": "huawei",
+          "format": "json",
+          "exit_code": 0
+        },
+        {
+          "vendor": "huawei",
+          "format": "md",
+          "exit_code": 0
+        },
+        {
+          "vendor": "huawei",
+          "format": "html",
+          "exit_code": 0
+        },
+        {
+          "vendor": "h3c",
+          "format": "json",
+          "exit_code": 0
+        },
+        {
+          "vendor": "h3c",
+          "format": "md",
+          "exit_code": 0
+        },
+        {
+          "vendor": "h3c",
+          "format": "html",
+          "exit_code": 0
+        },
+        {
+          "arguments": [
+            "--fail-on",
+            "high"
+          ],
+          "exit_code": 1
+        },
+        {
+          "arguments": [
+            "--strict"
+          ],
+          "exit_code": 2
+        },
+        {
+          "arguments": [
+            "--vendor",
+            "invalid"
+          ],
+          "exit_code": 2
+        }
+      ],
+      "stdin": "DEVNULL",
+      "timeout_seconds": 90,
+      "external_cwd": true,
+      "unicode_and_spaces_in_paths": true,
+      "status": "passed",
+      "seconds": 7.625
+    },
+    {
+      "name": "occupied default port, resources, audit API and process cleanup",
+      "target": "onefile-BAT-no-Python",
+      "resources_sha256": {
+        "index.html": "916d24641fa15d743d5972e4ddf7ba6ec0b3f6b3ad9c2da61b18c8d1163b4efd",
+        "style.css": "2689159e44f76b58a69439f39d8b1255aaddedb5cfce2982c192792a5b57951d",
+        "app.js": "2c2f0280279e8a0f6e8b38ce4273ba9246a2eceaee89b7c5f1b27bacadc6b3ac"
+      },
+      "vendors_findings": {
+        "cisco": 14,
+        "huawei": 9,
+        "h3c": 8
+      },
+      "exports": [
+        "json",
+        "md",
+        "html"
+      ],
+      "session_token": "validated; omitted",
+      "actual_port": 62894,
+      "requested_port": 8765,
+      "no_browser": true,
+      "arguments": [
+        "serve",
+        "--port",
+        "8765",
+        "--no-browser"
+      ],
+      "extraction_directories_observed": [
+        "_MEI000019202"
+      ],
+      "shutdown": {
+        "exit_code": 0,
+        "forced_cleanup": false,
+        "signal_error": null,
+        "process_inspection_error": null,
+        "observed_pids": [
+          768,
+          2560,
+          6432
+        ],
+        "remaining_pids": [],
+        "processes": [
+          {
+            "pid": 2560,
+            "parent_pid": 7392,
+            "image": "cmd.exe",
+            "created_ticks": 134354970335824791,
+            "alive": false,
+            "exit_code": 0
+          },
+          {
+            "pid": 6432,
+            "parent_pid": 2560,
+            "image": "NetAudit.exe",
+            "created_ticks": 134354970335967454,
+            "alive": false,
+            "exit_code": 0
+          },
+          {
+            "pid": 768,
+            "parent_pid": 6432,
+            "image": "NetAudit.exe",
+            "created_ticks": 134354970337171096,
+            "alive": false,
+            "exit_code": 0
+          }
+        ],
+        "excluded_historical_pid_links": [],
+        "taskkill": [],
+        "port_closed": true,
+        "interrupt_code_accepted_as_native_cmd_status": false
+      },
+      "extraction_cleanup": "verified",
+      "status": "passed",
+      "seconds": 1.89
+    },
+    {
+      "name": "no arguments start web and dispatch browser at actual port",
+      "target": "onefile-BAT-no-Python",
+      "browser_dispatch": "actual subprocess dispatched configured stub; OS default GUI not tested",
+      "resources_sha256": {
+        "index.html": "916d24641fa15d743d5972e4ddf7ba6ec0b3f6b3ad9c2da61b18c8d1163b4efd",
+        "style.css": "2689159e44f76b58a69439f39d8b1255aaddedb5cfce2982c192792a5b57951d",
+        "app.js": "2c2f0280279e8a0f6e8b38ce4273ba9246a2eceaee89b7c5f1b27bacadc6b3ac"
+      },
+      "vendors_findings": {
+        "cisco": 14,
+        "huawei": 9,
+        "h3c": 8
+      },
+      "exports": [
+        "json",
+        "md",
+        "html"
+      ],
+      "session_token": "validated; omitted",
+      "actual_port": 62906,
+      "requested_port": 8765,
+      "no_browser": false,
+      "arguments": [],
+      "extraction_directories_observed": [
+        "_MEI0000138c2"
+      ],
+      "shutdown": {
+        "exit_code": 0,
+        "forced_cleanup": false,
+        "signal_error": null,
+        "process_inspection_error": null,
+        "observed_pids": [
+          3108,
+          5004,
+          5640
+        ],
+        "remaining_pids": [],
+        "processes": [
+          {
+            "pid": 5640,
+            "parent_pid": 7392,
+            "image": "cmd.exe",
+            "created_ticks": 134354970354775785,
+            "alive": false,
+            "exit_code": 0
+          },
+          {
+            "pid": 5004,
+            "parent_pid": 5640,
+            "image": "NetAudit.exe",
+            "created_ticks": 134354970354977816,
+            "alive": false,
+            "exit_code": 0
+          },
+          {
+            "pid": 3108,
+            "parent_pid": 5004,
+            "image": "NetAudit.exe",
+            "created_ticks": 134354970356228714,
+            "alive": false,
+            "exit_code": 0
+          }
+        ],
+        "excluded_historical_pid_links": [],
+        "taskkill": [],
+        "port_closed": true,
+        "interrupt_code_accepted_as_native_cmd_status": false
+      },
+      "extraction_cleanup": "verified",
+      "status": "passed",
+      "seconds": 2.094
+    },
+    {
+      "name": "read-only application directory with writable user temporary directory",
+      "target": "onefile-EXE-no-Python",
+      "resources_sha256": {
+        "index.html": "916d24641fa15d743d5972e4ddf7ba6ec0b3f6b3ad9c2da61b18c8d1163b4efd",
+        "style.css": "2689159e44f76b58a69439f39d8b1255aaddedb5cfce2982c192792a5b57951d",
+        "app.js": "2c2f0280279e8a0f6e8b38ce4273ba9246a2eceaee89b7c5f1b27bacadc6b3ac"
+      },
+      "vendors_findings": {
+        "cisco": 14,
+        "huawei": 9,
+        "h3c": 8
+      },
+      "exports": [
+        "json",
+        "md",
+        "html"
+      ],
+      "session_token": "validated; omitted",
+      "actual_port": 62917,
+      "requested_port": 0,
+      "no_browser": true,
+      "arguments": [
+        "serve",
+        "--port",
+        "0",
+        "--no-browser"
+      ],
+      "extraction_directories_observed": [
+        "_MEI000015d02"
+      ],
+      "shutdown": {
+        "exit_code": 0,
+        "forced_cleanup": false,
+        "signal_error": null,
+        "process_inspection_error": null,
+        "observed_pids": [
+          2616,
+          5584
+        ],
+        "remaining_pids": [],
+        "processes": [
+          {
+            "pid": 5584,
+            "parent_pid": 7392,
+            "image": "NetAudit.exe",
+            "created_ticks": 134354970375893613,
+            "alive": false,
+            "exit_code": 0
+          },
+          {
+            "pid": 2616,
+            "parent_pid": 5584,
+            "image": "NetAudit.exe",
+            "created_ticks": 134354970377105578,
+            "alive": false,
+            "exit_code": 0
+          }
+        ],
+        "excluded_historical_pid_links": [],
+        "taskkill": [],
+        "port_closed": true,
+        "interrupt_code_accepted_as_native_cmd_status": false
+      },
+      "extraction_cleanup": "verified",
+      "status": "passed",
+      "seconds": 1.984
+    },
+    {
+      "name": "read-only application directory with writable user temporary directory",
+      "target": "onefile-BAT-no-Python",
+      "resources_sha256": {
+        "index.html": "916d24641fa15d743d5972e4ddf7ba6ec0b3f6b3ad9c2da61b18c8d1163b4efd",
+        "style.css": "2689159e44f76b58a69439f39d8b1255aaddedb5cfce2982c192792a5b57951d",
+        "app.js": "2c2f0280279e8a0f6e8b38ce4273ba9246a2eceaee89b7c5f1b27bacadc6b3ac"
+      },
+      "vendors_findings": {
+        "cisco": 14,
+        "huawei": 9,
+        "h3c": 8
+      },
+      "exports": [
+        "json",
+        "md",
+        "html"
+      ],
+      "session_token": "validated; omitted",
+      "actual_port": 62933,
+      "requested_port": 0,
+      "no_browser": true,
+      "arguments": [
+        "serve",
+        "--port",
+        "0",
+        "--no-browser"
+      ],
+      "extraction_directories_observed": [
+        "_MEI00001fcc2"
+      ],
+      "shutdown": {
+        "exit_code": 0,
+        "forced_cleanup": false,
+        "signal_error": null,
+        "process_inspection_error": null,
+        "observed_pids": [
+          3672,
+          4324,
+          8140
+        ],
+        "remaining_pids": [],
+        "processes": [
+          {
+            "pid": 3672,
+            "parent_pid": 7392,
+            "image": "cmd.exe",
+            "created_ticks": 134354970395651526,
+            "alive": false,
+            "exit_code": 0
+          },
+          {
+            "pid": 8140,
+            "parent_pid": 3672,
+            "image": "NetAudit.exe",
+            "created_ticks": 134354970395800344,
+            "alive": false,
+            "exit_code": 0
+          },
+          {
+            "pid": 4324,
+            "parent_pid": 8140,
+            "image": "NetAudit.exe",
+            "created_ticks": 134354970397060532,
+            "alive": false,
+            "exit_code": 0
+          }
+        ],
+        "excluded_historical_pid_links": [],
+        "taskkill": [],
+        "port_closed": true,
+        "interrupt_code_accepted_as_native_cmd_status": false
+      },
+      "extraction_cleanup": "verified",
+      "status": "passed",
+      "seconds": 2.094
+    }
+  ],
+  "not_tested": [
+    "Actual OS default-browser GUI launch and interactive file picker/filter/export clicks; real no-argument processes dispatch an observable configured browser stub",
+    "A separate Windows computer with Python physically absent; subprocess no-Python PATH checks do not uninstall host build Python",
+    "A standard non-administrator Windows account; this runner is administrative, with write-deny ACLs applied during read-only checks"
+  ],
+  "path_case": "application/config/report/runtime locations contain Chinese characters and spaces; external working directory",
+  "windows_process_is_admin": true,
+  "console_allocated_for_process_group_signals": false,
+  "executable_sha256": "a1b7f309a5f98e8139cfd99dde446ff0466f1ad846196c977abc5c3756571010",
+  "python_independence": "EXE/BAT child PATH excludes Python, py and Python-related environment variables; host still has build Python installed",
+  "passed": true
+}

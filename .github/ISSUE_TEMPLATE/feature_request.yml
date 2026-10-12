@@ -1,0 +1,24 @@
+name: 功能建议
+description: 建议新的解析支持、审计规则或使用体验改进。
+title: "[建议] "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 希望解决的问题
+      description: 描述具体使用场景与当前遇到的限制。
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 建议的行为
+      description: 说明期望的输入、输出或操作方式；涉及规则时描述触发条件与适用边界。
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 语法示例或依据（可选）
+      description: 可附官方文档、厂商版本或合成/脱敏配置，不提交真实凭据。
+      render: text
