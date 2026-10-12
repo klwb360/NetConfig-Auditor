@@ -1,0 +1,608 @@
+{
+  "schema": 1,
+  "mode": "source",
+  "platform": "Windows-2022Server-10.0.20348-SP0",
+  "machine": "AMD64",
+  "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "checks": [
+    {
+      "name": "missing Python gives guidance without pausing",
+      "target": "source-BAT",
+      "runs": [
+        {
+          "arguments": [],
+          "exit_code": 2
+        },
+        {
+          "arguments": [
+            "--help"
+          ],
+          "exit_code": 2
+        }
+      ],
+      "stdin": "DEVNULL",
+      "python_and_py_not_in_path": true,
+      "download_guidance": "verified",
+      "status": "passed",
+      "seconds": 0.047
+    },
+    {
+      "name": "CLI vendors, three exports and exit codes 0/1/2; no pause",
+      "target": "source-python",
+      "runs": [
+        {
+          "vendor": "cisco",
+          "format": "json",
+          "exit_code": 0
+        },
+        {
+          "vendor": "cisco",
+          "format": "md",
+          "exit_code": 0
+        },
+        {
+          "vendor": "cisco",
+          "format": "html",
+          "exit_code": 0
+        },
+        {
+          "vendor": "huawei",
+          "format": "json",
+          "exit_code": 0
+        },
+        {
+          "vendor": "huawei",
+          "format": "md",
+          "exit_code": 0
+        },
+        {
+          "vendor": "huawei",
+          "format": "html",
+          "exit_code": 0
+        },
+        {
+          "vendor": "h3c",
+          "format": "json",
+          "exit_code": 0
+        },
+        {
+          "vendor": "h3c",
+          "format": "md",
+          "exit_code": 0
+        },
+        {
+          "vendor": "h3c",
+          "format": "html",
+          "exit_code": 0
+        },
+        {
+          "arguments": [
+            "--fail-on",
+            "high"
+          ],
+          "exit_code": 1
+        },
+        {
+          "arguments": [
+            "--strict"
+          ],
+          "exit_code": 2
+        },
+        {
+          "arguments": [
+            "--vendor",
+            "invalid"
+          ],
+          "exit_code": 2
+        }
+      ],
+      "stdin": "DEVNULL",
+      "timeout_seconds": 90,
+      "external_cwd": true,
+      "unicode_and_spaces_in_paths": true,
+      "status": "passed",
+      "seconds": 1.281
+    },
+    {
+      "name": "occupied default port, resources, audit API and process cleanup",
+      "target": "source-python",
+      "resources_sha256": {
+        "index.html": "916d24641fa15d743d5972e4ddf7ba6ec0b3f6b3ad9c2da61b18c8d1163b4efd",
+        "style.css": "2689159e44f76b58a69439f39d8b1255aaddedb5cfce2982c192792a5b57951d",
+        "app.js": "2c2f0280279e8a0f6e8b38ce4273ba9246a2eceaee89b7c5f1b27bacadc6b3ac"
+      },
+      "vendors_findings": {
+        "cisco": 14,
+        "huawei": 9,
+        "h3c": 8
+      },
+      "exports": [
+        "json",
+        "md",
+        "html"
+      ],
+      "session_token": "validated; omitted",
+      "actual_port": 62686,
+      "requested_port": 8765,
+      "no_browser": true,
+      "arguments": [
+        "serve",
+        "--port",
+        "8765",
+        "--no-browser"
+      ],
+      "extraction_directories_observed": [],
+      "shutdown": {
+        "exit_code": 0,
+        "forced_cleanup": false,
+        "signal_error": null,
+        "process_inspection_error": null,
+        "observed_pids": [
+          1620,
+          7896
+        ],
+        "remaining_pids": [],
+        "processes": [
+          {
+            "pid": 1620,
+            "parent_pid": 1268,
+            "image": "python.exe",
+            "created_ticks": 134354969727281995,
+            "alive": false,
+            "exit_code": 0
+          },
+          {
+            "pid": 7896,
+            "parent_pid": 1620,
+            "image": "python.exe",
+            "created_ticks": 134354969727319111,
+            "alive": false,
+            "exit_code": 0
+          }
+        ],
+        "excluded_historical_pid_links": [],
+        "taskkill": [],
+        "port_closed": true,
+        "interrupt_code_accepted_as_native_cmd_status": false
+      },
+      "extraction_cleanup": "verified",
+      "status": "passed",
+      "seconds": 1.344
+    },
+    {
+      "name": "no arguments start web and dispatch browser at actual port",
+      "target": "source-python",
+      "browser_dispatch": "actual subprocess dispatched configured stub; OS default GUI not tested",
+      "resources_sha256": {
+        "index.html": "916d24641fa15d743d5972e4ddf7ba6ec0b3f6b3ad9c2da61b18c8d1163b4efd",
+        "style.css": "2689159e44f76b58a69439f39d8b1255aaddedb5cfce2982c192792a5b57951d",
+        "app.js": "2c2f0280279e8a0f6e8b38ce4273ba9246a2eceaee89b7c5f1b27bacadc6b3ac"
+      },
+      "vendors_findings": {
+        "cisco": 14,
+        "huawei": 9,
+        "h3c": 8
+      },
+      "exports": [
+        "json",
+        "md",
+        "html"
+      ],
+      "session_token": "validated; omitted",
+      "actual_port": 62697,
+      "requested_port": 8765,
+      "no_browser": false,
+      "arguments": [],
+      "extraction_directories_observed": [],
+      "shutdown": {
+        "exit_code": 0,
+        "forced_cleanup": false,
+        "signal_error": null,
+        "process_inspection_error": null,
+        "observed_pids": [
+          5612,
+          7544
+        ],
+        "remaining_pids": [],
+        "processes": [
+          {
+            "pid": 5612,
+            "parent_pid": 1268,
+            "image": "python.exe",
+            "created_ticks": 134354969740806800,
+            "alive": false,
+            "exit_code": 0
+          },
+          {
+            "pid": 7544,
+            "parent_pid": 5612,
+            "image": "python.exe",
+            "created_ticks": 134354969740853104,
+            "alive": false,
+            "exit_code": 0
+          }
+        ],
+        "excluded_historical_pid_links": [],
+        "taskkill": [],
+        "port_closed": true,
+        "interrupt_code_accepted_as_native_cmd_status": false
+      },
+      "extraction_cleanup": "verified",
+      "status": "passed",
+      "seconds": 1.766
+    },
+    {
+      "name": "CLI vendors, three exports and exit codes 0/1/2; no pause",
+      "target": "source-BAT",
+      "runs": [
+        {
+          "vendor": "cisco",
+          "format": "json",
+          "exit_code": 0
+        },
+        {
+          "vendor": "cisco",
+          "format": "md",
+          "exit_code": 0
+        },
+        {
+          "vendor": "cisco",
+          "format": "html",
+          "exit_code": 0
+        },
+        {
+          "vendor": "huawei",
+          "format": "json",
+          "exit_code": 0
+        },
+        {
+          "vendor": "huawei",
+          "format": "md",
+          "exit_code": 0
+        },
+        {
+          "vendor": "huawei",
+          "format": "html",
+          "exit_code": 0
+        },
+        {
+          "vendor": "h3c",
+          "format": "json",
+          "exit_code": 0
+        },
+        {
+          "vendor": "h3c",
+          "format": "md",
+          "exit_code": 0
+        },
+        {
+          "vendor": "h3c",
+          "format": "html",
+          "exit_code": 0
+        },
+        {
+          "arguments": [
+            "--fail-on",
+            "high"
+          ],
+          "exit_code": 1
+        },
+        {
+          "arguments": [
+            "--strict"
+          ],
+          "exit_code": 2
+        },
+        {
+          "arguments": [
+            "--vendor",
+            "invalid"
+          ],
+          "exit_code": 2
+        }
+      ],
+      "stdin": "DEVNULL",
+      "timeout_seconds": 90,
+      "external_cwd": true,
+      "unicode_and_spaces_in_paths": true,
+      "status": "passed",
+      "seconds": 2.734
+    },
+    {
+      "name": "occupied default port, resources, audit API and process cleanup",
+      "target": "source-BAT",
+      "resources_sha256": {
+        "index.html": "916d24641fa15d743d5972e4ddf7ba6ec0b3f6b3ad9c2da61b18c8d1163b4efd",
+        "style.css": "2689159e44f76b58a69439f39d8b1255aaddedb5cfce2982c192792a5b57951d",
+        "app.js": "2c2f0280279e8a0f6e8b38ce4273ba9246a2eceaee89b7c5f1b27bacadc6b3ac"
+      },
+      "vendors_findings": {
+        "cisco": 14,
+        "huawei": 9,
+        "h3c": 8
+      },
+      "exports": [
+        "json",
+        "md",
+        "html"
+      ],
+      "session_token": "validated; omitted",
+      "actual_port": 62709,
+      "requested_port": 8765,
+      "no_browser": true,
+      "arguments": [
+        "serve",
+        "--port",
+        "8765",
+        "--no-browser"
+      ],
+      "extraction_directories_observed": [],
+      "shutdown": {
+        "exit_code": 0,
+        "forced_cleanup": false,
+        "signal_error": null,
+        "process_inspection_error": null,
+        "observed_pids": [
+          1112,
+          4168,
+          5540
+        ],
+        "remaining_pids": [],
+        "processes": [
+          {
+            "pid": 1112,
+            "parent_pid": 1268,
+            "image": "cmd.exe",
+            "created_ticks": 134354969785806125,
+            "alive": false,
+            "exit_code": 0
+          },
+          {
+            "pid": 4168,
+            "parent_pid": 1112,
+            "image": "py.exe",
+            "created_ticks": 134354969786299137,
+            "alive": false,
+            "exit_code": 0
+          },
+          {
+            "pid": 5540,
+            "parent_pid": 4168,
+            "image": "python.exe",
+            "created_ticks": 134354969786387275,
+            "alive": false,
+            "exit_code": 0
+          }
+        ],
+        "excluded_historical_pid_links": [],
+        "taskkill": [],
+        "port_closed": true,
+        "interrupt_code_accepted_as_native_cmd_status": false
+      },
+      "extraction_cleanup": "verified",
+      "status": "passed",
+      "seconds": 1.969
+    },
+    {
+      "name": "no arguments start web and dispatch browser at actual port",
+      "target": "source-BAT",
+      "browser_dispatch": "actual subprocess dispatched configured stub; OS default GUI not tested",
+      "resources_sha256": {
+        "index.html": "916d24641fa15d743d5972e4ddf7ba6ec0b3f6b3ad9c2da61b18c8d1163b4efd",
+        "style.css": "2689159e44f76b58a69439f39d8b1255aaddedb5cfce2982c192792a5b57951d",
+        "app.js": "2c2f0280279e8a0f6e8b38ce4273ba9246a2eceaee89b7c5f1b27bacadc6b3ac"
+      },
+      "vendors_findings": {
+        "cisco": 14,
+        "huawei": 9,
+        "h3c": 8
+      },
+      "exports": [
+        "json",
+        "md",
+        "html"
+      ],
+      "session_token": "validated; omitted",
+      "actual_port": 62725,
+      "requested_port": 8765,
+      "no_browser": false,
+      "arguments": [],
+      "extraction_directories_observed": [],
+      "shutdown": {
+        "exit_code": 0,
+        "forced_cleanup": false,
+        "signal_error": null,
+        "process_inspection_error": null,
+        "observed_pids": [
+          1320,
+          4748,
+          5620
+        ],
+        "remaining_pids": [],
+        "processes": [
+          {
+            "pid": 5620,
+            "parent_pid": 1268,
+            "image": "cmd.exe",
+            "created_ticks": 134354969805429096,
+            "alive": false,
+            "exit_code": 0
+          },
+          {
+            "pid": 1320,
+            "parent_pid": 5620,
+            "image": "py.exe",
+            "created_ticks": 134354969841030476,
+            "alive": false,
+            "exit_code": 0
+          },
+          {
+            "pid": 4748,
+            "parent_pid": 1320,
+            "image": "python.exe",
+            "created_ticks": 134354969841117120,
+            "alive": false,
+            "exit_code": 0
+          }
+        ],
+        "excluded_historical_pid_links": [],
+        "taskkill": [],
+        "port_closed": true,
+        "interrupt_code_accepted_as_native_cmd_status": false
+      },
+      "extraction_cleanup": "verified",
+      "status": "passed",
+      "seconds": 4.984
+    },
+    {
+      "name": "read-only application directory with writable user temporary directory",
+      "target": "source-python",
+      "resources_sha256": {
+        "index.html": "916d24641fa15d743d5972e4ddf7ba6ec0b3f6b3ad9c2da61b18c8d1163b4efd",
+        "style.css": "2689159e44f76b58a69439f39d8b1255aaddedb5cfce2982c192792a5b57951d",
+        "app.js": "2c2f0280279e8a0f6e8b38ce4273ba9246a2eceaee89b7c5f1b27bacadc6b3ac"
+      },
+      "vendors_findings": {
+        "cisco": 14,
+        "huawei": 9,
+        "h3c": 8
+      },
+      "exports": [
+        "json",
+        "md",
+        "html"
+      ],
+      "session_token": "validated; omitted",
+      "actual_port": 62736,
+      "requested_port": 0,
+      "no_browser": true,
+      "arguments": [
+        "serve",
+        "--port",
+        "0",
+        "--no-browser"
+      ],
+      "extraction_directories_observed": [],
+      "shutdown": {
+        "exit_code": 0,
+        "forced_cleanup": false,
+        "signal_error": null,
+        "process_inspection_error": null,
+        "observed_pids": [
+          2840,
+          2904
+        ],
+        "remaining_pids": [],
+        "processes": [
+          {
+            "pid": 2840,
+            "parent_pid": 1268,
+            "image": "python.exe",
+            "created_ticks": 134354969855468883,
+            "alive": false,
+            "exit_code": 0
+          },
+          {
+            "pid": 2904,
+            "parent_pid": 2840,
+            "image": "python.exe",
+            "created_ticks": 134354969855501267,
+            "alive": false,
+            "exit_code": 0
+          }
+        ],
+        "excluded_historical_pid_links": [],
+        "taskkill": [],
+        "port_closed": true,
+        "interrupt_code_accepted_as_native_cmd_status": false
+      },
+      "extraction_cleanup": "verified",
+      "status": "passed",
+      "seconds": 1.343
+    },
+    {
+      "name": "read-only application directory with writable user temporary directory",
+      "target": "source-BAT",
+      "resources_sha256": {
+        "index.html": "916d24641fa15d743d5972e4ddf7ba6ec0b3f6b3ad9c2da61b18c8d1163b4efd",
+        "style.css": "2689159e44f76b58a69439f39d8b1255aaddedb5cfce2982c192792a5b57951d",
+        "app.js": "2c2f0280279e8a0f6e8b38ce4273ba9246a2eceaee89b7c5f1b27bacadc6b3ac"
+      },
+      "vendors_findings": {
+        "cisco": 14,
+        "huawei": 9,
+        "h3c": 8
+      },
+      "exports": [
+        "json",
+        "md",
+        "html"
+      ],
+      "session_token": "validated; omitted",
+      "actual_port": 62749,
+      "requested_port": 0,
+      "no_browser": true,
+      "arguments": [
+        "serve",
+        "--port",
+        "0",
+        "--no-browser"
+      ],
+      "extraction_directories_observed": [],
+      "shutdown": {
+        "exit_code": 0,
+        "forced_cleanup": false,
+        "signal_error": null,
+        "process_inspection_error": null,
+        "observed_pids": [
+          1760,
+          2916,
+          5144
+        ],
+        "remaining_pids": [],
+        "processes": [
+          {
+            "pid": 2916,
+            "parent_pid": 1268,
+            "image": "cmd.exe",
+            "created_ticks": 134354969868938577,
+            "alive": false,
+            "exit_code": 0
+          },
+          {
+            "pid": 1760,
+            "parent_pid": 2916,
+            "image": "py.exe",
+            "created_ticks": 134354969869552300,
+            "alive": false,
+            "exit_code": 0
+          },
+          {
+            "pid": 5144,
+            "parent_pid": 1760,
+            "image": "python.exe",
+            "created_ticks": 134354969869653686,
+            "alive": false,
+            "exit_code": 0
+          }
+        ],
+        "excluded_historical_pid_links": [],
+        "taskkill": [],
+        "port_closed": true,
+        "interrupt_code_accepted_as_native_cmd_status": false
+      },
+      "extraction_cleanup": "verified",
+      "status": "passed",
+      "seconds": 1.375
+    }
+  ],
+  "not_tested": [
+    "Actual OS default-browser GUI launch and interactive file picker/filter/export clicks; real no-argument processes dispatch an observable configured browser stub",
+    "A separate Windows computer with Python physically absent; subprocess no-Python PATH checks do not uninstall host build Python",
+    "A standard non-administrator Windows account; this runner is administrative, with write-deny ACLs applied during read-only checks"
+  ],
+  "path_case": "application/config/report/runtime locations contain Chinese characters and spaces; external working directory",
+  "windows_process_is_admin": true,
+  "console_allocated_for_process_group_signals": false,
+  "passed": true
+}

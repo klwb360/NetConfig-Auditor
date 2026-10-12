@@ -1,0 +1,71 @@
+{
+  "inventory": {
+    "hostname": "cisco-05-vty-telnet-risk",
+    "interfaces": {
+      "GigabitEthernet0/1": {
+        "name": "GigabitEthernet0/1",
+        "shutdown": false,
+        "description": "Campus-uplink",
+        "mode": "routed",
+        "access_vlan": null,
+        "native_vlan": null,
+        "allowed_vlan_ranges": null,
+        "addresses": [
+          "10.5.0.1/24"
+        ],
+        "vrf": "default",
+        "acl_bindings": {},
+        "nat_role": null,
+        "stp_enabled": null,
+        "stp_edge": null,
+        "bpdu_guard": null,
+        "bpdu_filter": null,
+        "protected": null
+      }
+    },
+    "vlans": {},
+    "routes": [],
+    "acls": {},
+    "nat": [],
+    "nat_pools": {},
+    "management_lines": [
+      {
+        "name": "line vty 0 4",
+        "transport": [
+          "telnet",
+          "ssh"
+        ],
+        "authentication": "login local",
+        "idle_seconds": 600,
+        "acl_bindings": {}
+      }
+    ],
+    "stp": {
+      "enabled": null,
+      "mode": null,
+      "edge_default": null,
+      "bpdu_guard_default": null,
+      "bpdu_filter_default": null,
+      "vlan_enabled": {}
+    }
+  },
+  "risk_findings": [
+    {
+      "rule_id": "MGMT-VTY-TELNET",
+      "affected_objects": [
+        "line vty 0 4"
+      ]
+    }
+  ],
+  "unknown_findings": [
+    {
+      "rule_id": "MGMT-VTY-SOURCE",
+      "affected_objects": [
+        "line vty 0 4"
+      ]
+    }
+  ],
+  "unknown_commands": [],
+  "must_not_report": [],
+  "annotation": "手工根据显式命令、匹配顺序和对象作用域标注；不代表实设备运行状态。"
+}

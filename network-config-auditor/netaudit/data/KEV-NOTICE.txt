@@ -1,0 +1,9 @@
+CISA Known Exploited Vulnerabilities (KEV) catalog
+Official data publisher: U.S. Cybersecurity and Infrastructure Security Agency (CISA)
+Source: https://raw.githubusercontent.com/cisagov/kev-data/develop/known_exploited_vulnerabilities.json
+Catalog: https://www.cisa.gov/known-exploited-vulnerabilities-catalog
+Data license: CC0 1.0; see KEV-LICENSE.txt.
+This snapshot is unmodified official JSON, not a live feed.
+Third-party links in this data have their own terms; CC0 does not cover them.
+CISA listing indicates known exploitation of the vulnerability, not compromise of the audited device.
+Bundling this public catalog does not imply CISA endorsement of NetAudit.

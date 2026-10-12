@@ -1,0 +1,50 @@
+{
+  "source_head": "caf3717a131f6ca7cd8c6b477628ba528a6b129e",
+  "ci_build_source": "3789bff692bede73c0be723a3f1e9feea174c050",
+  "windows_tests": {
+    "passed": 471,
+    "subtests_passed": 506
+  },
+  "linux_tests_per_python_version": {
+    "passed": 470,
+    "skipped": 1,
+    "subtests_passed": 506
+  },
+  "core_coverage": {
+    "covered_lines": 3522,
+    "num_statements": 3783,
+    "percent_covered": 91.40774171150842,
+    "percent_covered_display": "91",
+    "missing_lines": 261,
+    "excluded_lines": 0,
+    "percent_statements_covered": 93.10071371927042,
+    "percent_statements_covered_display": "93",
+    "num_branches": 1978,
+    "num_partial_branches": 212,
+    "covered_branches": 1744,
+    "missing_branches": 234,
+    "percent_branches_covered": 88.16986855409505,
+    "percent_branches_covered_display": "88"
+  },
+  "windows_run_id": 38226564521,
+  "linux_run_ids": [
+    38226564305,
+    38226557637
+  ],
+  "ci_artifact_id": 11735878519,
+  "ci_artifact_sha256": "1cce7847d092cfd4665f7b9c2926f031910d205140d24db23e4fa735b7830a67",
+  "clean_runtime_artifact_id": 11736564253,
+  "clean_runtime_artifact_sha256": "f4352281db44c514502eec0de4903857da99755a3ebbed8c3d7210fa7b28e3e2",
+  "windows_process_checks": {
+    "source": 10,
+    "onedir": 9,
+    "onefile": 9
+  },
+  "artifact_hashes_verified": true,
+  "limits": [
+    "Synthetic gold results only cover the frozen supported syntax and rule scope.",
+    "CI removed standard CPython cache and restricted PATH; it did not prove every interpreter absent from the physical machine.",
+    "Windows 11 local frozen acceptance used source 18f8550; final caf3717 changed Git attributes, CI PowerShell and tests only.",
+    "Explorer double-click, real browser visual interaction, ordinary user account and a separate physically Python-free desktop remain manual checks."
+  ]
+}

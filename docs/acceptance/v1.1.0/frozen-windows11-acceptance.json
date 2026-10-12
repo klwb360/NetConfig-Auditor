@@ -1,0 +1,45 @@
+{
+  "platform": "Windows 11 10.0.26200 x64",
+  "source_commit": "18f85507f51b73daf9dd3ffa6dac0f70bf82564b",
+  "external_python_on_path": false,
+  "modes": [
+    {
+      "mode": "onedir",
+      "cases": 50,
+      "fields": {
+        "correct": 1870,
+        "total": 1870,
+        "accuracy": 1.0
+      },
+      "findings": {
+        "tp": 26,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "executable_sha256": "e4d1889fe96cd528890bbc897fb66be9a1831ac4e329beee1a58e3efcbcd0783",
+      "passed": true
+    },
+    {
+      "mode": "onefile",
+      "cases": 50,
+      "fields": {
+        "correct": 1870,
+        "total": 1870,
+        "accuracy": 1.0
+      },
+      "findings": {
+        "tp": 26,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "executable_sha256": "b820d560584fa9bf803e9b340890227144c39da1a11003272a6ac5afee1568e4",
+      "passed": true
+    }
+  ],
+  "limitations": "Host has Python installed; frozen child processes have a System32-only PATH. Manual Explorer and separate physical no-Python desktop checks are not claimed.",
+  "passed": true
+}

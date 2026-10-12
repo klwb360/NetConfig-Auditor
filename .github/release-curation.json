@@ -1,0 +1,263 @@
+{
+  "repository": "klwb360/NetAudit",
+  "releases": [
+    {
+      "id": 402591198,
+      "tag": "v0.2.1",
+      "source_commit": "befb38bbecbbaa9d0d97c48c922e50e18c42f462",
+      "run_id": 37136065995,
+      "run_attempt": 1,
+      "artifact": {
+        "id": 11278162885,
+        "name": "NetAudit-windows-x64-befb38bbecbbaa9d0d97c48c922e50e18c42f462",
+        "digest": "sha256:06ce04dae8a15f345a159dbdcd5bdfcb50ae9b6954887379d65442aaa9ebee40"
+      },
+      "assets": [
+        {
+          "id": 608120775,
+          "name": "manifest.json",
+          "size": 77770,
+          "digest": "sha256:302219671cdf5008465dbd5b6a829de0b1c92b4948c1341b58693ee8d40863c1",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.2.1/manifest.json",
+          "keep": false
+        },
+        {
+          "id": 608120580,
+          "name": "NetAudit-0.2.1-source-befb38bbecbb.zip",
+          "size": 623186,
+          "digest": "sha256:7d9b3c654a727269dbec07d2df40b8f4295d69ec868e4877e4cdc49341cef44e",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.2.1/NetAudit-0.2.1-source-befb38bbecbb.zip",
+          "keep": false
+        },
+        {
+          "id": 608120615,
+          "name": "NetAudit-0.2.1-windows-x64-befb38bbecbb-onefile.exe",
+          "size": 9278501,
+          "digest": "sha256:a20572e92de8891b6f4f27204a4a7fccef3ebe0facc907a2d7aeb1dba013e3d8",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.2.1/NetAudit-0.2.1-windows-x64-befb38bbecbb-onefile.exe",
+          "keep": true
+        },
+        {
+          "id": 608120648,
+          "name": "NetAudit-0.2.1-windows-x64-befb38bbecbb-onefile.zip",
+          "size": 10030171,
+          "digest": "sha256:4498444bdbc5f36816fe71b1fa730c3440b92d1937b3e49a21759ab632ad55a4",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.2.1/NetAudit-0.2.1-windows-x64-befb38bbecbb-onefile.zip",
+          "keep": true
+        },
+        {
+          "id": 608120697,
+          "name": "NetAudit-0.2.1-windows-x64-befb38bbecbb-portable.zip",
+          "size": 10132679,
+          "digest": "sha256:67e207dc67a6ce0d3c09fb6f69f0fb7de62ab46ca2273673c6034ca9014d7f9d",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.2.1/NetAudit-0.2.1-windows-x64-befb38bbecbb-portable.zip",
+          "keep": true
+        },
+        {
+          "id": 608120753,
+          "name": "SHA256SUMS.txt",
+          "size": 801,
+          "digest": "sha256:260972911e2bf9a2a327f9ce3a43c0774652abda3af9d48c90de70947e602d47",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.2.1/SHA256SUMS.txt",
+          "keep": false
+        },
+        {
+          "id": 608120812,
+          "name": "smoke-onedir.json",
+          "size": 20755,
+          "digest": "sha256:0a42c84e16114c9e8a040c8193d82f020357c9866c1d2d5967470f5e675c1d21",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.2.1/smoke-onedir.json",
+          "keep": false
+        },
+        {
+          "id": 608120838,
+          "name": "smoke-onefile.json",
+          "size": 22306,
+          "digest": "sha256:02cedf0d8280b0a489dbcbc595b6e0400a3c4367b277fb5379d7be20b11608a5",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.2.1/smoke-onefile.json",
+          "keep": false
+        },
+        {
+          "id": 608120859,
+          "name": "smoke-source.json",
+          "size": 22197,
+          "digest": "sha256:ef62d340fb7140dc569229f4e41c409fcc52ecb922901910572a52ca62a4938a",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.2.1/smoke-source.json",
+          "keep": false
+        }
+      ]
+    },
+    {
+      "id": 402487028,
+      "tag": "v0.2.0",
+      "source_commit": "8a9840601d6c51dbdaff1fbbf62aeaf84cc0b490",
+      "run_id": 37120272682,
+      "run_attempt": 1,
+      "artifact": {
+        "id": 11272449538,
+        "name": "NetAudit-windows-x64-8a9840601d6c51dbdaff1fbbf62aeaf84cc0b490",
+        "digest": "sha256:45dc43a26b1073a3214e86f32eb6e7d59571e7bb4cf8b296ae366af067fdacb1"
+      },
+      "assets": [
+        {
+          "id": 607718618,
+          "name": "manifest.json",
+          "size": 77771,
+          "digest": "sha256:a6682bfe635634e1cbf58cfb6fc93b9bb7db78da26d63c48ec5ab292c7ef34c7",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.2.0/manifest.json",
+          "keep": false
+        },
+        {
+          "id": 607718438,
+          "name": "NetAudit-0.2.0-source-8a9840601d6c.zip",
+          "size": 431907,
+          "digest": "sha256:6727e00ba46557b7839673cf6cc4c84bed07241f105d69dc4f2755493bb68f52",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.2.0/NetAudit-0.2.0-source-8a9840601d6c.zip",
+          "keep": false
+        },
+        {
+          "id": 607718467,
+          "name": "NetAudit-0.2.0-windows-x64-8a9840601d6c-onefile.exe",
+          "size": 9271125,
+          "digest": "sha256:bc0ae2627bd1baca884a4b1cc9950e912beaa9a0f0ff9b012c9a5d46539e70ab",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.2.0/NetAudit-0.2.0-windows-x64-8a9840601d6c-onefile.exe",
+          "keep": true
+        },
+        {
+          "id": 607718511,
+          "name": "NetAudit-0.2.0-windows-x64-8a9840601d6c-onefile.zip",
+          "size": 9828485,
+          "digest": "sha256:77f4849a3ca90b5d1ca7b5698ddf92b29d9d1bb7e08d741be94204b482b98e92",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.2.0/NetAudit-0.2.0-windows-x64-8a9840601d6c-onefile.zip",
+          "keep": true
+        },
+        {
+          "id": 607718551,
+          "name": "NetAudit-0.2.0-windows-x64-8a9840601d6c-portable.zip",
+          "size": 9932219,
+          "digest": "sha256:72eb86ba6b99b8bef964c388b84bc9ad251e5e181dadfd537b082b73299bb794",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.2.0/NetAudit-0.2.0-windows-x64-8a9840601d6c-portable.zip",
+          "keep": true
+        },
+        {
+          "id": 607718600,
+          "name": "SHA256SUMS.txt",
+          "size": 801,
+          "digest": "sha256:431c5884867aa6cd170d327573b3c7d90296c7f92b5eef80ae2bb9f81607a061",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.2.0/SHA256SUMS.txt",
+          "keep": false
+        },
+        {
+          "id": 607718632,
+          "name": "smoke-onedir.json",
+          "size": 20751,
+          "digest": "sha256:266e511ee61b287f20584eb00174f4fcc0a84a7b49a12a8b141830207ccc6a9e",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.2.0/smoke-onedir.json",
+          "keep": false
+        },
+        {
+          "id": 607718647,
+          "name": "smoke-onefile.json",
+          "size": 22309,
+          "digest": "sha256:6d154ab6bdb874656d2a19be533cfd74abbe4711b586447d89968200892302b8",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.2.0/smoke-onefile.json",
+          "keep": false
+        },
+        {
+          "id": 607718668,
+          "name": "smoke-source.json",
+          "size": 22201,
+          "digest": "sha256:693c94af80e7c5aef2a1024e8dc0391e9081cc6f7f8317ecf238cd3b40fadc00",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.2.0/smoke-source.json",
+          "keep": false
+        }
+      ]
+    },
+    {
+      "id": 402468203,
+      "tag": "v0.1.0",
+      "source_commit": "f2002b79bd6da91e2a29f741c8483951e20bba86",
+      "run_id": 37116561468,
+      "run_attempt": 1,
+      "artifact": {
+        "id": 11272270396,
+        "name": "NetAudit-windows-x64-f2002b79bd6da91e2a29f741c8483951e20bba86",
+        "digest": "sha256:f84bfff005504715e83edadd9f78560a57e0d8efe8436f0ac9140d0ea305ee26"
+      },
+      "assets": [
+        {
+          "id": 607654511,
+          "name": "manifest.json",
+          "size": 59526,
+          "digest": "sha256:7feeddaa9885d851baf05453fa43b2e9d7e4b0f3d60ce77d55e63b900a3a69e4",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.1.0/manifest.json",
+          "keep": false
+        },
+        {
+          "id": 607654383,
+          "name": "NetAudit-0.1.0-source-f2002b79bd6d.zip",
+          "size": 145967,
+          "digest": "sha256:0bac018b90e1709f5e7f826558b66df004c448f6e6a18e275ad6643342157f15",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.1.0/NetAudit-0.1.0-source-f2002b79bd6d.zip",
+          "keep": false
+        },
+        {
+          "id": 607654402,
+          "name": "NetAudit-0.1.0-windows-x64-f2002b79bd6d-onefile.exe",
+          "size": 8897426,
+          "digest": "sha256:a1b7f309a5f98e8139cfd99dde446ff0466f1ad846196c977abc5c3756571010",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.1.0/NetAudit-0.1.0-windows-x64-f2002b79bd6d-onefile.exe",
+          "keep": true
+        },
+        {
+          "id": 607654428,
+          "name": "NetAudit-0.1.0-windows-x64-f2002b79bd6d-onefile.zip",
+          "size": 8947219,
+          "digest": "sha256:645cc8b90956c82e870d671c0c09698336e288de10eb3672da4722385ad97aa3",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.1.0/NetAudit-0.1.0-windows-x64-f2002b79bd6d-onefile.zip",
+          "keep": true
+        },
+        {
+          "id": 607654448,
+          "name": "NetAudit-0.1.0-windows-x64-f2002b79bd6d-portable.zip",
+          "size": 9047714,
+          "digest": "sha256:66f0400a0522395c3cf3cf19aa1294aed0f8243de7c10a6e04c658edff44090d",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.1.0/NetAudit-0.1.0-windows-x64-f2002b79bd6d-portable.zip",
+          "keep": true
+        },
+        {
+          "id": 607654484,
+          "name": "SHA256SUMS.txt",
+          "size": 801,
+          "digest": "sha256:356c1a2ea1c15c43df77a48976d004358945a1d3c3f714853afd745b55083df8",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.1.0/SHA256SUMS.txt",
+          "keep": false
+        },
+        {
+          "id": 607654526,
+          "name": "smoke-onedir.json",
+          "size": 15572,
+          "digest": "sha256:3d38c24ac04af9e9f10e9d688165b2228790fbf48299bbba1f3521ede6f950e2",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.1.0/smoke-onedir.json",
+          "keep": false
+        },
+        {
+          "id": 607654541,
+          "name": "smoke-onefile.json",
+          "size": 17115,
+          "digest": "sha256:b8cfc0c91e86975525c9d43721db326d1ea2e4ef3f0ff04cc06fa00ffd81a240",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.1.0/smoke-onefile.json",
+          "keep": false
+        },
+        {
+          "id": 607654552,
+          "name": "smoke-source.json",
+          "size": 17051,
+          "digest": "sha256:d179ebb209df2ba4b877d49cf467a484c3f5fb5ec697260a69921a0ef50655d6",
+          "url": "https://github.com/klwb360/NetAudit/releases/download/v0.1.0/smoke-source.json",
+          "keep": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+# Preserve the official intelligence snapshot, provenance and license hashes on
+# Windows checkouts; these are verified as original bytes before every audit.
+netaudit/data/* -text

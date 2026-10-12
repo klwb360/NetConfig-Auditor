@@ -1,0 +1,4 @@
+# Preserve the exact published checksums, manifests and acceptance records.
+docs/releases/** -text
+**/*.bat text eol=crlf
+network-config-auditor/benchmarks/** -text

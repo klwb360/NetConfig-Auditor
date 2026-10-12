@@ -1,0 +1,13 @@
+{
+  "title": "CISA Known Exploited Vulnerabilities (official snapshot)",
+  "source_url": "https://raw.githubusercontent.com/cisagov/kev-data/develop/known_exploited_vulnerabilities.json",
+  "catalog_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+  "license": "CC0-1.0",
+  "license_url": "https://github.com/cisagov/kev-data/blob/develop/LICENSE",
+  "retrieved_at": "2026-10-03T11:12:29.663833+00:00",
+  "catalog_version": "2026.10.02",
+  "date_released": "2026-10-02T15:19:38.2945Z",
+  "count": 1733,
+  "sha256": "d2c8c6cb23291b46ff2b086197641a6b1fa35e6b746bba714cc280a1778f9e48",
+  "license_sha256": "8dfcf2d0cba33bede386eb470daf2ac08caf6540fc2516baab10dd546f90938a"
+}
