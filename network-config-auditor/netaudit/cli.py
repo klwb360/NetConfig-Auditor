@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -13,6 +14,7 @@ from .reports import render
 from .rules import SEVERITIES
 from .pipeline import audit_configuration
 from .intelligence import load_intelligence_file
+from .config_io import ENCODINGS, decode_config_bytes
 
 MAX_INTELLIGENCE_BYTES = 16 * 1024 * 1024
 
@@ -56,8 +58,9 @@ def main(argv=None):
     p.add_argument("--version", action="version", version=f"NetAudit {__version__}")
     sub = p.add_subparsers(dest="command", required=True)
     a = sub.add_parser("audit", help="审计配置文件或标准输入")
-    a.add_argument("input", help="UTF-8 配置文件；- 表示标准输入")
+    a.add_argument("input", help="配置文件；- 表示标准输入")
     a.add_argument("--vendor", choices=VENDORS, default="auto")
+    a.add_argument("--encoding", choices=ENCODINGS, default="auto", help="配置编码；auto 先识别 BOM，再严格尝试 UTF-8 / GB18030")
     a.add_argument("--format", choices=("json", "md", "html"), default="md")
     a.add_argument("--out", type=Path)
     a.add_argument("--fail-on", choices=tuple(SEVERITIES), help="达到此严重度时退出码为 1")
@@ -68,6 +71,14 @@ def main(argv=None):
     a.add_argument("--ai-model", help="显式启用本机 Ollama 模型进行解释")
     a.add_argument("--ai-endpoint", default="http://127.0.0.1:11434", help="Ollama 本机地址")
     a.add_argument("--ai-timeout", type=float, default=30, help="AI 请求超时秒数（默认 30）")
+    batch = sub.add_parser("audit-batch", help="逐文件离线审计配置目录并输出 JSON / HTML 汇总")
+    batch.add_argument("input", type=Path, help="输入配置目录")
+    batch.add_argument("--out-dir", type=Path, required=True, help="报告目录，不能位于输入目录内")
+    batch.add_argument("--recursive", action="store_true", help="递归扫描子目录")
+    batch.add_argument("--vendor", choices=VENDORS, default="auto")
+    batch.add_argument("--encoding", choices=ENCODINGS, default="auto")
+    batch.add_argument("--strict", action="store_true", help="存在未建模行则退出码为 2")
+    batch.add_argument("--fail-on", choices=tuple(SEVERITIES), help="达到此严重度时退出码为 1；输入错误优先为 2")
     simulation = sub.add_parser("simulate", help="在配置副本中练习命令，输出 JSON；失败批次全部回滚")
     simulation.add_argument("input", help="UTF-8 备份文件；- 表示标准输入")
     simulation.add_argument("--vendor", choices=VENDORS, default="auto")
@@ -100,6 +111,18 @@ def main(argv=None):
             fetch_official_kev(destination=output)
             print(f"KEV 已更新：{output}；审计时使用 --kev-file 指定该文件。")
             return 0
+        if args.command == "audit-batch":
+            from .batch import audit_directory
+            result = audit_directory(args.input, args.out_dir, vendor=args.vendor,
+                                     encoding=args.encoding, recursive=args.recursive,
+                                     strict=args.strict, fail_on=args.fail_on)
+            summary = result["summary"]
+            print(f"批量审计：共 {summary['total']} 个文件，完成 {summary['succeeded']}，失败 {summary['failed']}，待复核 {summary['review_required']}；无告警不表示安全。")
+            for error in result["errors"]:
+                print("错误：" + error["message"], file=sys.stderr)
+            if result["devices"]:
+                print(f"汇总报告：{args.out_dir / 'batch.json'} / {args.out_dir / 'batch.html'}")
+            return result["exit_code"]
         if args.input == "-":
             data = sys.stdin.buffer.read(MAX_BYTES + 1)
         else:
@@ -141,13 +164,16 @@ def main(argv=None):
             if any(path and args.out.resolve() == path.resolve()
                    for path in (args.asset_info, args.kev_file, args.nvd_file)):
                 raise ValueError("报告输出不能覆盖设备信息或情报文件")
+        config, used_encoding = decode_config_bytes(data, args.encoding)
         result = audit_configuration(
-            data.decode("utf-8-sig"), args.vendor,
+            config, args.vendor,
             asset=_load_json(args.asset_info, "设备信息", 65536),
             kev=load_intelligence_file(args.kev_file, "kev") if args.kev_file else None,
             nvd=load_intelligence_file(args.nvd_file, "nvd") if args.nvd_file else None,
             ai={"enabled": bool(args.ai_model), "provider": "ollama", "model": args.ai_model or "",
                 "endpoint": args.ai_endpoint, "timeout": args.ai_timeout})
+        result["source"] = {"path": "stdin" if args.input == "-" else Path(args.input).name,
+                            "sha256": hashlib.sha256(data).hexdigest(), "encoding": used_encoding}
         output = render(result, args.format)
         if args.out:
             _write_private(args.out, output)
