@@ -34,7 +34,7 @@ function Invoke-FrozenCommand([string]$Executable,[string[]]$Arguments) {
     $info.RedirectStandardOutput=$true
     $info.RedirectStandardError=$true
     foreach($argument in $Arguments){[void]$info.ArgumentList.Add($argument)}
-    $info.Environment['PATH']="$env:SystemRoot\System32;$env:SystemRoot"
+    $info.Environment['PATH']="$env:SystemRoot\System32"
     foreach($key in @('PYTHONHOME','PYTHONPATH','VIRTUAL_ENV')){[void]$info.Environment.Remove($key)}
     $process=[Diagnostics.Process]::new()
     $process.StartInfo=$info
@@ -81,7 +81,8 @@ try {
         if(Test-Path -LiteralPath $pythonRoot){throw 'External CPython cache still exists.'}
         $record.runner_cpython_removed=$true
     }
-    $env:PATH="$env:SystemRoot\System32;$env:SystemRoot"
+    # A Python launcher can live in C:\Windows outside the CPython cache.
+    $env:PATH="$env:SystemRoot\System32"
     if(Get-Command python,python3,py -ErrorAction SilentlyContinue){throw 'External Python remains on the restricted runtime PATH.'}
     $record.external_python_commands_absent=$true
     $inputDirectory=Join-Path $extractRoot '合成配置'
