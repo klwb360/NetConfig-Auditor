@@ -1,0 +1,2050 @@
+{
+  "schema_version": "1.0",
+  "dataset": "campus-synthetic-gold-v1.1",
+  "scope": "50份按厂商真实CLI语法人工合成的校园网络配置片段；未采集、未连接或验证实设备。仅衡量冻结支持字段与列出的规则，不能外推为所有平台、版本或生产网络的普适性能。",
+  "gold_provenance": "author_fixtures.py逐场景人工指定配置和语义值；不导入、调用或复制当前parser/rules输出。expected JSON在首次测量前写入并由SHA256冻结。",
+  "supported_paths": [
+    "hostname",
+    "interfaces.*.name",
+    "interfaces.*.shutdown",
+    "interfaces.*.description",
+    "interfaces.*.mode",
+    "interfaces.*.access_vlan",
+    "interfaces.*.native_vlan",
+    "interfaces.*.allowed_vlan_ranges",
+    "interfaces.*.addresses",
+    "interfaces.*.vrf",
+    "interfaces.*.acl_bindings",
+    "interfaces.*.nat_role",
+    "interfaces.*.stp_enabled",
+    "interfaces.*.stp_edge",
+    "interfaces.*.bpdu_guard",
+    "interfaces.*.bpdu_filter",
+    "interfaces.*.protected",
+    "vlans.*.name",
+    "routes[].destination",
+    "routes[].next_hop",
+    "routes[].interface",
+    "routes[].vrf",
+    "routes[].distance",
+    "acls.*.name",
+    "acls.*.kind",
+    "acls.*.ordered",
+    "acls.*.rules[].sequence",
+    "acls.*.rules[].action",
+    "acls.*.rules[].protocol",
+    "acls.*.rules[].source",
+    "acls.*.rules[].destination",
+    "acls.*.rules[].source_port",
+    "acls.*.rules[].destination_port",
+    "acls.*.rules[].complete",
+    "nat[].kind",
+    "nat[].interface",
+    "nat[].acl",
+    "nat[].pool",
+    "nat[].protocol",
+    "nat[].inside",
+    "nat[].outside",
+    "nat[].outside_port",
+    "nat[].complete",
+    "nat_pools.*",
+    "management_lines[].name",
+    "management_lines[].transport",
+    "management_lines[].authentication",
+    "management_lines[].idle_seconds",
+    "management_lines[].acl_bindings",
+    "stp.enabled",
+    "stp.mode",
+    "stp.edge_default",
+    "stp.bpdu_guard_default",
+    "stp.bpdu_filter_default",
+    "stp.vlan_enabled"
+  ],
+  "unknown_rule_ids": [
+    "ACL-UNBOUND",
+    "MGMT-VTY-SOURCE",
+    "MGMT-VTY-UNKNOWN",
+    "OSPF-AUTH-REVIEW",
+    "PARSE-INCOMPLETE",
+    "PARSE-NUMBER"
+  ],
+  "thresholds": {
+    "field_accuracy": 0.95,
+    "risk_precision": 0.9
+  },
+  "coverage": {
+    "case_count": 50,
+    "vendor_counts": {
+      "cisco": 18,
+      "huawei": 16,
+      "h3c": 16
+    },
+    "paired_risk_rules": [
+      "ACL-SHADOW",
+      "ACL-UNDEFINED",
+      "ACL-VTY-UNDEFINED",
+      "IF-DUPLICATE-IP",
+      "MGMT-CREDENTIAL",
+      "MGMT-HTTP",
+      "MGMT-SNMP-COMMUNITY",
+      "MGMT-SSH-RETRIES",
+      "MGMT-SSHV1",
+      "MGMT-TELNET-SERVER",
+      "MGMT-VTY-NOAUTH",
+      "MGMT-VTY-TELNET",
+      "MGMT-VTY-TIMEOUT",
+      "NAT-ACL-UNDEFINED",
+      "NAT-INBOUND-MAPPING",
+      "NAT-POOL-UNDEFINED",
+      "OSPF-BROAD-NETWORK",
+      "ROUTE-SELF-NEXTHOP",
+      "STP-BPDU-FILTER",
+      "STP-DISABLED",
+      "STP-EDGE-TRUNK",
+      "VLAN-NATIVE-1",
+      "VLAN-PVID-NOT-ALLOWED",
+      "VLAN-TRUNK-ALL",
+      "VLAN-UNDEFINED"
+    ],
+    "paired_risk_rule_count": 25,
+    "integrity_passed": true
+  },
+  "fields": {
+    "correct": 1870,
+    "total": 1870,
+    "accuracy": 1.0
+  },
+  "findings": {
+    "tp": 26,
+    "fp": 0,
+    "fn": 0,
+    "precision": 1.0,
+    "recall": 1.0
+  },
+  "unknown": {
+    "tp": 8,
+    "fp": 1,
+    "fn": 0,
+    "precision": 0.8888888888888888,
+    "recall": 1.0
+  },
+  "by_vendor": {
+    "cisco": {
+      "fields": {
+        "correct": 598,
+        "total": 598,
+        "accuracy": 1.0
+      },
+      "findings": {
+        "tp": 9,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "unknown": {
+        "tp": 8,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      }
+    },
+    "h3c": {
+      "fields": {
+        "correct": 640,
+        "total": 640,
+        "accuracy": 1.0
+      },
+      "findings": {
+        "tp": 8,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": null
+      }
+    },
+    "huawei": {
+      "fields": {
+        "correct": 632,
+        "total": 632,
+        "accuracy": 1.0
+      },
+      "findings": {
+        "tp": 9,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null
+      }
+    }
+  },
+  "by_module": {
+    "acls": {
+      "fields": {
+        "correct": 136,
+        "total": 136,
+        "accuracy": 1.0
+      },
+      "findings": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null
+      }
+    },
+    "coverage": {
+      "fields": null,
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null
+      },
+      "unknown": {
+        "tp": 2,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.6666666666666666,
+        "recall": 1.0
+      }
+    },
+    "hostname": {
+      "fields": {
+        "correct": 50,
+        "total": 50,
+        "accuracy": 1.0
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null
+      }
+    },
+    "interfaces": {
+      "fields": {
+        "correct": 1040,
+        "total": 1040,
+        "accuracy": 1.0
+      },
+      "findings": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null
+      }
+    },
+    "management_lines": {
+      "fields": {
+        "correct": 82,
+        "total": 82,
+        "accuracy": 1.0
+      },
+      "findings": {
+        "tp": 9,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "unknown": {
+        "tp": 6,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      }
+    },
+    "nat": {
+      "fields": {
+        "correct": 90,
+        "total": 90,
+        "accuracy": 1.0
+      },
+      "findings": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null
+      }
+    },
+    "nat_pools": {
+      "fields": {
+        "correct": 50,
+        "total": 50,
+        "accuracy": 1.0
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null
+      }
+    },
+    "ospf": {
+      "fields": null,
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null
+      }
+    },
+    "routes": {
+      "fields": {
+        "correct": 62,
+        "total": 62,
+        "accuracy": 1.0
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null
+      }
+    },
+    "stp": {
+      "fields": {
+        "correct": 300,
+        "total": 300,
+        "accuracy": 1.0
+      },
+      "findings": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null
+      }
+    },
+    "vlans": {
+      "fields": {
+        "correct": 60,
+        "total": 60,
+        "accuracy": 1.0
+      },
+      "findings": {
+        "tp": 4,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null
+      }
+    }
+  },
+  "negative_assertion_failures": 0,
+  "unknown_warning_misses": 0,
+  "passed": true,
+  "cases": [
+    {
+      "id": "cisco-01-http-risk",
+      "file": "configs/cisco-01-http-risk.cfg",
+      "vendor": "cisco",
+      "fields": {
+        "correct": 29,
+        "total": 29,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "cisco-02-http-control",
+      "file": "configs/cisco-02-http-control.cfg",
+      "vendor": "cisco",
+      "fields": {
+        "correct": 29,
+        "total": 29,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "cisco-03-ssh-retries-risk",
+      "file": "configs/cisco-03-ssh-retries-risk.cfg",
+      "vendor": "cisco",
+      "fields": {
+        "correct": 29,
+        "total": 29,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "cisco-04-ssh-retries-control",
+      "file": "configs/cisco-04-ssh-retries-control.cfg",
+      "vendor": "cisco",
+      "fields": {
+        "correct": 29,
+        "total": 29,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "cisco-05-vty-telnet-risk",
+      "file": "configs/cisco-05-vty-telnet-risk.cfg",
+      "vendor": "cisco",
+      "fields": {
+        "correct": 33,
+        "total": 33,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "cisco-06-vty-telnet-control",
+      "file": "configs/cisco-06-vty-telnet-control.cfg",
+      "vendor": "cisco",
+      "fields": {
+        "correct": 33,
+        "total": 33,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "cisco-07-vty-noauth-risk",
+      "file": "configs/cisco-07-vty-noauth-risk.cfg",
+      "vendor": "cisco",
+      "fields": {
+        "correct": 33,
+        "total": 33,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "cisco-08-vty-noauth-control",
+      "file": "configs/cisco-08-vty-noauth-control.cfg",
+      "vendor": "cisco",
+      "fields": {
+        "correct": 33,
+        "total": 33,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "cisco-09-vty-timeout-risk",
+      "file": "configs/cisco-09-vty-timeout-risk.cfg",
+      "vendor": "cisco",
+      "fields": {
+        "correct": 33,
+        "total": 33,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "cisco-10-vty-timeout-control",
+      "file": "configs/cisco-10-vty-timeout-control.cfg",
+      "vendor": "cisco",
+      "fields": {
+        "correct": 33,
+        "total": 33,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "cisco-11-credential-risk",
+      "file": "configs/cisco-11-credential-risk.cfg",
+      "vendor": "cisco",
+      "fields": {
+        "correct": 29,
+        "total": 29,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "cisco-12-credential-control",
+      "file": "configs/cisco-12-credential-control.cfg",
+      "vendor": "cisco",
+      "fields": {
+        "correct": 45,
+        "total": 45,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [
+        {
+          "line": 10,
+          "text": "ip address dhcp",
+          "reason": "动态/借用地址无法静态确认"
+        }
+      ],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "cisco-13-snmp-risk",
+      "file": "configs/cisco-13-snmp-risk.cfg",
+      "vendor": "cisco",
+      "fields": {
+        "correct": 29,
+        "total": 29,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "cisco-14-snmp-control",
+      "file": "configs/cisco-14-snmp-control.cfg",
+      "vendor": "cisco",
+      "fields": {
+        "correct": 29,
+        "total": 29,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "cisco-15-ssh-version-risk",
+      "file": "configs/cisco-15-ssh-version-risk.cfg",
+      "vendor": "cisco",
+      "fields": {
+        "correct": 29,
+        "total": 29,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "cisco-16-ssh-version-control",
+      "file": "configs/cisco-16-ssh-version-control.cfg",
+      "vendor": "cisco",
+      "fields": {
+        "correct": 29,
+        "total": 29,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "cisco-17-acl-shadow-risk",
+      "file": "configs/cisco-17-acl-shadow-risk.cfg",
+      "vendor": "cisco",
+      "fields": {
+        "correct": 47,
+        "total": 47,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "cisco-18-acl-shadow-control",
+      "file": "configs/cisco-18-acl-shadow-control.cfg",
+      "vendor": "cisco",
+      "fields": {
+        "correct": 47,
+        "total": 47,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [
+        {
+          "line": 9,
+          "text": "10 permit tcp any any established",
+          "reason": "ACL 条件未完整解析，禁用此规则的安全/遮蔽推断"
+        }
+      ],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "huawei-01-telnet-server-risk",
+      "file": "configs/huawei-01-telnet-server-risk.cfg",
+      "vendor": "huawei",
+      "fields": {
+        "correct": 29,
+        "total": 29,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "huawei-02-telnet-server-control",
+      "file": "configs/huawei-02-telnet-server-control.cfg",
+      "vendor": "huawei",
+      "fields": {
+        "correct": 29,
+        "total": 29,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "huawei-03-acl-undefined-risk",
+      "file": "configs/huawei-03-acl-undefined-risk.cfg",
+      "vendor": "huawei",
+      "fields": {
+        "correct": 29,
+        "total": 29,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "huawei-04-acl-undefined-control",
+      "file": "configs/huawei-04-acl-undefined-control.cfg",
+      "vendor": "huawei",
+      "fields": {
+        "correct": 39,
+        "total": 39,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "huawei-05-vty-acl-undefined-risk",
+      "file": "configs/huawei-05-vty-acl-undefined-risk.cfg",
+      "vendor": "huawei",
+      "fields": {
+        "correct": 33,
+        "total": 33,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "huawei-06-vty-acl-undefined-control",
+      "file": "configs/huawei-06-vty-acl-undefined-control.cfg",
+      "vendor": "huawei",
+      "fields": {
+        "correct": 43,
+        "total": 43,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "huawei-07-vlan-undefined-risk",
+      "file": "configs/huawei-07-vlan-undefined-risk.cfg",
+      "vendor": "huawei",
+      "fields": {
+        "correct": 45,
+        "total": 45,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "huawei-08-vlan-undefined-control",
+      "file": "configs/huawei-08-vlan-undefined-control.cfg",
+      "vendor": "huawei",
+      "fields": {
+        "correct": 45,
+        "total": 45,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "huawei-09-native-vlan-risk",
+      "file": "configs/huawei-09-native-vlan-risk.cfg",
+      "vendor": "huawei",
+      "fields": {
+        "correct": 46,
+        "total": 46,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "huawei-10-native-vlan-control",
+      "file": "configs/huawei-10-native-vlan-control.cfg",
+      "vendor": "huawei",
+      "fields": {
+        "correct": 46,
+        "total": 46,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "huawei-11-pvid-list-risk",
+      "file": "configs/huawei-11-pvid-list-risk.cfg",
+      "vendor": "huawei",
+      "fields": {
+        "correct": 46,
+        "total": 46,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "huawei-12-pvid-list-control",
+      "file": "configs/huawei-12-pvid-list-control.cfg",
+      "vendor": "huawei",
+      "fields": {
+        "correct": 46,
+        "total": 46,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "huawei-13-duplicate-ip-risk",
+      "file": "configs/huawei-13-duplicate-ip-risk.cfg",
+      "vendor": "huawei",
+      "fields": {
+        "correct": 45,
+        "total": 45,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "huawei-14-duplicate-ip-control",
+      "file": "configs/huawei-14-duplicate-ip-control.cfg",
+      "vendor": "huawei",
+      "fields": {
+        "correct": 45,
+        "total": 45,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "huawei-15-self-nexthop-risk",
+      "file": "configs/huawei-15-self-nexthop-risk.cfg",
+      "vendor": "huawei",
+      "fields": {
+        "correct": 33,
+        "total": 33,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "huawei-16-self-nexthop-control",
+      "file": "configs/huawei-16-self-nexthop-control.cfg",
+      "vendor": "huawei",
+      "fields": {
+        "correct": 33,
+        "total": 33,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "h3c-01-trunk-all-risk",
+      "file": "configs/h3c-01-trunk-all-risk.cfg",
+      "vendor": "h3c",
+      "fields": {
+        "correct": 46,
+        "total": 46,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "h3c-02-trunk-all-control",
+      "file": "configs/h3c-02-trunk-all-control.cfg",
+      "vendor": "h3c",
+      "fields": {
+        "correct": 46,
+        "total": 46,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "h3c-03-nat-acl-risk",
+      "file": "configs/h3c-03-nat-acl-risk.cfg",
+      "vendor": "h3c",
+      "fields": {
+        "correct": 37,
+        "total": 37,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "h3c-04-nat-acl-control",
+      "file": "configs/h3c-04-nat-acl-control.cfg",
+      "vendor": "h3c",
+      "fields": {
+        "correct": 47,
+        "total": 47,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "h3c-05-nat-pool-risk",
+      "file": "configs/h3c-05-nat-pool-risk.cfg",
+      "vendor": "h3c",
+      "fields": {
+        "correct": 47,
+        "total": 47,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "h3c-06-nat-pool-control",
+      "file": "configs/h3c-06-nat-pool-control.cfg",
+      "vendor": "h3c",
+      "fields": {
+        "correct": 47,
+        "total": 47,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "h3c-07-nat-inbound-risk",
+      "file": "configs/h3c-07-nat-inbound-risk.cfg",
+      "vendor": "h3c",
+      "fields": {
+        "correct": 37,
+        "total": 37,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "h3c-08-nat-inbound-control",
+      "file": "configs/h3c-08-nat-inbound-control.cfg",
+      "vendor": "h3c",
+      "fields": {
+        "correct": 29,
+        "total": 29,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "h3c-09-stp-disabled-risk",
+      "file": "configs/h3c-09-stp-disabled-risk.cfg",
+      "vendor": "h3c",
+      "fields": {
+        "correct": 29,
+        "total": 29,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "h3c-10-stp-disabled-control",
+      "file": "configs/h3c-10-stp-disabled-control.cfg",
+      "vendor": "h3c",
+      "fields": {
+        "correct": 29,
+        "total": 29,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "h3c-11-edge-trunk-risk",
+      "file": "configs/h3c-11-edge-trunk-risk.cfg",
+      "vendor": "h3c",
+      "fields": {
+        "correct": 46,
+        "total": 46,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "h3c-12-edge-trunk-control",
+      "file": "configs/h3c-12-edge-trunk-control.cfg",
+      "vendor": "h3c",
+      "fields": {
+        "correct": 46,
+        "total": 46,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "h3c-13-bpdu-filter-risk",
+      "file": "configs/h3c-13-bpdu-filter-risk.cfg",
+      "vendor": "h3c",
+      "fields": {
+        "correct": 46,
+        "total": 46,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "h3c-14-bpdu-filter-control",
+      "file": "configs/h3c-14-bpdu-filter-control.cfg",
+      "vendor": "h3c",
+      "fields": {
+        "correct": 46,
+        "total": 46,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "h3c-15-ospf-broad-risk",
+      "file": "configs/h3c-15-ospf-broad-risk.cfg",
+      "vendor": "h3c",
+      "fields": {
+        "correct": 29,
+        "total": 29,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [],
+      "negative_assertion_failures": []
+    },
+    {
+      "id": "h3c-16-ospf-broad-control",
+      "file": "configs/h3c-16-ospf-broad-control.cfg",
+      "vendor": "h3c",
+      "fields": {
+        "correct": 33,
+        "total": 33,
+        "accuracy": 1.0,
+        "mismatches": []
+      },
+      "findings": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "false_positives": [],
+        "false_negatives": []
+      },
+      "unknown": {
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": null,
+        "false_positives": [
+          [
+            "configs/h3c-16-ospf-broad-control.cfg",
+            "PARSE-INCOMPLETE",
+            "device"
+          ]
+        ],
+        "false_negatives": []
+      },
+      "unknown_warning_misses": [],
+      "warnings": [
+        {
+          "line": 12,
+          "text": "ip route-static 192.0.2.0 255.255.255.0 10.16.0.254 description Lab-route",
+          "reason": "静态路由参数未完整建模；禁用此路由的配置推断"
+        }
+      ],
+      "negative_assertion_failures": []
+    }
+  ]
+}

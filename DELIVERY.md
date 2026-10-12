@@ -1,3 +1,11 @@
+# NetConfig Auditor v1.1.0 交付状态
+
+2026-10-12：项目已迁入公开 [klwb360/NetConfig-Auditor](https://github.com/klwb360/NetConfig-Auditor)。本次新增批量CLI、多编码、来源追溯、独立金标准和量化CI，修复路由/NAT完整性、H3C短undo与Windows BAT执行问题。[PR #1](https://github.com/klwb360/NetConfig-Auditor/pull/1)列出新增、修复和保留模块。
+
+最新源码及Windows冻结构建已验证，[验收记录](docs/acceptance/v1.1.0/README.md)保存真实计数、覆盖、50案例指标和环境边界。主分支正式1.1.0Release正在收尾，完成后此处更新下载入口；下方v1.0.1与更早章节是保留的历史记录，均不包含本次批量功能。
+
+旧版本七个Release和21附件已逐字节迁入[公开发行列表](https://github.com/klwb360/NetConfig-Auditor/releases)，历史章节的旧NetAudit下载地址可将仓库名替换为NetConfig-Auditor；旧Actions运行链接只作为历史出处保留。旧仓库清理状态见[项目状态](PROJECT_STATUS.md)，不能把迁移完成等同于删除完成。
+
 # NetAudit Windows 下载与交付检查点
 
 2026-10-09：私人仓库 `klwb360/NetAudit` 已发布 **v1.0.1**，在原始备份、模拟命令区以及草案 / 预览中增加厂商底色和文字说明。Cisco 蓝、华为橙、H3C 紫、锐捷绿；共享语法显示候选厂商，未知行保持中性。底色只表示语法归属，不代表安全、可执行或真实设备支持。原有学习流程、四厂商审计、主题、风险折叠、报告、许可证与来源保留；旧六个版本运行文件、标签和档案保持。

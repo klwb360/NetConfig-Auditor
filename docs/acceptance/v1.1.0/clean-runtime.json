@@ -1,0 +1,40 @@
+{
+  "platform": "Microsoft Windows NT 10.0.20348.0",
+  "source_commit": "3789bff692bede73c0be723a3f1e9feea174c050",
+  "runner_cpython_removed": true,
+  "external_python_commands_absent": true,
+  "checks": [
+    {
+      "check": "version_without_external_python",
+      "mode": "portable",
+      "status": "passed"
+    },
+    {
+      "check": "50_file_batch_json_html_and_source_trace",
+      "mode": "portable",
+      "status": "passed"
+    },
+    {
+      "check": "utf16_bom_and_gb18030_without_external_python",
+      "mode": "portable",
+      "status": "passed"
+    },
+    {
+      "check": "version_without_external_python",
+      "mode": "onefile",
+      "status": "passed"
+    },
+    {
+      "check": "50_file_batch_json_html_and_source_trace",
+      "mode": "onefile",
+      "status": "passed"
+    },
+    {
+      "check": "utf16_bom_and_gb18030_without_external_python",
+      "mode": "onefile",
+      "status": "passed"
+    }
+  ],
+  "passed": true,
+  "limitations": "Hosted Windows Server runner; Explorer double-click, Windows 10/11 desktop and ordinary-user acceptance remain separate checks."
+}
