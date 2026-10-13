@@ -1,5 +1,16 @@
 # NetConfig Auditor 项目状态
 
+## v1.1.1 已交付（2026-10-13）
+
+- 正式 [v1.1.1 Release](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v1.1.1)已公开；对应源码 `5ffe0051ff7929dd7bfd8bfbca593af8a355b1b3`，名称、中性暗黑界面、单厂商高亮策略和主页真实截图已完成。
+- [PR #3](https://github.com/klwb360/NetConfig-Auditor/pull/3) / [PR #4](https://github.com/klwb360/NetConfig-Auditor/pull/4)记录改动与修复。Windows 构建 `38350727838`、Linux CI `38350727805`、发布 `38351238049`与永久发行记录对应；28 项进程检查及 6 项清洁运行检查通过。
+- 三个运行附件名称、原始大小和 SHA-256 已与公开 Release、manifest、record.json 及本机下载字节交叉校验。旧 v1.1.0 与更早记录不改写。
+- 源码浏览器的新策略验证见 `docs/acceptance/v1.1.1/source-browser-single-vendor.json`；Windows 人工桌面、普通账户和独立物理无 Python 环境仍待验收。
+- Windows11发行单EXE浏览器检查也已通过，子进程PATH限制为System32，验证新标题、`#111111`和单一/混合高亮切换；证据见 `docs/acceptance/v1.1.1/final-main/frozen-windows11-branding.json`。两种EXE产品信息均为NetConfig Auditor 1.1.1。
+- 恢复入口：[检查点10](docs/checkpoints/2026-10-13-10-branding-and-highlight-delivery.md)。所有仓库操作收尾后，最后更新默认下载目录的独立 EXE 并记录下载回执；旧程序保留，旧 NetAudit 由用户自行删除。
+
+下面保留此前检查点与 v1.1.0 历史状态；其中“待完成”描述属于相应历史步骤。
+
 ## 单一厂商高亮补充（2026-10-13）
 
 - 用户要求同一厂商配置不显示高亮；已实现单一已确定/所选厂商兼容时隐藏底色、标签与图例颜色，并收起编辑器标签栏。混合或与选择冲突的厂商语法仍区分；共享语法歧义和未知行提示保留。

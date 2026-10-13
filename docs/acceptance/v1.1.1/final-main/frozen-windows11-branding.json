@@ -1,0 +1,19 @@
+{
+  "source_commit": "5ffe0051ff7929dd7bfd8bfbca593af8a355b1b3",
+  "platform": "Windows 11",
+  "runtime": "Published onefile EXE; child PATH limited to System32",
+  "single": {
+    "title": "NetConfig Auditor · 配置学习与模拟",
+    "background": "rgb(17, 17, 17)",
+    "mode": "single-vendor",
+    "rows": 0
+  },
+  "mixed": {
+    "mode": "mixed",
+    "rows": 2
+  },
+  "passed": true,
+  "limits": [
+    "Automated browser checks; Explorer/default-browser double-click and ordinary account were not manually accepted."
+  ]
+}

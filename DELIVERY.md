@@ -1,3 +1,37 @@
+# NetConfig Auditor v1.1.1 交付
+
+2026-10-13：[PR #3](https://github.com/klwb360/NetConfig-Auditor/pull/3)与[PR #4](https://github.com/klwb360/NetConfig-Auditor/pull/4)记录名称、暗黑外观和单厂商高亮策略；正式 [v1.1.1 Release](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v1.1.1)已公开发布。三个运行附件与固定源码 `5ffe0051ff7929dd7bfd8bfbca593af8a355b1b3`、永久发行清单一致，下载后的文件大小与 SHA-256 已核验。
+
+**[推荐便携 ZIP](https://github.com/klwb360/NetConfig-Auditor/releases/download/v1.1.1/NetConfig-Auditor-1.1.1-windows-x64-5ffe0051ff79-portable.zip)** · [单 EXE 配套 ZIP](https://github.com/klwb360/NetConfig-Auditor/releases/download/v1.1.1/NetConfig-Auditor-1.1.1-windows-x64-5ffe0051ff79-onefile.zip) · [独立 EXE](https://github.com/klwb360/NetConfig-Auditor/releases/download/v1.1.1/NetConfig-Auditor-1.1.1-windows-x64-5ffe0051ff79-onefile.exe)。
+
+## 本轮变化
+
+程序、界面和 Windows 产品信息统一为 **NetConfig Auditor**；新版便携 EXE 为 `NetConfig-Auditor.exe`，保留旧 BAT 兼容入口。暗黑主背景 `#111111`、面板 `#1b1b1b`、输入框 `#161616`采用中性黑灰。已识别指令归属于同一已确定厂商时不显示厂商底色与行侧标签，混合厂商继续区分语法；自动模式中的共享或不确定语法保持保守提示。风险等级提示、原文与审计结论不受配色策略影响。主页预览已重拍，仅使用合成配置。
+
+## 实际构建与验证
+
+- 固定源码及发行标签：`5ffe0051ff7929dd7bfd8bfbca593af8a355b1b3`；[永久发行档案](docs/releases/v1.1.1/README.md)保留原始记录与校验。
+- [Windows 构建 38350727838](https://github.com/klwb360/NetConfig-Auditor/actions/runs/38350727838)：Windows-2022Server-10.0.20348-SP0 / AMD64，Python 3.12.10、PyInstaller 6.22.3；28 项真实进程检查通过（源码 10、onedir 9、onefile 9），清理标准 CPython 缓存并限制 PATH 后的两种冻结包共 6 项检查通过。
+- [Linux 三版本 CI 38350727805](https://github.com/klwb360/NetConfig-Auditor/actions/runs/38350727805)与[正式发布 38351238049](https://github.com/klwb360/NetConfig-Auditor/actions/runs/38351238049)已完成；发行身份、三附件名称与大小 / SHA-256 与原始 manifest、record.json 和实际下载字节交叉核对。
+- [源码浏览器新策略证据](docs/acceptance/v1.1.1/source-browser-single-vendor.json)记录真实浏览器中的单厂商取消高亮、混合厂商提示及页面交互；[原外观浏览器证据](docs/acceptance/v1.1.1/source-browser.json)按原字节保留。
+- [Windows 11 单EXE浏览器验证](docs/acceptance/v1.1.1/final-main/frozen-windows11-branding.json)：在仅含System32的子进程PATH中实际启动发行EXE，验证NetConfig Auditor标题、`#111111`背景、单厂商零高亮行与混合厂商恢复高亮。两种EXE的Windows产品信息均核对为1.1.1新名称。
+
+| 运行文件 | SHA-256 |
+|---|---|
+| `NetConfig-Auditor-1.1.1-windows-x64-5ffe0051ff79-portable.zip` | `ebefc6c0d28ee1ee57b8eb6c2a376214d879b9fa7bf23aa339c4e66e872c2749` |
+| `NetConfig-Auditor-1.1.1-windows-x64-5ffe0051ff79-onefile.zip` | `927c78f422a4f31fd00ffa3f5f004ed0cf739f395b147f02e968fffadbb5c69d` |
+| `NetConfig-Auditor-1.1.1-windows-x64-5ffe0051ff79-onefile.exe` | `b310fd49ea5323824da71b1486c71edb904da5755814172d7bd85d9651de7eb0` |
+
+## 使用与验收边界
+
+解压便携 ZIP 后双击 `Start-NetConfig-Auditor.bat` / `NetConfig-Auditor.exe`，或双击独立 EXE；关闭服务需回到启动窗口按 Ctrl+C。批量、多编码仍通过 CLI，网页一次导入一份 UTF-8 备份。兼容模块、浏览器偏好、会话协议和历史缓存保留，设备原始 hostname 不改写。
+
+源码真实浏览器检查不替代冻结 EXE 的人工桌面验收；普通非管理员账户、Explorer / 默认浏览器双击路径、独立物理无 Python 电脑仍待人工验证。CI 仅证明移除标准 CPython 缓存并限制 PATH，不证明整个 runner 没有其它解释器。未识别配置仍需复核；50 份合成评测的指标不代表生产网络准确率。工具不会连接或修改真实设备，模拟配置导出保留原始凭据。
+
+以下完整保留 v1.1.0 及更早的历史交付记录，其中当时的 latest 状态仅表示历史情况。旧 EXE、附件、源码与验收档案没有被改写。
+
+---
+
 # NetConfig Auditor v1.1.0 交付
 
 2026-10-12：[PR #1](https://github.com/klwb360/NetConfig-Auditor/pull/1)已合并，本轮新增、修复和验证说明均已标注。正式[v1.1.0 Release](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v1.1.0)已公开且为latest。

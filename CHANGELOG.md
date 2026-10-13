@@ -1,5 +1,12 @@
 # 更新记录
 
+## 1.1.1 — 2026-10-13
+
+- 统一程序、网页、CLI、Windows 产品信息和新运行文件名称为 NetConfig Auditor；保留旧 BAT、模块、会话和缓存兼容。
+- 暗黑主题改为以 `#111111` 为主的中性黑灰，修复新标题在窄屏的溢出，并重拍主页预览图。
+- 单一确定厂商取消语法底色与行侧标签；混合厂商保留区分，共享 / 未确定语法不强行认定，风险提示和审计语义保持。
+- 变更与修复见 [PR #3](https://github.com/klwb360/NetConfig-Auditor/pull/3)、[PR #4](https://github.com/klwb360/NetConfig-Auditor/pull/4)。[正式发行](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v1.1.1)固定源码 `5ffe0051ff7929dd7bfd8bfbca593af8a355b1b3`，实际验证和人工边界见 [DELIVERY.md](DELIVERY.md)；历史发行文件与验收记录保持。
+
 ## 1.1.0 — 2026-10-12
 
 已公开[正式发行](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v1.1.0)，源码db690b0固定；Windows38263182407、Linux38263155318、发布38263905711均成功，运行附件下载SHA回验通过。

@@ -1,0 +1,59 @@
+{
+  "application": "NetConfig Auditor",
+  "application_version": "1.1.1",
+  "source_commit": "5ffe0051ff7929dd7bfd8bfbca593af8a355b1b3",
+  "windows_run_id": 38350727838,
+  "windows_run_attempt": 1,
+  "linux_run_id": 38350727805,
+  "windows_artifact_id": 11790229278,
+  "windows_artifact_sha256": "ecb0082e1cf4c845ff89faf8ed5741f0bbd3ec4471edf5c4ce949646ee6be6f3",
+  "clean_runtime_artifact_id": 11790752276,
+  "clean_runtime_artifact_sha256": "72bde9bcf48be48093307ee494b14da298ae12e26624c845a23c2d5837aa5621",
+  "original_files_verified": 9,
+  "process_checks": {
+    "source": 10,
+    "onedir": 9,
+    "onefile": 9
+  },
+  "clean_runtime_checks": 6,
+  "runtime_artifacts": [
+    {
+      "file": "NetConfig-Auditor-1.1.1-windows-x64-5ffe0051ff79-portable.zip",
+      "size_bytes": 10975462,
+      "sha256": "ebefc6c0d28ee1ee57b8eb6c2a376214d879b9fa7bf23aa339c4e66e872c2749"
+    },
+    {
+      "file": "NetConfig-Auditor-1.1.1-windows-x64-5ffe0051ff79-onefile.zip",
+      "size_bytes": 10868304,
+      "sha256": "927c78f422a4f31fd00ffa3f5f004ed0cf739f395b147f02e968fffadbb5c69d"
+    },
+    {
+      "file": "NetConfig-Auditor-1.1.1-windows-x64-5ffe0051ff79-onefile.exe",
+      "size_bytes": 9425579,
+      "sha256": "b310fd49ea5323824da71b1486c71edb904da5755814172d7bd85d9651de7eb0"
+    },
+    {
+      "file": "NetConfig-Auditor-1.1.1-source-5ffe0051ff79.zip",
+      "size_bytes": 1342600,
+      "sha256": "e8ed3686b4353fe330bda6cb413d10af15274c43964bde7d276649fe9514f2a7"
+    }
+  ],
+  "package_roots": [
+    "NetConfig-Auditor",
+    "NetConfig-Auditor-onefile"
+  ],
+  "portable_executable_path": "D:\\User\\文档\\Codex\\2026-10-12\\referenced-chatgpt-conversation-this-is-an\\work\\v1.1.1-main-portable-5ffe0051ff79\\NetConfig-Auditor\\NetConfig-Auditor.exe",
+  "windows_product_identity": {
+    "product_name": "NetConfig Auditor",
+    "file_description": "NetConfig Auditor",
+    "original_filename": "NetConfig-Auditor.exe",
+    "product_version": "1.1.1",
+    "file_version": "1.1.1"
+  },
+  "passed": true,
+  "limits": [
+    "Clean hosted runner removed standard CPython cache and restricted PATH; physical absence of all Python runtimes was not established.",
+    "Explorer/default-browser interaction, a standard non-administrator account and a separate physically Python-free desktop remain manual acceptance.",
+    "This helper verifies build/process evidence and bytes; it does not claim real-device syntax or business-effect validation."
+  ]
+}

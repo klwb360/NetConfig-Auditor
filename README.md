@@ -2,7 +2,7 @@
 
 导入 Cisco、华为、H3C 或锐捷 RGOS 的配置备份，用中文描述一个具体目标，或在模拟命令行逐条练习；先查看命令的前提、理由与配置差异，确认后应用到练习副本，需要时再运行原有审计。配置处理在本机完成，工具不会连接设备或下发命令。
 
-**v1.1.1 外观与名称更新**：程序统一使用 **NetConfig Auditor**，暗黑风格以 `#111111` 为主背景，面板与输入框采用中性黑灰；已识别指令都归属于同一厂商时不显示厂商高亮，混合厂商继续区分语法，风险等级保留提示色。下面的预览为新版程序运行截图。v1.1.1 尚在发行验证，当前下载仍为 v1.1.0。
+**v1.1.1 外观与名称更新**：程序统一使用 **NetConfig Auditor**，暗黑风格以 `#111111` 为主背景，面板与输入框采用中性黑灰；已识别指令都归属于同一厂商时不显示厂商高亮，混合厂商继续区分语法，风险等级保留提示色。下面的预览为新版程序运行截图。[v1.1.1 已正式发布](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v1.1.1)；当前下载已更新，源码与实测范围见 [交付记录](DELIVERY.md)。
 
 **[v1.1.0 已发布](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v1.1.0)**：在原有配置学习、单文件审计和网页功能基础上新增批量 CLI、多编码导入、配置文件与行号追溯、独立评测及 408 学习资料。正式 Windows 构建、校验和验收范围见 [交付记录](DELIVERY.md)。
 
@@ -10,9 +10,9 @@
 
 **[历史 v1.0.1 已发布](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v1.0.1)**：新增厂商指令底色高亮，Cisco 蓝、华为橙、H3C 紫、锐捷绿；共享语法显示候选厂商，未知行保持中性。底色只表示语法归属，不代表安全、可执行或真实设备支持。中文目标、模拟练习、按需审计与完整报告继续保留；旧版本可在 [发布档案](docs/releases/README.md) 查阅。
 
-**[直接下载可运行的单 EXE](https://github.com/klwb360/NetConfig-Auditor/releases/download/v1.1.0/NetAudit-1.1.0-windows-x64-db690b04742d-onefile.exe)**：下载后双击，等待本地网页打开即可使用，无需安装 Python。需要 BAT、示例和配套资料时选择 **[便携 ZIP](https://github.com/klwb360/NetConfig-Auditor/releases/download/v1.1.0/NetAudit-1.1.0-windows-x64-db690b04742d-portable.zip)**，解压一次后双击启动。也可选择 **[单 EXE 配套 ZIP](https://github.com/klwb360/NetConfig-Auditor/releases/download/v1.1.0/NetAudit-1.1.0-windows-x64-db690b04742d-onefile.zip)**。当前三个运行附件对应源码 `db690b04742d953b8d067e50332d14bef0b2bccb`。
+**[直接下载可运行的单 EXE](https://github.com/klwb360/NetConfig-Auditor/releases/download/v1.1.1/NetConfig-Auditor-1.1.1-windows-x64-5ffe0051ff79-onefile.exe)**：下载后双击，等待本地网页打开即可使用，无需安装 Python。需要 BAT、示例和配套资料时选择 **[便携 ZIP](https://github.com/klwb360/NetConfig-Auditor/releases/download/v1.1.1/NetConfig-Auditor-1.1.1-windows-x64-5ffe0051ff79-portable.zip)**，解压一次后双击启动。也可选择 **[单 EXE 配套 ZIP](https://github.com/klwb360/NetConfig-Auditor/releases/download/v1.1.1/NetConfig-Auditor-1.1.1-windows-x64-5ffe0051ff79-onefile.zip)**。当前三个运行附件对应源码 `5ffe0051ff7929dd7bfd8bfbca593af8a355b1b3`。
 
-[v1.1.0 发布页](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v1.1.0) · [历史 v1.0.1 发布页](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v1.0.1) · [使用说明与常见问题](docs/FAQ.md) · [故障排查](docs/TROUBLESHOOTING.md) · [文件校验与实测范围](DELIVERY.md)
+[v1.1.1 发布页](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v1.1.1) · [历史 v1.0.1 发布页](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v1.0.1) · [使用说明与常见问题](docs/FAQ.md) · [故障排查](docs/TROUBLESHOOTING.md) · [文件校验与实测范围](DELIVERY.md)
 
 [下载与双击](#windows下载后双击使用) · [模拟练习步骤](#新版网页怎么用) · [练习范围](network-config-auditor/docs/SIMULATOR.md) · [命令行](#源码与命令行) · [文档索引](#文档导航) · [1.1 新增功能](#新增功能)
 
