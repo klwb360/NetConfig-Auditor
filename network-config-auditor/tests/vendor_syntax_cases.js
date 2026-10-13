@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
-const {classifyLines,MAX_CHARS,MAX_LINES} = require("../netaudit/web/vendor-syntax.js");
+const {classifyLines,presentationForLines,MAX_CHARS,MAX_LINES} = require("../netaudit/web/vendor-syntax.js");
 let checks = 0;
 function check(name,run) { run(); checks++; }
 const one = (text,vendor="auto",kind="config") => classifyLines(text,{vendor,kind})[0];
@@ -136,5 +136,122 @@ check("browser global needs neither DOM nor network",() => {
   const source=fs.readFileSync(path.join(__dirname,"..","netaudit","web","vendor-syntax.js"),"utf8");
   const context=vm.createContext({});vm.runInContext(source,context);
   assert.equal(context.NetAuditVendorSyntax.classifyLines("port trunk permit vlan 10")[0].category,"h3c");
+});
+const presentation = (text,vendor="auto") => presentationForLines(classifyLines(text,{vendor}),{vendor});
+check("single-vendor presentation follows all four explicit markers",() => {
+  assert.equal(typeof presentationForLines,"function","Presentation must decide whether a known single-vendor document needs colors.");
+  for(const [text,vendor] of [
+    ["Cisco IOS Software, Version 15.2\nhostname LAB\nswitchport mode trunk\ninterface GigabitEthernet0/1","cisco"],
+    ["!Software Version V200R019\nsysname LAB\ninterface Vlanif10\nundo shutdown","huawei"],
+    ["H3C Comware Software, Version 7.1\nsysname LAB\ninterface Vlan-interface10\nundo shutdown","h3c"],
+    ["version S29_RGOS 11.4\nhostname LAB\nvlan range 10,20\nshutdown","ruijie"],
+  ]) {
+    const result=presentation(text);
+    assert.equal(result.suppressColors,true);assert.equal(result.singleVendor,vendor);
+  }
+});
+check("distinctive syntax establishes one vendor without recoloring shared metadata",() => {
+  for(const [text,vendor] of [["interface Vlanif10\nsysname LAB\nip address 192.0.2.1 255.255.255.0","huawei"],["port trunk permit vlan 10\nport link-type trunk","h3c"],["vlan range 10,20\nhostname LAB","ruijie"]]) {
+    const lines=classifyLines(text),before=JSON.stringify(lines);
+    assert.equal(presentationForLines(lines).singleVendor,vendor);
+    assert.equal(presentationForLines(lines).suppressColors,true);
+    assert.equal(JSON.stringify(lines),before);
+    assert.equal(lines[1].category,"shared");
+  }
+});
+check("manual vendor may establish compatible shared-only syntax for all four vendors",() => {
+  for(const [vendor,text] of [["cisco","hostname LAB\nswitchport mode trunk"],["ruijie","hostname LAB\nswitchport mode trunk"],["huawei","sysname LAB\nport link-type trunk"],["h3c","sysname LAB\nport link-type trunk"]]) {
+    assert.equal(presentation(text,vendor).suppressColors,true);
+    assert.equal(presentation(text,vendor).singleVendor,vendor);
+  }
+});
+check("auto shared-only input never claims an identified vendor",() => {
+  for(const text of ["hostname LAB\nswitchport mode trunk","sysname LAB\nundo shutdown","interface GigabitEthernet0/1\nip address 192.0.2.1 255.255.255.0"]) {
+    const result=presentation(text);assert.equal(result.suppressColors,false);assert.equal(result.singleVendor,null);
+  }
+});
+check("foreign syntax prevents suppression even with a manual vendor",() => {
+  for(const text of ["hostname LAB\nport trunk permit vlan 10","H3C Comware Software, Version 7.1\nsysname LAB","sysname LAB"]) {
+    assert.equal(presentation(text,"cisco").suppressColors,false);
+    assert.equal(presentation(text,"cisco").singleVendor,null);
+  }
+});
+check("contradictory vendor lines keep mixed highlights",() => {
+  for(const text of ["interface Vlanif10\nport trunk permit vlan 10","Cisco IOS Software, Version 15.2\nversion S29_RGOS 11.4","interface Vlanif10\nhostname LAB"]) assert.equal(presentation(text).suppressColors,false);
+});
+check("unknown lines remain separate when known syntax is homogeneous",() => {
+  const lines=classifyLines("interface Vlanif10\nmade-up-command Cisco\n<not-a-command>");
+  const result=presentationForLines(lines);
+  assert.equal(result.suppressColors,true);assert.equal(result.singleVendor,"huawei");
+  assert.equal(result.recognized,1);assert.equal(result.unknown,2);
+  assert.deepEqual(lines.map(line=>line.category),["huawei","unknown","unknown"]);
+  assert.ok(lines.every(line=>!Object.hasOwn(line,"safe")));
+});
+check("comments blanks and protected banner body do not create conflicts",() => {
+  const text="H3C Comware Software, Version 7.1\nheader login %\nCisco IOS Software, Version 15.2\ninterface Vlanif10\n%\n# vlan range 10\n\nport trunk permit vlan 10";
+  const result=presentation(text);assert.equal(result.suppressColors,true);assert.equal(result.singleVendor,"h3c");
+  assert.equal(result.recognized,3);assert.equal(result.unknown,0);
+});
+check("no recognized lines cannot be called homogeneous",() => {
+  for(const text of ["","# Cisco\n! Huawei\n","made-up-command"]) for(const vendor of ["auto","huawei"]) {
+    assert.equal(presentation(text,vendor).suppressColors,false);assert.equal(presentation(text,vendor).singleVendor,null);
+  }
+});
+check("invalid context and large homogeneous input retain honest presentation",() => {
+  for(const vendor of ["__proto__","constructor",null,[],"CISCO"]) assert.equal(presentation("hostname LAB",vendor).suppressColors,false);
+  const lines=classifyLines("!Software Version V200R019\n"+"interface GigabitEthernet0/1\n".repeat(MAX_LINES-1));
+  const result=presentationForLines(lines);assert.equal(result.suppressColors,true);assert.equal(result.recognized,MAX_LINES);
+  assert.equal(lines.at(-2).lineNumber,MAX_LINES);assert.equal(lines.at(-1).text,"");
+});
+// Narrow DOM adapter for command-node decoration. The real browser validates
+// textarea layout and events; this exercises the production group decorator.
+function highlightHarness() {
+  const makeNode = text => {
+    const classes=new Set(), item={textContent:text,dataset:{},siblings:[],className:""};
+    item.classList={add:name=>classes.add(name),remove:name=>classes.delete(name),contains:name=>classes.has(name)};
+    item.after=badge=>{badge.owner=item;item.siblings.push(badge);};
+    item.remove=()=>{if(item.owner) item.owner.siblings.splice(item.owner.siblings.indexOf(item),1);};
+    return item;
+  };
+  const window={NetAuditVendorSyntax:require("../netaudit/web/vendor-syntax.js"),addEventListener:()=>{}};
+  const document={querySelectorAll:()=>[],getElementById:()=>null,createElement:()=>makeNode("")};
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname,"..","netaudit","web","vendor-highlight.js"),"utf8"),{window,document});
+  return {decorateAll:window.NetAuditHighlights.decorateAll,command:makeNode};
+}
+check("draft and preview do not decorate homogeneous command groups",() => {
+  const {decorateAll,command}=highlightHarness();
+  for(const [vendor,texts] of [["cisco",["configure terminal","interface GigabitEthernet0/1","no shutdown"]],["huawei",["system-view","interface Vlanif10","undo shutdown"]],["h3c",["system-view","port trunk permit vlan 10"]],["ruijie",["configure terminal","vlan range 10,20"]]]) {
+    const commands=texts.map(command);decorateAll(commands,{vendor});
+    assert.ok(commands.every(item=>!item.classList.contains("vendor-command")));
+    assert.ok(commands.every(item=>item.siblings.length===0));
+    assert.deepEqual(commands.map(item=>item.textContent),texts);
+  }
+});
+check("mixed command groups keep decorations while unknown nodes stay neutral",() => {
+  const {decorateAll,command}=highlightHarness();
+  const commands=["hostname LAB","port trunk permit vlan 10","made-up-command <script>"].map(command);
+  decorateAll(commands,{vendor:"cisco"});
+  assert.equal(commands[0].dataset.vendorCategory,"cisco");assert.equal(commands[1].dataset.vendorCategory,"h3c");
+  assert.equal(commands[0].siblings.length,1);assert.equal(commands[1].siblings.length,1);
+  assert.equal(commands[2].classList.contains("vendor-command"),false);assert.equal(commands[2].siblings.length,0);
+  assert.equal(commands[2].textContent,"made-up-command <script>");
+});
+check("each draft or preview group is evaluated without source-editor state",() => {
+  const {decorateAll,command}=highlightHarness();
+  const mixed=["interface Vlanif10","port trunk permit vlan 10"].map(command);
+  decorateAll(mixed);assert.ok(mixed.every(item=>item.classList.contains("vendor-command")));
+  const independent=["sysname LAB","port link-type trunk"].map(command);
+  decorateAll(independent,{vendor:"h3c"});assert.ok(independent.every(item=>!item.classList.contains("vendor-command")));
+  const ambiguous=["hostname LAB","switchport mode trunk"].map(command);
+  decorateAll(ambiguous);assert.ok(ambiguous.every(item=>item.classList.contains("vendor-command")));
+});
+check("redecoration removes stale colors and labels without duplicating badges",() => {
+  const {decorateAll,command}=highlightHarness();
+  const commands=["hostname LAB","port trunk permit vlan 10"].map(command);
+  decorateAll(commands,{vendor:"cisco"});decorateAll(commands,{vendor:"cisco"});
+  assert.equal(commands[0].siblings.length,1);assert.equal(commands[1].siblings.length,1);
+  commands[0].textContent="sysname LAB";decorateAll(commands,{vendor:"h3c"});
+  assert.ok(commands.every(item=>!item.classList.contains("vendor-command")));
+  assert.ok(commands.every(item=>!Object.hasOwn(item.dataset,"vendorCategory") && item.siblings.length===0));
 });
 process.stdout.write(JSON.stringify({all_passed:true,checks})+"\n");

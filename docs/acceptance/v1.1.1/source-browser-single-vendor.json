@@ -1,0 +1,256 @@
+{
+  "product": "NetConfig Auditor",
+  "version": "1.1.1",
+  "date": "2026-10-13",
+  "source_base": "1fd92fab243f85d97e1cf1f089a13d34ca179180",
+  "branch": "feat/single-vendor-highlights",
+  "browser": "Edg/155.0.4283.45",
+  "scope": "Actual source app, synthetic configs; no real device connections",
+  "cases": [
+    {
+      "name": "cisco_selected",
+      "mode": "single-vendor",
+      "rows": 0,
+      "padding": "14px",
+      "gutter": "0px",
+      "summary": "当前厂商为 Cisco；已识别行均与其兼容，不显示高亮。隐藏颜色不代表配置安全或设备支持。按行统计 · Cisco 2 行。",
+      "text": "hostname LAB\nswitchport mode trunk"
+    },
+    {
+      "name": "cisco_marker",
+      "mode": "single-vendor",
+      "rows": 0,
+      "padding": "14px",
+      "gutter": "0px",
+      "summary": "已识别为单一厂商 Cisco 的语法线索，已识别行不显示高亮。隐藏颜色不代表配置安全或设备支持。按行统计 · Cisco 1 行，共享 2 行。",
+      "text": "Cisco IOS Software, Version 15.2\nhostname LAB\nswitchport mode trunk"
+    },
+    {
+      "name": "huawei_marker",
+      "mode": "single-vendor",
+      "rows": 0,
+      "padding": "14px",
+      "gutter": "0px",
+      "summary": "已识别为单一厂商 华为 的语法线索，已识别行不显示高亮。隐藏颜色不代表配置安全或设备支持。按行统计 · 华为 2 行，共享 1 行。",
+      "text": "!Software Version V200R019\nsysname LAB\ninterface Vlanif10"
+    },
+    {
+      "name": "h3c_marker",
+      "mode": "single-vendor",
+      "rows": 0,
+      "padding": "14px",
+      "gutter": "0px",
+      "summary": "已识别为单一厂商 H3C 的语法线索，已识别行不显示高亮。隐藏颜色不代表配置安全或设备支持。按行统计 · H3C 2 行，共享 1 行。",
+      "text": "H3C Comware Software, Version 7.1\nsysname LAB\nport trunk permit vlan 10"
+    },
+    {
+      "name": "ruijie_marker",
+      "mode": "single-vendor",
+      "rows": 0,
+      "padding": "14px",
+      "gutter": "0px",
+      "summary": "已识别为单一厂商 锐捷 的语法线索，已识别行不显示高亮。隐藏颜色不代表配置安全或设备支持。按行统计 · 锐捷 2 行，共享 1 行。",
+      "text": "version S29_RGOS 11.4\nhostname LAB\nvlan range 10,20"
+    },
+    {
+      "name": "mixed_auto",
+      "mode": "mixed",
+      "rows": 2,
+      "padding": "14px",
+      "gutter": "68px",
+      "summary": "按行语法线索 · 华为 1 行，H3C 1 行。",
+      "text": "interface Vlanif10\nport trunk permit vlan 10"
+    },
+    {
+      "name": "foreign_selected",
+      "mode": "mixed",
+      "rows": 2,
+      "padding": "14px",
+      "gutter": "68px",
+      "summary": "按行语法线索 · Cisco 1 行，H3C 1 行；其中 1 行共享语法按当前厂商标注。",
+      "text": "hostname LAB\nport trunk permit vlan 10"
+    },
+    {
+      "name": "shared_ambiguous",
+      "mode": "mixed",
+      "rows": 2,
+      "padding": "14px",
+      "gutter": "68px",
+      "summary": "按行语法线索 · 共享 2 行。",
+      "text": "hostname LAB\nswitchport mode trunk"
+    },
+    {
+      "name": "unknown_preserved",
+      "mode": "single-vendor",
+      "rows": 0,
+      "padding": "14px",
+      "gutter": "0px",
+      "summary": "已识别为单一厂商 华为 的语法线索，已识别行不显示高亮。仍有 1 行未识别，不能据此认定安全。按行统计 · 华为 1 行，未识别 1 行。",
+      "text": "interface Vlanif10\nmade-up-command Cisco"
+    },
+    {
+      "name": "banner_comment_ignored",
+      "mode": "single-vendor",
+      "rows": 0,
+      "padding": "14px",
+      "gutter": "0px",
+      "summary": "已识别为单一厂商 H3C 的语法线索，已识别行不显示高亮。隐藏颜色不代表配置安全或设备支持。按行统计 · H3C 2 行，共享 1 行。",
+      "text": "H3C Comware Software, Version 7.1\nheader login %\ninterface Vlanif10\n%\n# Cisco\nport trunk permit vlan 10"
+    },
+    {
+      "name": "mixed_to_single",
+      "mode": "single-vendor",
+      "rows": 0,
+      "padding": "14px",
+      "gutter": "0px",
+      "summary": "当前厂商为 华为；已识别行均与其兼容，不显示高亮。隐藏颜色不代表配置安全或设备支持。按行统计 · 华为 2 行。",
+      "text": "interface Vlanif10\nundo shutdown"
+    }
+  ],
+  "themes": [
+    {
+      "theme": "light",
+      "page": "rgb(245, 246, 242)",
+      "panel": "rgb(255, 255, 255)",
+      "stored": "light"
+    },
+    {
+      "theme": "dark",
+      "page": "rgb(17, 17, 17)",
+      "panel": "rgb(27, 27, 27)",
+      "stored": "dark"
+    },
+    {
+      "theme": "system",
+      "page": "rgb(17, 17, 17)",
+      "panel": "rgb(27, 27, 27)",
+      "stored": "system"
+    }
+  ],
+  "widths": [
+    {
+      "width": 320,
+      "client": 305,
+      "scroll": 305
+    },
+    {
+      "width": 421,
+      "client": 406,
+      "scroll": 406
+    },
+    {
+      "width": 430,
+      "client": 415,
+      "scroll": 415
+    },
+    {
+      "width": 440,
+      "client": 425,
+      "scroll": 425
+    },
+    {
+      "width": 460,
+      "client": 445,
+      "scroll": 445
+    },
+    {
+      "width": 768,
+      "client": 753,
+      "scroll": 753
+    },
+    {
+      "width": 1024,
+      "client": 1009,
+      "scroll": 1009
+    },
+    {
+      "width": 1600,
+      "client": 1585,
+      "scroll": 1585
+    }
+  ],
+  "tabs": [
+    {
+      "selected": "tab-findings",
+      "visible": [
+        "result-panel-findings"
+      ]
+    },
+    {
+      "selected": "tab-architecture",
+      "visible": [
+        "result-panel-architecture"
+      ]
+    },
+    {
+      "selected": "tab-intelligence",
+      "visible": [
+        "result-panel-intelligence"
+      ]
+    },
+    {
+      "selected": "tab-ai",
+      "visible": [
+        "result-panel-ai"
+      ]
+    },
+    {
+      "selected": "tab-inventory",
+      "visible": [
+        "result-panel-inventory"
+      ]
+    },
+    {
+      "selected": "tab-help",
+      "visible": [
+        "result-panel-help"
+      ]
+    }
+  ],
+  "plan": {
+    "commands": 5,
+    "colored": 0
+  },
+  "commands": {
+    "mode": "single-vendor",
+    "rows": 0,
+    "padding": "14px",
+    "gutter": "0px",
+    "summary": "当前厂商为 Cisco；已识别行均与其兼容，不显示高亮。隐藏颜色不代表配置安全或设备支持。按行统计 · Cisco 5 行。",
+    "text": "end\nconfigure terminal\nvlan 20\nexit\nend"
+  },
+  "preview": {
+    "commands": 5,
+    "colored": 0,
+    "state": "等待您确认应用"
+  },
+  "mixed_commands": {
+    "mode": "mixed",
+    "rows": 2,
+    "padding": "14px",
+    "gutter": "68px",
+    "summary": "按行语法线索 · Cisco 1 行，H3C 1 行；其中 1 行共享语法按当前厂商标注。",
+    "text": "configure terminal\nport trunk permit vlan 10"
+  },
+  "audit": {
+    "status": "审计完成 · cisco · LAB-SW · 识别 27/27 行",
+    "exports": true,
+    "tabs": 6
+  },
+  "runtime_exceptions": [],
+  "screenshots": [
+    {
+      "path": "docs/images/simulator.png",
+      "sha256": "e2c6daf27a11a6f49611cc3a8b6287b11eac02b6983baf06e505f2b26f26e141",
+      "real_app": true,
+      "capture": "Ephemeral primary-tab headless Edge; actual app and synthetic configuration"
+    },
+    {
+      "path": "docs/images/workspace.png",
+      "sha256": "b314af5fd072fa135549fb3b063f6765af93f1a04bf4d8d9a822484530dd2e11",
+      "real_app": true,
+      "capture": "Ephemeral primary-tab headless Edge; actual app and synthetic configuration"
+    }
+  ],
+  "passed": true
+}
