@@ -5,6 +5,7 @@
   const names = {cisco:"Cisco",huawei:"华为",h3c:"H3C",ruijie:"锐捷",shared:"共享",unknown:"未识别"};
   const colored = new Set(["cisco","huawei","h3c","ruijie","shared"]);
   const editors = new Map();
+  const commandBadges = new WeakMap();
   const node = (tag,text,cls) => {
     const item = document.createElement(tag);
     if(text !== undefined) item.textContent = text;
@@ -29,6 +30,7 @@
       this.vendor = "auto";
       this.kind = input.id === "config" ? "config" : "commands";
       this.text = null;this.classifiedVendor = null;this.lines = [];this.lineStarts = [];this.frame = 0;
+      this.presentation = syntax.presentationForLines([]);
       this.chips = new Map();
       for(const [category,label] of Object.entries(names)) {
         const chip = node("span",undefined,"vendor-key");chip.dataset.vendorCategory = category;
@@ -57,6 +59,9 @@
         this.text = text;this.classifiedVendor = this.vendor;
         try {
           this.lines = syntax.classifyLines(text,{vendor:this.vendor,kind:this.kind});
+          this.presentation = syntax.presentationForLines(this.lines,{vendor:this.vendor});
+          const mode = this.presentation.suppressColors ? "single-vendor" : "mixed";
+          this.shell.dataset.highlightMode = mode;this.legend.dataset.highlightMode = mode;
           this.lineStarts = [];
           let offset = 0;
           for(const line of this.lines) {this.lineStarts.push(offset);offset += line.text.length + 1;}
@@ -67,11 +72,21 @@
             if(line.basis === "context") contextual++;
           }
           for(const [category,chip] of this.chips) chip.querySelector("b").textContent = String(counts[category]);
-          this.summary.textContent = text ? `按行识别 · ${Object.entries(counts).filter(([,count]) => count).map(([key,count]) => `${names[key]} ${count} 行`).join("，") || "仅有空行或注释"}${contextual ? `；其中 ${contextual} 行共享语法按当前厂商标注` : ""}。` : "输入后显示指令的厂商颜色与行数。";
+          const statistics = Object.entries(counts).filter(([,count]) => count).map(([key,count]) => `${names[key]} ${count} 行`).join("，") || "仅有空行或注释";
+          if(this.presentation.suppressColors) {
+            const vendorName = names[this.presentation.singleVendor];
+            const basis = this.vendor === "auto" ? `已识别为单一厂商 ${vendorName} 的语法线索，已识别行不显示高亮。` : `当前厂商为 ${vendorName}；已识别行均与其兼容，不显示高亮。`;
+            const warning = this.presentation.unknown ? `仍有 ${this.presentation.unknown} 行未识别，不能据此认定安全。` : "隐藏颜色不代表配置安全或设备支持。";
+            this.summary.textContent = basis + warning + `按行统计 · ${statistics}。`;
+          } else {
+            this.summary.textContent = text ? `按行语法线索 · ${statistics}${contextual ? `；其中 ${contextual} 行共享语法按当前厂商标注` : ""}。` : "输入后显示指令的厂商线索与行数；同一厂商时不显示高亮。";
+          }
           this.shell.dataset.highlightState = "ready";
         } catch(error) {
           // Highlighting is advisory; never alter or reject the underlying text.
           this.lines = [];this.lineStarts = [];
+          this.presentation = syntax.presentationForLines([]);
+          this.shell.dataset.highlightMode = "mixed";this.legend.dataset.highlightMode = "mixed";
           for(const chip of this.chips.values()) chip.querySelector("b").textContent = "—";
           this.summary.textContent = error instanceof RangeError ? "文本过长或超过 30,000 行，暂不显示底色；原文仍可编辑。" : "暂时无法高亮，原文仍可编辑。";
           this.shell.dataset.highlightState = "unavailable";
@@ -93,6 +108,7 @@
       this.currentLine.textContent = line ? `光标第 ${index + 1} 行：${line.label}${line.basis === "context" ? "（兼容 " + line.vendors.map(vendor => names[vendor]).join(" / ") + "）" : ""}。` : "";
     }
     paint() {
+      if(this.presentation.suppressColors) {this.overlay.replaceChildren();return;}
       const input = this.input, style = getComputedStyle(input);
       const lineHeight = parseFloat(style.lineHeight), paddingTop = parseFloat(style.paddingTop);
       const height = input.clientHeight, width = input.clientWidth;
@@ -135,10 +151,18 @@
     badge.dataset.vendorCategory = line.category;
     badge.title = line.label + (line.reason ? "：" + line.reason : "");
     commandNode.after(badge);
+    commandBadges.set(commandNode,badge);
   }
   function decorateAll(commandNodes,options={}) {
     const texts = commandNodes.map(item => item.textContent);
     const lines = syntax.classifyLines(texts.join("\n"),{...options,kind:"commands"});
+    for(const commandNode of commandNodes) {
+      commandNode.classList.remove("vendor-command");
+      delete commandNode.dataset.vendorCategory;
+      commandBadges.get(commandNode)?.remove();
+      commandBadges.delete(commandNode);
+    }
+    if(syntax.presentationForLines(lines,options).suppressColors) return;
     let index = 0;
     for(let item = 0;item < commandNodes.length;item++) {
       decorateLine(commandNodes[item],lines[index]);

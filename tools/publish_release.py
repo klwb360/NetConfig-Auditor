@@ -320,6 +320,7 @@ def notes(repository, tag, manifest, run_id, records_commit="main"):
 
 - 程序、界面及报告统一使用 NetConfig Auditor 名称；可执行文件为 `NetConfig-Auditor.exe`，主启动器为 `Start-NetConfig-Auditor.bat`，保留旧 BAT 入口兼容已有操作方式。
 - 暗黑主题以 `#111111` 深黑色和中性灰层次为主，减少整体绿色偏色；风险等级和四厂商语法高亮继续保留语义配色。历史发行版名称和文件不修改。
+- 已识别指令都与同一已确定厂商兼容时不显示厂商高亮；混合或外来语法仍区分。备份、命令区、草案与预览分别判断，未知行数量和警告保留，风险等级提示色不受影响。
 
 """
     return f"""下载后即可使用的 Windows x64 便携版，配置处理在本机完成。

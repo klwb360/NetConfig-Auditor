@@ -126,5 +126,24 @@
       return {lineNumber:index + 1,text,...hint,vendors:[...hint.vendors]};
     });
   }
-  return Object.freeze({classifyLines,MAX_CHARS,MAX_LINES});
+  // Presentation only: do not replace per-line categories or infer that an
+  // unrecognized command is compatible, executable, or safe. Shared syntax
+  // alone cannot establish a vendor without the user's explicit context.
+  function presentationForLines(lines,options={}) {
+    const selected = options && Object.hasOwn(names,options.vendor) ? options.vendor : null;
+    let candidates = [...ALL], recognized = 0, unknown = 0;
+    const established = new Set();
+    for(const line of lines) {
+      if(line.category === "unknown") {unknown++;continue;}
+      if(line.category === "comment" || line.category === "blank" || !line.vendors.length) continue;
+      recognized++;
+      candidates = candidates.filter(vendor => line.vendors.includes(vendor));
+      if(line.vendors.length === 1) established.add(line.vendors[0]);
+    }
+    const singleVendor = !recognized ? null : selected
+      ? (candidates.includes(selected) ? selected : null)
+      : (candidates.length === 1 && established.has(candidates[0]) ? candidates[0] : null);
+    return {suppressColors:singleVendor !== null,singleVendor,candidates,recognized,unknown};
+  }
+  return Object.freeze({classifyLines,presentationForLines,MAX_CHARS,MAX_LINES});
 });
