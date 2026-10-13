@@ -31,9 +31,16 @@ PROJECT = Path(__file__).resolve().parents[1]
 REPOSITORY = PROJECT.parent
 LOCK = PROJECT / "requirements-build-windows.txt"
 BUILD_PYTHON = (3, 12, 10)
-sys.path.insert(0, str(PROJECT))
-from netaudit import __version__
-from netaudit.branding import APPLICATION_NAME, FILE_STEM
+# Source tests may leave editable-install egg-info next to the app. Keep the
+# source import temporary so the isolated venv guard sees only installed wheels.
+_original_sys_path = sys.path[:]
+try:
+    sys.path.insert(0, str(PROJECT))
+    from netaudit import __version__
+    from netaudit.branding import APPLICATION_NAME, FILE_STEM
+finally:
+    sys.path[:] = _original_sys_path
+del _original_sys_path
 
 
 def run(command: list[str], *, capture: bool = False, cwd: Path = PROJECT) -> str:

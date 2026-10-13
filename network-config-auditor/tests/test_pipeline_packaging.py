@@ -5,7 +5,9 @@ import hashlib
 import io
 import json
 from pathlib import Path
+import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -19,6 +21,32 @@ SPEC.loader.exec_module(BUILD)
 
 
 class PipelinePackagingTests(unittest.TestCase):
+    def test_builder_brand_import_does_not_pollute_locked_environment_metadata(self):
+        # Editable source tests leave egg-info beside the app. Importing the
+        # brand must not make it appear installed in the separate build venv.
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory)
+            (project / "tools").mkdir()
+            shutil.copy2(PROJECT / "tools" / "build_windows.py", project / "tools" / "build_windows.py")
+            shutil.copytree(PROJECT / "netaudit", project / "netaudit",
+                            ignore=shutil.ignore_patterns("__pycache__", "web", "data"))
+            egg = project / "source_fixture.egg-info"
+            egg.mkdir()
+            (egg / "PKG-INFO").write_text("Metadata-Version: 2.1\nName: netconfig-source-metadata-fixture\nVersion: 1.1.1\n", encoding="utf-8")
+            script = """
+import importlib.metadata as metadata
+import runpy
+import sys
+before = {(d.metadata['Name'], d.version) for d in metadata.distributions()}
+builder = runpy.run_path(sys.argv[1])
+after = {(d.metadata['Name'], d.version) for d in metadata.distributions()}
+assert builder['APPLICATION_NAME'] == 'NetConfig Auditor'
+assert after == before, 'Source metadata leaked into the locked build environment: ' + repr(after - before)
+"""
+            result = subprocess.run([sys.executable, "-I", "-c", script, str(project / "tools" / "build_windows.py")],
+                                    cwd=project, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_new_distribution_keeps_canonical_and_compatible_launchers(self):
         with tempfile.TemporaryDirectory() as directory:
             destination = Path(directory)
