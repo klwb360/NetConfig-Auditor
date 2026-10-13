@@ -1,18 +1,22 @@
-# 1.1.0 批量审计与解析完整性更新
+# 1.1.1 名称与暗黑主题更新
 
-本项目已迁入公开 NetConfig-Auditor。新增 audit-batch、严格多编码导入、文件路径/哈希/行号追溯、独立50配置金标准；修复路由/NAT条件丢失、NAT伪映射和H3C撤销语法。包名与 NetAudit 启动器保持兼容。使用与验证见 [公开仓库说明](../README.md)、[验收方法](../docs/ACCEPTANCE.md)和[检查点](../docs/checkpoints/)。
+程序与界面统一使用 **NetConfig Auditor**，Windows 程序为 `NetConfig-Auditor.exe`，主启动器为 [Start-NetConfig-Auditor.bat](Start-NetConfig-Auditor.bat)。暗黑主题以 `#111111` 为主，面板采用中性黑灰，保留风险等级和厂商语法的提示色。已实现功能继续复用；正式下载、校验及验收范围以公开仓库交付记录为准。
 
-# NetAudit · 网络配置学习与审计
+## 1.1.0 批量审计与解析完整性更新
+
+本项目已迁入公开 NetConfig-Auditor。新增 audit-batch、严格多编码导入、文件路径/哈希/行号追溯、独立50配置金标准；修复路由/NAT条件丢失、NAT伪映射和H3C撤销语法。`netaudit` 命令与旧 [Start-NetAudit.bat](Start-NetAudit.bat) 入口保持兼容。使用与验证见 [公开仓库说明](../README.md)、[验收方法](../docs/ACCEPTANCE.md)和[检查点](../docs/checkpoints/)。
+
+# NetConfig Auditor · 网络配置学习与审计
 
 导入一台 Cisco、华为、H3C 或锐捷 RGOS 交换机/路由器的备份，在独立副本中练习配置：**中文目标或设备命令 → 预览结果、理由与差异 → 明确应用 → 撤销 / 重置 / 导出配置 → 按需审计**。原有六域架构检查、35 个规则 ID、CVE / KEV 核对、可选本机 AI 与 JSON / Markdown / HTML 报告继续提供；运行时仅使用 Python 标准库。
 
-**本页对应 v1.0.1 源码**。Windows 运行文件见 [最新 Release](https://github.com/klwb360/NetConfig-Auditor/releases/latest) 的 **Assets**：选择 `*-onefile.exe` 双击运行，或下载 `*-portable.zip` 解压后启动；模拟功能需要 **1.0.0 或更新**，厂商底色高亮需要 **1.0.1 或更新**，旧 v0.2.3 只有审计功能。实际发布状态、文件名、校验值与验收范围见在线 [仓库交付记录](https://github.com/klwb360/NetAudit/blob/main/DELIVERY.md)。
+**本页对应 v1.1.1 源码**。Windows 运行文件见公开仓库的 [最新 Release](https://github.com/klwb360/NetConfig-Auditor/releases/latest) 的 **Assets**，无需登录即可下载：选择 `*-onefile.exe` 双击运行，或下载 `*-portable.zip` 解压后启动；模拟功能需要 **1.0.0 或更新**，厂商底色高亮需要 **1.0.1 或更新**，旧 v0.2.3 只有审计功能。v1.1.1 起使用新程序名，历史发行文件名保持原样。实际发布状态、文件名、校验值与验收范围见在线 [仓库交付记录](https://github.com/klwb360/NetConfig-Auditor/blob/main/DELIVERY.md)。
 
 本项目审计了 [pynipper-ng](https://github.com/syn-4ck/pynipper-ng)，保留并改写其插件基类，重建了三厂商解析、审计规则和报告模块。来源、固定提交和改动见 [NOTICE](NOTICE)；审计详情见 [代码审计报告](docs/UPSTREAM_AUDIT.md)。项目采用 GPL-3.0-only。
 
 ## 最快开始
 
-Windows 普通用户使用便携包：**下载 → 解压 → 双击 `Start-NetAudit.bat` → 导入备份 → 模拟练习 → 按需审计与导出**。单 EXE 下载后无需解压。便携 EXE 自带 Python 运行库，普通使用设计为无需管理员权限。下载方法、关闭与迁移说明见 [Windows 使用说明](docs/WINDOWS.md)。构建方法与实际验收边界见 [便携化记录](docs/PORTABILITY.md)。
+Windows 普通用户使用便携包：**下载 → 解压 → 双击 `Start-NetConfig-Auditor.bat` → 导入备份 → 模拟练习 → 按需审计与导出**。单 EXE 下载后无需解压。便携 EXE 自带 Python 运行库，普通使用设计为无需管理员权限。下载方法、关闭与迁移说明见 [Windows 使用说明](docs/WINDOWS.md)。构建方法与实际验收边界见 [便携化记录](docs/PORTABILITY.md)。
 
 将一份 UTF-8 配置文件拖入左侧文本区域，或使用“导入配置文件”；按内容自动识别四厂商，支持中文、空格及无扩展名文件。信息不足或混合厂商标记时提示手动选择。文件最大 2 MiB / 30000 行，每次一个文件，不支持文件夹；也可粘贴文本或“载入示例”。
 
@@ -20,7 +24,7 @@ Windows 普通用户使用便携包：**下载 → 解压 → 双击 `Start-NetA
 
 原始备份和模拟命令区按已识别的语法显示底色与文字标签：**Cisco 蓝、华为橙、H3C 紫、锐捷绿**。多厂商共享的语法在“自动识别”选项下保持中性；指定兼容厂商后可按该厂商着色，并注明“共享语法”。未知行、普通注释和 banner 正文不据此猜测厂商。底色仅帮助读懂语法，不能证明命令安全或真实设备可执行；输入、复制及配置和报告导出不会加入颜色标记。长命令保持一行，左右滚动查看。详见 [高亮说明](docs/SIMULATOR.md#厂商底色高亮v101)。
 
-源码版 Windows 也可双击 `Start-NetAudit.bat`，需要 Python **3.10 或更新版本**。BAT 会优先运行同目录的 `NetAudit.exe`，否则检测 Python。
+源码版 Windows 也可双击 `Start-NetConfig-Auditor.bat`，需要 Python **3.10 或更新版本**。BAT 会优先运行同目录的 `NetConfig-Auditor.exe`，否则检测 Python。
 
 需要 Python **3.10 或更新版本**。在仓库根目录进入本项目：
 

@@ -13,10 +13,12 @@ import zipfile
 
 try:
     from tools import release_records as records
+    from tools.release_identity import identity as release_identity, artifact_name
 except ModuleNotFoundError as exc:
     if exc.name != "tools":
         raise
     import release_records as records
+    from release_identity import identity as release_identity, artifact_name
 
 API = "https://api.github.com"
 MAX_DOWNLOAD = 64 * 1024 * 1024
@@ -53,7 +55,7 @@ class GitHub:
                 "Refusing authenticated request outside GitHub API")
         headers = {"Authorization": "Bearer " + self.token,
                    "Accept": accept,
-                   "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "NetAudit-release"}
+                   "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "NetConfig-Auditor-release"}
         if data is not None:
             headers["Content-Type"] = "application/octet-stream" if upload else "application/json"
             if not upload:
@@ -79,7 +81,7 @@ class GitHub:
         require(parsed.scheme == "https" and parsed.hostname is not None,
                 "Artifact redirect must use HTTPS")
         # A fresh opener/request has no Authorization header from the API call.
-        request = urllib.request.Request(url, headers={"User-Agent": "NetAudit-release"})
+        request = urllib.request.Request(url, headers={"User-Agent": "NetConfig-Auditor-release"})
         try:
             with urllib.request.build_opener(NoRedirect).open(request, timeout=60) as response:
                 data = response.read(MAX_DOWNLOAD + 1)
@@ -115,14 +117,15 @@ def verify_files(files, commit, run_id, run_attempt):
     version = manifest["application_version"]
     require(re.fullmatch(r"\d+\.\d+\.\d+", version), "Invalid application version")
     version_parts = tuple(map(int, version.split(".")))
+    application, stem = release_identity(version)
     has_simulator = version_parts >= (1, 0, 0)
     has_vendor_highlighting = version_parts >= (1, 0, 1)
     expected_web = {"index.html", "style.css", "app.js", "simulator.js"}
     if has_vendor_highlighting:
         expected_web |= {"vendor-syntax.js", "vendor-highlight.js"}
-    prefix = f"NetAudit-{version}-windows-x64-{commit[:12]}"
+    prefix = f"{stem}-{version}-windows-x64-{commit[:12]}"
     packages = {prefix + "-portable.zip", prefix + "-onefile.zip", prefix + "-onefile.exe",
-                f"NetAudit-{version}-source-{commit[:12]}.zip"}
+                f"{stem}-{version}-source-{commit[:12]}.zip"}
     expected = packages | {"manifest.json", "SHA256SUMS.txt", "smoke-source.json",
                            "smoke-onedir.json", "smoke-onefile.json"}
     require(set(files) == expected, "Artifact must contain exactly the nine delivery files")
@@ -135,7 +138,7 @@ def verify_files(files, commit, run_id, run_attempt):
         sums[name] = sha
     require(set(sums) == expected - {"SHA256SUMS.txt"}, "Checksum file list mismatch")
     require(all(digest(files[n]) == sha for n, sha in sums.items()), "File checksum mismatch")
-    require(manifest["application"] == "NetAudit" and manifest["source"]["commit"] == commit
+    require(manifest["application"] == application and manifest["source"]["commit"] == commit
             and manifest["source"]["dirty"] is False, "Manifest source mismatch")
     env = manifest["environment"]
     require(env["github_run_id"] == str(run_id) and env["github_run_attempt"] == str(run_attempt),
@@ -215,6 +218,8 @@ def notes(repository, tag, manifest, run_id, records_commit="main"):
     has_simulator = version_parts >= (1, 0, 0)
     has_vendor_highlighting = version_parts >= (1, 0, 1)
     has_batch_auditing = version_parts >= (1, 1, 0)
+    has_new_branding = version_parts >= (1, 1, 1)
+    _, stem = release_identity(version)
     vendor_choices = "Cisco、华为、H3C 或锐捷 RGOS" if has_rgos_remediation else "Cisco、华为或 H3C"
     vendor_coverage = "四厂商" if has_rgos_remediation else "三厂商"
     commit = manifest["source"]["commit"]
@@ -310,19 +315,26 @@ def notes(repository, tag, manifest, run_id, records_commit="main"):
                    "6. 如需审查，点击“审查当前模拟配置”，再导出 JSON、Markdown 或 HTML 报告。未应用的预览不参与导出和审查。") if has_simulator else (
                    f"3. 浏览器打开后导入 UTF-8 配置，选择 {vendor_choices}，点击“开始审计”；也可先载入示例。\n"
                    "4. 查看发现与严重度，导出 JSON、Markdown 或 HTML 报告。")
+    branding_features = "" if not has_new_branding else """
+### 项目名称与中性暗黑主题
+
+- 程序、界面及报告统一使用 NetConfig Auditor 名称；可执行文件为 `NetConfig-Auditor.exe`，主启动器为 `Start-NetConfig-Auditor.bat`，保留旧 BAT 入口兼容已有操作方式。
+- 暗黑主题以 `#111111` 深黑色和中性灰层次为主，减少整体绿色偏色；风险等级和四厂商语法高亮继续保留语义配色。历史发行版名称和文件不修改。
+
+"""
     return f"""下载后即可使用的 Windows x64 便携版，配置处理在本机完成。
 
 **推荐下载：[便携 ZIP]({base}/releases/download/{tag}/{portable})**（下方 Assets 中名称以 `-portable.zip` 结尾的文件）。
 
 {download_step}
-2. 解压一次，双击文件夹中的 `Start-NetAudit.bat` 或 `NetAudit.exe`。
+2. 解压一次，双击文件夹中的 `Start-{stem}.bat` 或 `{stem}.exe`。
 {start_steps}
 
 关闭：回到启动窗口按 Ctrl+C；关闭浏览器标签页不会停止服务。迁移：复制整个文件夹（包括 `_internal`）到另一台电脑。EXE 自带 Python 运行库，普通使用设计为无需安装 Python、无需管理员权限。端口占用时以启动窗口显示的实际地址为准。
 
 `-onefile.zip` 提供单 EXE 与配套说明、示例、许可证和源码；`-onefile.exe` 可独立启动。再次分发仍需保留 GPL-3.0-only 许可证、归属说明与对应源码。普通用户无需下载 GitHub 自动生成的 “Source code”。
 
-{batch_features}{highlighting_features}{simulator_features}{features}{ui_features}{remediation_features}{theme_features}
+{branding_features}{batch_features}{highlighting_features}{simulator_features}{features}{ui_features}{remediation_features}{theme_features}
 
 ### 验证与来源
 
@@ -359,7 +371,8 @@ def ensure_tag(api, tag, commit, allow_create=True):
 
 
 def runtime_names(tag, commit):
-    prefix = f"NetAudit-{tag[1:]}-windows-x64-{commit[:12]}"
+    stem = release_identity(tag[1:])[1]
+    prefix = f"{stem}-{tag[1:]}-windows-x64-{commit[:12]}"
     return {prefix + "-portable.zip", prefix + "-onefile.zip", prefix + "-onefile.exe"}
 
 
@@ -370,7 +383,7 @@ def publish(api, tag, commit, files, body):
     matches = [r for r in releases if r["tag_name"] == tag]
     require(len(matches) <= 1, "Duplicate version releases")
     release = matches[0] if matches else api.repo("releases", method="POST", data={
-        "tag_name": tag, "target_commitish": commit, "name": f"NetAudit {tag[1:]} · Windows x64 便携版",
+        "tag_name": tag, "target_commitish": commit, "name": f"{release_identity(tag[1:])[0]} {tag[1:]} · Windows x64 便携版",
         "body": body, "draft": True, "prerelease": False})
     assets = {a["name"]: a for a in release["assets"]}
     require(len(assets) == len(release["assets"]), "Duplicate release assets")
@@ -403,7 +416,7 @@ def prepare_delivery(api, config, tag, commit, run_id):
     run = api.repo(f"actions/runs/{run_id}")
     validate_run(run, api.repository, commit)
     artifacts = api.repo(f"actions/runs/{run_id}/artifacts?per_page=100")["artifacts"]
-    matches = [a for a in artifacts if a["name"] == "NetAudit-windows-x64-" + commit]
+    matches = [a for a in artifacts if a["name"] == artifact_name(tag[1:], commit)]
     require(len(matches) <= 1, "Duplicate verified build artifacts")
     artifact = matches[0] if matches else None
     from_records = artifact is None or artifact["expired"]
@@ -417,7 +430,7 @@ def prepare_delivery(api, config, tag, commit, run_id):
                 and record["source_commit"] == commit and record["run_id"] == str(run_id)
                 and record["run_attempt"] == run["run_attempt"], "Archived build identity mismatch")
         archived_artifact = record["artifact"]
-        require(archived_artifact["name"] == "NetAudit-windows-x64-" + commit,
+        require(archived_artifact["name"] == artifact_name(tag[1:], commit),
                 "Archived artifact name mismatch")
         if artifact:
             require(all(artifact[key] == archived_artifact[key] for key in ("id", "name", "digest")),
@@ -474,7 +487,7 @@ def main():
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
         with open(summary, "a", encoding="utf-8") as f:
-            f.write(f"## Published NetAudit\n\n[Download {tag}]({url})\n\nSource: `{commit}`\n\n")
+            f.write(f"## Published {release_identity(tag[1:])[0]}\n\n[Download {tag}]({url})\n\nSource: `{commit}`\n\n")
             f.write("All nine original delivery files passed the complete checksum, source and acceptance guards; "
                     "their records are permanently archived. All three runtime release assets were "
                     "downloaded and SHA-256 verified.\n\n")

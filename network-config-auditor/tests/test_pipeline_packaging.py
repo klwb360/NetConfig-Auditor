@@ -8,6 +8,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 import zipfile
 
 
@@ -18,6 +19,29 @@ SPEC.loader.exec_module(BUILD)
 
 
 class PipelinePackagingTests(unittest.TestCase):
+    def test_new_distribution_keeps_canonical_and_compatible_launchers(self):
+        with tempfile.TemporaryDirectory() as directory:
+            destination = Path(directory)
+            BUILD.add_user_files(destination)
+            for launcher in ("Start-NetConfig-Auditor.bat", "Start-NetAudit.bat"):
+                self.assertEqual((destination / launcher).read_bytes(), (PROJECT / launcher).read_bytes())
+            self.assertFalse((destination / "NetAudit.exe").exists())
+
+    def test_builder_passes_new_executable_name_and_product_metadata_to_pyinstaller(self):
+        with tempfile.TemporaryDirectory() as directory:
+            work = Path(directory)
+            executable = work / "dist-onefile" / "NetConfig-Auditor.exe"
+            executable.parent.mkdir()
+            executable.write_bytes(b"MZ fixture executable")
+            with patch.object(BUILD, "run") as command, patch.object(BUILD, "add_user_files"):
+                self.assertEqual(BUILD.build_executable("onefile", work), executable)
+            args = command.call_args.args[0]
+            self.assertEqual(args[args.index("--name") + 1], "NetConfig-Auditor")
+            metadata = Path(args[args.index("--version-file") + 1]).read_text(encoding="utf-8")
+            self.assertIn("StringStruct('ProductName', 'NetConfig Auditor')", metadata)
+            self.assertIn("StringStruct('FileDescription', 'NetConfig Auditor')", metadata)
+            self.assertIn("StringStruct('OriginalFilename', 'NetConfig-Auditor.exe')", metadata)
+
     def test_windows_newline_checkout_preserves_official_snapshot_and_hash(self):
         # A Windows Git checkout may have core.autocrlf=true. Intelligence is
         # verified against the upstream raw bytes, so converting LF to CRLF

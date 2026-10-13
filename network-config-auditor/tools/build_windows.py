@@ -31,6 +31,9 @@ PROJECT = Path(__file__).resolve().parents[1]
 REPOSITORY = PROJECT.parent
 LOCK = PROJECT / "requirements-build-windows.txt"
 BUILD_PYTHON = (3, 12, 10)
+sys.path.insert(0, str(PROJECT))
+from netaudit import __version__
+from netaudit.branding import APPLICATION_NAME, FILE_STEM
 
 
 def run(command: list[str], *, capture: bool = False, cwd: Path = PROJECT) -> str:
@@ -90,7 +93,7 @@ def ensure_build_environment() -> dict[str, str]:
 
 def add_user_files(destination: Path) -> None:
     destination.mkdir(parents=True, exist_ok=True)
-    for name in ("Start-NetAudit.bat", "README.md", "LICENSE", "NOTICE"):
+    for name in ("Start-NetConfig-Auditor.bat", "Start-NetAudit.bat", "README.md", "LICENSE", "NOTICE"):
         shutil.copy2(PROJECT / name, destination / name)
     instructions = PROJECT / "docs" / "WINDOWS.md"
     shutil.copy2(instructions, destination / "WINDOWS.md")
@@ -132,7 +135,7 @@ def collect_licenses(destination: Path, pins: dict[str, str]) -> None:
         raise ValueError("The Windows Python installation must provide its LICENSE.txt for redistribution")
     write_json(destination / "VERSIONS.json", {"python": platform.python_version(), "build_packages": pins})
     (destination / "README.txt").write_text(
-        "NetAudit has no third-party runtime Python package dependencies.\n"
+        "NetConfig Auditor has no third-party runtime Python package dependencies.\n"
         "The frozen executable contains Python and PyInstaller bootloader/runtime components.\n"
         "Python and all locked build dependency licenses are retained here; listing a build\n"
         "dependency does not imply that the whole package is embedded in the executable.\n"
@@ -152,11 +155,38 @@ def smoke(mode: str, target: Path, report: Path) -> dict[str, object]:
     return result
 
 
+def write_version_resource(work: Path) -> Path:
+    """Set the Windows Properties product identity alongside the file name."""
+    version = __version__
+    if not re.fullmatch(r"\d+\.\d+\.\d+", version):
+        raise ValueError("Windows version resource requires a three-part version")
+    parts = tuple(map(int, version.split("."))) + (0,)
+    strings = {"FileDescription": APPLICATION_NAME, "ProductName": APPLICATION_NAME,
+               "FileVersion": version, "ProductVersion": version,
+               "OriginalFilename": FILE_STEM + ".exe", "InternalName": FILE_STEM}
+    fields = ",\n".join(f"                StringStruct({key!r}, {value!r})" for key, value in strings.items())
+    text = f"""# UTF-8 Windows PE VERSIONINFO generated from the project identity.
+VSVersionInfo(
+    ffi=FixedFileInfo(filevers={parts!r}, prodvers={parts!r}, mask=0x3f,
+                      flags=0x0, OS=0x40004, fileType=0x1, subtype=0x0, date=(0, 0)),
+    kids=[StringFileInfo([StringTable('040904B0', [
+{fields}
+    ])]), VarFileInfo([VarStruct('Translation', [1033, 1200])])]
+)
+"""
+    path = work / "windows-version.txt"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+    return path
+
+
 def build_executable(mode: str, work: Path) -> Path:
     output = work / ("dist-" + mode)
+    version_resource = write_version_resource(work)
     command = [
         sys.executable, "-m", "PyInstaller", "--" + mode,
-        "--clean", "--noconfirm", "--console", "--noupx", "--name", "NetAudit",
+        "--clean", "--noconfirm", "--console", "--noupx", "--name", FILE_STEM,
+        "--version-file", str(version_resource),
         "--paths", str(PROJECT), "--workpath", str(work / ("analysis-" + mode)),
         "--specpath", str(work / ("spec-" + mode)), "--distpath", str(output),
         "--add-data", str(PROJECT / "netaudit" / "web") + ":netaudit/web",
@@ -164,7 +194,7 @@ def build_executable(mode: str, work: Path) -> Path:
         str(PROJECT / "tools" / "windows_entry.py"),
     ]
     run(command)
-    executable = output / ("NetAudit/NetAudit.exe" if mode == "onedir" else "NetAudit.exe")
+    executable = output / (FILE_STEM + "/" + FILE_STEM + ".exe" if mode == "onedir" else FILE_STEM + ".exe")
     if not executable.is_file():
         raise ValueError("Expected Windows executable was not generated: " + str(executable))
     with executable.open("rb") as stream:
@@ -197,7 +227,7 @@ def package(
     mode: str, executable: Path, output: Path, work: Path, stem: str,
     source_zip: Path, build_manifest: dict[str, object], licenses: Path,
 ) -> Path:
-    folder = work / "packages" / ("NetAudit" if mode == "onedir" else "NetAudit-onefile")
+    folder = work / "packages" / (FILE_STEM if mode == "onedir" else FILE_STEM + "-onefile")
     shutil.copytree(executable.parent, folder)
     shutil.copy2(source_zip, folder / source_zip.name)
     shutil.copytree(licenses, folder / "third-party-licenses")
@@ -205,7 +235,7 @@ def package(
     (folder / "build-requirements-freeze.txt").write_text(str(build_manifest["pip_freeze"]) + "\n", encoding="utf-8")
     write_json(folder / "BUILD-MANIFEST.json", {
         **build_manifest, "package_mode": mode,
-        "executable_sha256": sha256(folder / "NetAudit.exe"),
+        "executable_sha256": sha256(folder / (FILE_STEM + ".exe")),
         "source_archive": {"file": source_zip.name, "sha256": sha256(source_zip)},
     })
     reports = folder / "verification"
@@ -237,10 +267,12 @@ def build(output: Path, work: Path, identity: dict[str, object]) -> None:
         sys.executable, "-c",
         "import pathlib,tomllib; print(tomllib.loads(pathlib.Path('pyproject.toml').read_text(encoding='utf-8'))['project']['version'])",
     ], capture=True)
-    stem = "NetAudit-" + version + "-windows-x64-" + source_commit[:12]
-    source_zip = output / ("NetAudit-" + version + "-source-" + source_commit[:12] + ".zip")
+    if version != __version__:
+        raise ValueError("Project metadata version differs from the runtime application version")
+    stem = FILE_STEM + "-" + version + "-windows-x64-" + source_commit[:12]
+    source_zip = output / (FILE_STEM + "-" + version + "-source-" + source_commit[:12] + ".zip")
     run([
-        "git", "archive", "--format=zip", "--prefix=NetAudit-source-" + source_commit[:12] + "/",
+        "git", "archive", "--format=zip", "--prefix=" + FILE_STEM + "-source-" + source_commit[:12] + "/",
         "--output=" + str(source_zip), source_commit,
     ], cwd=REPOSITORY)
     # The same committed source ZIP is bundled inside both distributions.
@@ -256,7 +288,7 @@ def build(output: Path, work: Path, identity: dict[str, object]) -> None:
     freeze = run([sys.executable, "-m", "pip", "freeze", "--all"], capture=True)
     manifest = {
         "schema_version": 1,
-        "application": "NetAudit", "application_version": version,
+        "application": APPLICATION_NAME, "application_version": version,
         "built_at_utc": datetime.now(timezone.utc).isoformat(),
         "source": identity,
         "environment": {
@@ -320,7 +352,7 @@ def build(output: Path, work: Path, identity: dict[str, object]) -> None:
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
         with Path(summary).open("a", encoding="utf-8") as stream:
-            stream.write("### Verified NetAudit Windows x64 build\n\nSource: `" + source_commit + "`\n\n")
+            stream.write("### Verified NetConfig Auditor Windows x64 build\n\nSource: `" + source_commit + "`\n\n")
             stream.write("Python: `" + platform.python_version() + "`; OS: `" + platform.platform() + "`\n\n")
             stream.write("Source, onedir and onefile process smoke checks passed. See the artifact verification JSON for scope and skipped desktop checks.\n\n")
             stream.write("```text\n" + checksum_text + "```\n")
@@ -333,7 +365,7 @@ def main() -> int:
     parser.add_argument("--_in-build-venv", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
     if sys.platform != "win32":
-        parser.error("Windows EXE must be built on Windows; use the NetAudit Windows portable GitHub Actions workflow")
+        parser.error("Windows EXE must be built on Windows; use the NetConfig Auditor Windows portable GitHub Actions workflow")
     if sys.version_info[:3] != BUILD_PYTHON or struct.calcsize("P") != 8:
         parser.error("Use Windows x64 Python 3.12.10 to reproduce the recorded build environment")
     output, work = args.output.resolve(), args.work_dir.resolve()

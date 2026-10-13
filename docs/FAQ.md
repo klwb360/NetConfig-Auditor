@@ -1,10 +1,12 @@
-# 常见问题
+# NetConfig Auditor 常见问题
 
-面向 Windows 便携版用户。当前正式版本为 v1.0.1，增加厂商语法底色，保留“中文目标 + 模拟命令行”学习流程与按需审计；旧版继续保留。文件、校验值与实测范围见 [下载与交付记录](../DELIVERY.md)。
+面向 Windows 便携版用户，本文对应 v1.1.1 源码。程序名称为 NetConfig Auditor，暗黑主题以 `#111111` 为主，保留厂商语法底色、“中文目标 + 模拟命令行”学习流程与按需审计；旧版继续保留。文件、校验值与实测范围见 [下载与交付记录](../DELIVERY.md)。
 
 ## 如何下载并开始使用？
 
-使用有访问权限的 GitHub 账号登录，点击 [v1.0.1 单 EXE](https://github.com/klwb360/NetConfig-Auditor/releases/download/v1.0.1/NetAudit-1.0.1-windows-x64-fb5a64016f45-onefile.exe)，下载后双击即可打开本地网页。需要配套资料时下载 [便携 ZIP](https://github.com/klwb360/NetConfig-Auditor/releases/download/v1.0.1/NetAudit-1.0.1-windows-x64-fb5a64016f45-portable.zip)，解压一次，进入文件夹双击 `Start-NetAudit.bat` 或 `NetAudit.exe`；不要在 ZIP 预览窗口内运行。网页默认进入配置练习，按下面步骤载入备份；也可切到“按需审查”直接审计原始备份。
+打开公开仓库的 [最新 Release](https://github.com/klwb360/NetConfig-Auditor/releases/latest)，在 **Assets** 下载 `*-onefile.exe`，无需 GitHub 登录即可下载；双击后打开本地网页。需要配套资料时下载同一发布页的 `*-portable.zip`，解压一次，进入文件夹双击 `Start-NetConfig-Auditor.bat` 或 `NetConfig-Auditor.exe`；不要在 ZIP 预览窗口内运行。网页默认进入配置练习，按下面步骤载入备份；也可切到“按需审查”直接审计原始备份。
+
+v1.1.1 起程序为 `NetConfig-Auditor.exe`，主启动器为 `Start-NetConfig-Auditor.bat`，旧 `Start-NetAudit.bat` 保留为兼容入口；历史发行文件名保持原样。
 
 普通使用无需下载 GitHub 自动生成的 “Source code”。两个运行 ZIP 内的 `*-source-*.zip` 是分发所对应的完整源码，供查阅、修改与重建；Release 已移除重复的独立源码附件，版本标签仍固定到构建提交。
 
@@ -71,13 +73,13 @@ v1.0.1、v1.0.0、v0.2.3、v0.2.2、v0.2.1、v0.2.0、v0.1.0 均提供 `portable
 
 ## 为什么有的下载包需要解压两次？
 
-从 Release 下载的便携 ZIP 只需解压一次。开发或备份使用的 [Windows Actions 产物](https://github.com/klwb360/NetConfig-Auditor/actions/workflows/netaudit-windows.yml) 有外层 ZIP，需先解压外层，再解压其中的 `portable.zip`，才能找到 EXE。Actions 产物有保留期限；Release 下载仍需要私人仓库访问权限。
+从 Release 下载的便携 ZIP 只需解压一次。开发或备份使用的 [Windows Actions 产物](https://github.com/klwb360/NetConfig-Auditor/actions/workflows/netaudit-windows.yml) 有外层 ZIP，需先解压外层，再解压其中的 `portable.zip`，才能找到 EXE。Actions 产物有保留期限；公开仓库的 Release 下载无需 GitHub 登录或仓库访问授权。
 
 ## portable 和 onefile 有什么区别？
 
 | 版本 | 如何使用 |
 |---|---|
-| `portable.zip` | 推荐。解压后保留整个文件夹；`NetAudit.exe` 依赖同目录的 `_internal`，不能只复制 EXE。 |
+| `portable.zip` | 推荐。解压后保留整个文件夹；`NetConfig-Auditor.exe` 依赖同目录的 `_internal`，不能只复制 EXE。 |
 | `onefile.zip` / `onefile.exe` | EXE 内含运行库，启动时会解压到用户临时目录，首次启动可能多等几秒。ZIP 还提供说明、示例、许可证和对应源码。 |
 
 单 EXE 可以独立运行；再次分发时请同时提供许可证、归属说明与对应源码。源码 ZIP 用于查阅、修改和重建，普通使用无需解压源码。
@@ -145,10 +147,10 @@ AI 是可选解释功能。默认关闭，没有本机模型也能完成配置�
 可以。在便携文件夹中打开命令提示符：
 
 ```bat
-Start-NetAudit.bat serve --no-browser
-NetAudit.exe plan "D:\网络配置\设备.cfg" --vendor huawei --goal "创建 VLAN 20"
-NetAudit.exe simulate "D:\网络配置\设备.cfg" --vendor huawei --commands "D:\练习\commands.txt" --out "D:\练习\模拟配置.cfg"
-NetAudit.exe audit "D:\网络配置\设备.cfg" --vendor huawei --format html --out "D:\审计报告\设备.html"
+Start-NetConfig-Auditor.bat serve --no-browser
+NetConfig-Auditor.exe plan "D:\网络配置\设备.cfg" --vendor huawei --goal "创建 VLAN 20"
+NetConfig-Auditor.exe simulate "D:\网络配置\设备.cfg" --vendor huawei --commands "D:\练习\commands.txt" --out "D:\练习\模拟配置.cfg"
+NetConfig-Auditor.exe audit "D:\网络配置\设备.cfg" --vendor huawei --format html --out "D:\审计报告\设备.html"
 ```
 
 传入参数时 BAT 不会暂停。`plan` / `simulate` 需 v1.0.0；标准输出是 JSON，模拟 JSON 的 `config` 保留原始凭据。命令批次失败返回 2、整批回滚且不写 `--out`。三种审计报告格式参数为 `json`、`md`、`html`；完整用法见 [项目说明](../network-config-auditor/README.md#最快开始)。遇到问题请看 [故障排查](TROUBLESHOOTING.md)。

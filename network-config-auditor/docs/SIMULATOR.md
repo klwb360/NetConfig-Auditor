@@ -1,10 +1,12 @@
-# 配置模拟与学习练习
+# NetConfig Auditor · 配置模拟与学习练习
 
-NetAudit 自 v1.0.0 起可以在导入备份的副本上练习命令，解释当前能否执行、会改变什么，以及下一步应做什么。支持 Cisco、华为、H3C、锐捷 RGOS 已建模的配置语法，处理在本机完成。本页同时说明 v1.0.1 新增的厂商底色；可下载版本及实际验收范围以 [最新 Release](https://github.com/klwb360/NetConfig-Auditor/releases/latest) 和[交付记录](https://github.com/klwb360/NetConfig-Auditor/blob/main/DELIVERY.md)为准。
+NetConfig Auditor（原 NetAudit）自 v1.0.0 起可以在导入备份的副本上练习命令，解释当前能否执行、会改变什么，以及下一步应做什么。支持 Cisco、华为、H3C、锐捷 RGOS 已建模的配置语法，处理在本机完成。本页同时说明 v1.0.1 新增的厂商底色；可下载版本及实际验收范围以 [最新 Release](https://github.com/klwb360/NetConfig-Auditor/releases/latest) 和[交付记录](https://github.com/klwb360/NetConfig-Auditor/blob/main/DELIVERY.md)为准。
+
+本页对应 v1.1.1 源码，使用 `NetConfig-Auditor.exe` 和 `Start-NetConfig-Auditor.bat`；旧 `Start-NetAudit.bat` 继续兼容。历史运行附件名称不变。
 
 ## 五步开始
 
-1. 双击 `NetAudit.exe` 或 `Start-NetAudit.bat`，拖入一台设备的 UTF-8 备份，确认厂商后点击 **载入模拟**。
+1. 双击 `NetConfig-Auditor.exe` 或 `Start-NetConfig-Auditor.bat`，拖入一台设备的 UTF-8 备份，确认厂商后点击 **载入模拟**。
 2. 在中文目标区输入一个明确目标，例如“把接口 GigabitEthernet0/1 加入 VLAN 20”，点击 **生成命令草案**。接口名需要与备份一致；也可直接在模拟命令行输入命令。
 3. 将草案放入命令区，点击 **预览运行**，阅读每条结果、简短理由与配置差异。预览不会自动修改练习副本。
 4. 确认可应用后点击 **应用本次预览**。可继续练习、撤销上一步、重置为原始备份，或导出模拟配置 `.cfg`。
@@ -93,13 +95,13 @@ H3C 的接入 VLAN 命令是 `port access vlan 20`。接口名以实际备份为
 
 ## 在 Windows 命令行中使用
 
-路径带中文或空格时加双引号；源码版把 `NetAudit.exe` 替换成 `python -m netaudit`。
+路径带中文或空格时加双引号；源码版把 `NetConfig-Auditor.exe` 替换成 `python -m netaudit`。
 
 ```bat
-NetAudit.exe plan "备份 配置.cfg" --vendor cisco --goal "把接口 GigabitEthernet0/1 加入 VLAN 20"
-NetAudit.exe simulate "备份 配置.cfg" --vendor cisco --commands "练习 命令.txt" --out "候选 配置.cfg"
-NetAudit.exe simulate "备份 配置.cfg" --vendor cisco --command "configure terminal" --command "vlan 20" --command "end"
-NetAudit.exe audit "候选 配置.cfg" --vendor cisco --format html --out "审查 报告.html"
+NetConfig-Auditor.exe plan "备份 配置.cfg" --vendor cisco --goal "把接口 GigabitEthernet0/1 加入 VLAN 20"
+NetConfig-Auditor.exe simulate "备份 配置.cfg" --vendor cisco --commands "练习 命令.txt" --out "候选 配置.cfg"
+NetConfig-Auditor.exe simulate "备份 配置.cfg" --vendor cisco --command "configure terminal" --command "vlan 20" --command "end"
+NetConfig-Auditor.exe audit "候选 配置.cfg" --vendor cisco --format html --out "审查 报告.html"
 ```
 
 `plan` 仅生成草案；状态为 `ready` 时退出码为 0，其余为 2。`simulate` 输出 JSON，成功退出码为 0，失败批次为 2。省略命令可查看当前配置状态；`--context` 可读取上次结果中的 `context` 对象 JSON，继续指定视图。CLI 调用不会暂停等按键。

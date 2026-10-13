@@ -51,6 +51,10 @@ function Invoke-FrozenCommand([string]$Executable,[string[]]$Arguments) {
 }
 
 try {
+    $manifest=Get-Content -LiteralPath (Join-Path $packageRoot 'manifest.json') -Raw | ConvertFrom-Json
+    if($manifest.application -ne 'NetConfig Auditor' -or $manifest.application_version -notmatch '^\d+\.\d+\.\d+$'){
+        throw 'Unexpected clean-runtime package application identity.'
+    }
     $extractRoot=Join-Path $runtimeTemp 'netaudit-clean-runtime'
     New-Item -ItemType Directory -Path $extractRoot -Force | Out-Null
     $executables=@()
@@ -59,7 +63,7 @@ try {
         if($archives.Count -ne 1){throw "Expected exactly one $mode package."}
         $destination=Join-Path $extractRoot $mode
         Expand-Archive -LiteralPath $archives[0].FullName -DestinationPath $destination
-        $found=@(Get-ChildItem -LiteralPath $destination -Recurse -Filter 'NetAudit.exe')
+        $found=@(Get-ChildItem -LiteralPath $destination -Recurse -Filter 'NetConfig-Auditor.exe')
         if($found.Count -ne 1){throw "Expected exactly one executable in $mode package."}
         $executables+=@{mode=$mode;path=$found[0].FullName}
     }
@@ -96,7 +100,7 @@ try {
     [IO.File]::WriteAllBytes((Join-Path $inputDirectory '50.cfg'),$gbText)
     foreach($executable in $executables){
         $version=Invoke-FrozenCommand $executable.path @('--version')
-        if($version.Trim() -ne 'NetAudit 1.1.0'){throw 'Unexpected frozen version.'}
+        if($version.Trim() -ne ('NetConfig Auditor '+$manifest.application_version)){throw 'Unexpected frozen version.'}
         $record.checks+=@{mode=$executable.mode;check='version_without_external_python';status='passed'}
         $reportsDirectory=Join-Path $extractRoot ($executable.mode+'-reports')
         $null=Invoke-FrozenCommand $executable.path @('audit-batch',$inputDirectory,'--vendor','cisco','--out-dir',$reportsDirectory)

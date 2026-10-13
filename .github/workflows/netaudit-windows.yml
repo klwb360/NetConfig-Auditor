@@ -1,4 +1,4 @@
-name: NetAudit Windows portable
+name: NetConfig Auditor Windows portable
 
 on:
   pull_request:
@@ -55,7 +55,7 @@ jobs:
         id: upload
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: NetAudit-windows-x64-${{ github.sha }}
+          name: NetConfig-Auditor-windows-x64-${{ github.sha }}
           path: network-config-auditor/dist/windows/*
           if-no-files-found: error
           retention-days: 90
@@ -64,7 +64,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: NetAudit-windows-diagnostics-${{ github.sha }}
+          name: NetConfig-Auditor-windows-diagnostics-${{ github.sha }}
           path: network-config-auditor/build/windows/verification/*.json
           if-no-files-found: warn
           retention-days: 14
@@ -84,7 +84,7 @@ jobs:
           persist-credentials: false
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          name: NetAudit-windows-x64-${{ github.sha }}
+          name: NetConfig-Auditor-windows-x64-${{ github.sha }}
           path: ${{ runner.temp }}/netaudit-packages
       - name: Verify frozen packages after removing runner CPython installs
         shell: pwsh

@@ -1,4 +1,4 @@
-name: NetAudit release
+name: NetConfig Auditor release
 
 on:
   workflow_dispatch:

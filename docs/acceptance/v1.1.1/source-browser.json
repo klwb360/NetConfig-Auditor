@@ -1,0 +1,132 @@
+{
+  "product": "NetConfig Auditor",
+  "version": "1.1.1",
+  "date": "2026-10-13",
+  "browser": "Edg/155.0.4283.45",
+  "scope": "Real source app on Windows; synthetic Cisco sample; no device connections",
+  "audit": {
+    "status": "审计完成 · cisco · LAB-SW · 识别 28/28 行",
+    "exports": true,
+    "tabs": 6
+  },
+  "themes": [
+    {
+      "theme": "light",
+      "page": "rgb(245, 246, 242)",
+      "panel": "rgb(255, 255, 255)",
+      "text": "rgb(36, 52, 47)",
+      "controlBorder": "rgb(200, 216, 206)",
+      "stored": "light"
+    },
+    {
+      "theme": "dark",
+      "page": "rgb(17, 17, 17)",
+      "panel": "rgb(27, 27, 27)",
+      "text": "rgb(231, 231, 231)",
+      "controlBorder": "rgb(104, 104, 104)",
+      "stored": "dark"
+    },
+    {
+      "theme": "system",
+      "page": "rgb(17, 17, 17)",
+      "panel": "rgb(27, 27, 27)",
+      "text": "rgb(231, 231, 231)",
+      "controlBorder": "rgb(104, 104, 104)",
+      "stored": "system"
+    }
+  ],
+  "widths": [
+    {
+      "width": 320,
+      "client": 305,
+      "scroll": 305
+    },
+    {
+      "width": 421,
+      "client": 406,
+      "scroll": 406
+    },
+    {
+      "width": 430,
+      "client": 415,
+      "scroll": 415
+    },
+    {
+      "width": 440,
+      "client": 425,
+      "scroll": 425
+    },
+    {
+      "width": 460,
+      "client": 445,
+      "scroll": 445
+    },
+    {
+      "width": 768,
+      "client": 753,
+      "scroll": 753
+    },
+    {
+      "width": 1024,
+      "client": 1009,
+      "scroll": 1009
+    },
+    {
+      "width": 1600,
+      "client": 1585,
+      "scroll": 1585
+    }
+  ],
+  "tabs": [
+    {
+      "selected": "tab-findings",
+      "visible": [
+        "result-panel-findings"
+      ]
+    },
+    {
+      "selected": "tab-architecture",
+      "visible": [
+        "result-panel-architecture"
+      ]
+    },
+    {
+      "selected": "tab-intelligence",
+      "visible": [
+        "result-panel-intelligence"
+      ]
+    },
+    {
+      "selected": "tab-ai",
+      "visible": [
+        "result-panel-ai"
+      ]
+    },
+    {
+      "selected": "tab-inventory",
+      "visible": [
+        "result-panel-inventory"
+      ]
+    },
+    {
+      "selected": "tab-help",
+      "visible": [
+        "result-panel-help"
+      ]
+    }
+  ],
+  "runtime_exceptions": [],
+  "screenshots": [
+    {
+      "path": "docs/images/simulator.png",
+      "sha256": "cb04e2448aadaf5a46146a3a29d3253088aa79a2a6216c28e4b24c5b9357d558",
+      "real_app": true
+    },
+    {
+      "path": "docs/images/workspace.png",
+      "sha256": "bfc7a05f157de29d875fb9f2e2f8b9f726c66c8884cf9d533cab85bc8cc42779",
+      "real_app": true
+    }
+  ],
+  "passed": true
+}
