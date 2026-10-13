@@ -1,0 +1,67 @@
+{
+  "artifact": {
+    "digest": "sha256:ecb0082e1cf4c845ff89faf8ed5741f0bbd3ec4471edf5c4ce949646ee6be6f3",
+    "id": 11790229278,
+    "name": "NetConfig-Auditor-windows-x64-5ffe0051ff7929dd7bfd8bfbca593af8a355b1b3"
+  },
+  "files": {
+    "NetConfig-Auditor-1.1.1-source-5ffe0051ff79.zip": {
+      "sha256": "e8ed3686b4353fe330bda6cb413d10af15274c43964bde7d276649fe9514f2a7",
+      "size_bytes": 1342600
+    },
+    "NetConfig-Auditor-1.1.1-windows-x64-5ffe0051ff79-onefile.exe": {
+      "sha256": "b310fd49ea5323824da71b1486c71edb904da5755814172d7bd85d9651de7eb0",
+      "size_bytes": 9425579
+    },
+    "NetConfig-Auditor-1.1.1-windows-x64-5ffe0051ff79-onefile.zip": {
+      "sha256": "927c78f422a4f31fd00ffa3f5f004ed0cf739f395b147f02e968fffadbb5c69d",
+      "size_bytes": 10868304
+    },
+    "NetConfig-Auditor-1.1.1-windows-x64-5ffe0051ff79-portable.zip": {
+      "sha256": "ebefc6c0d28ee1ee57b8eb6c2a376214d879b9fa7bf23aa339c4e66e872c2749",
+      "size_bytes": 10975462
+    },
+    "SHA256SUMS.txt": {
+      "sha256": "375b31790cc98933b7976aa2cd4af38f99ab3feb8e2f7079089d8ae6798e66cc",
+      "size_bytes": 837
+    },
+    "manifest.json": {
+      "sha256": "6ac2c3b4c2cdedb6c7d8bd276bffeabc7f39e3f57157bb0e96abee412ee623c5",
+      "size_bytes": 112808
+    },
+    "smoke-onedir.json": {
+      "sha256": "1832a6756c6099022a6eed504766c05c4cca47a6d5026e343ee6d372d2f338f5",
+      "size_bytes": 30761
+    },
+    "smoke-onefile.json": {
+      "sha256": "5ff485d970ed6c0d4743837d95845cee6171957380c0976b6de12074db0c8afa",
+      "size_bytes": 32368
+    },
+    "smoke-source.json": {
+      "sha256": "6f911bb4c218a1b7c1b584dc858af507b6c11a1fd2f895136db1ca32cf814b45",
+      "size_bytes": 32157
+    }
+  },
+  "repository": "klwb360/NetConfig-Auditor",
+  "run_attempt": 1,
+  "run_id": "38350727838",
+  "runtime_names": [
+    "NetConfig-Auditor-1.1.1-windows-x64-5ffe0051ff79-onefile.exe",
+    "NetConfig-Auditor-1.1.1-windows-x64-5ffe0051ff79-onefile.zip",
+    "NetConfig-Auditor-1.1.1-windows-x64-5ffe0051ff79-portable.zip"
+  ],
+  "schema_version": 1,
+  "source_commit": "5ffe0051ff7929dd7bfd8bfbca593af8a355b1b3",
+  "source_locations": [
+    {
+      "archive": "NetConfig-Auditor-1.1.1-windows-x64-5ffe0051ff79-portable.zip",
+      "member": "NetConfig-Auditor/NetConfig-Auditor-1.1.1-source-5ffe0051ff79.zip"
+    },
+    {
+      "archive": "NetConfig-Auditor-1.1.1-windows-x64-5ffe0051ff79-onefile.zip",
+      "member": "NetConfig-Auditor-onefile/NetConfig-Auditor-1.1.1-source-5ffe0051ff79.zip"
+    }
+  ],
+  "source_name": "NetConfig-Auditor-1.1.1-source-5ffe0051ff79.zip",
+  "tag": "v1.1.1"
+}
