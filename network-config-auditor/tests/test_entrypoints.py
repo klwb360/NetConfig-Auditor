@@ -79,7 +79,8 @@ class ServerTests(unittest.TestCase):
     def test_static_ui_and_headers(self):
         status, headers, body = self.request("GET", "/")
         self.assertEqual(status, 200)
-        self.assertIn("NetAudit", body)
+        self.assertIn("NetConfig Auditor", body)
+        self.assertEqual(headers["Server"].strip(), "NetConfig-Auditor")
         self.assertEqual(headers["Cache-Control"], "no-store")
         self.assertIn("frame-ancestors 'none'", headers["Content-Security-Policy"])
 

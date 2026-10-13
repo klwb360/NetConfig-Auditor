@@ -7,6 +7,13 @@ import re
 import urllib.parse
 import zipfile
 
+try:
+    from tools.release_identity import identity as release_identity, artifact_name
+except ModuleNotFoundError as exc:
+    if exc.name != "tools":
+        raise
+    from release_identity import identity as release_identity, artifact_name
+
 TEXT_NAMES = ("SHA256SUMS.txt", "manifest.json", "smoke-source.json",
               "smoke-onedir.json", "smoke-onefile.json")
 MAX_SOURCE = 64 * 1024 * 1024
@@ -24,7 +31,8 @@ def digest(data):
 def identity(tag, commit):
     require(re.fullmatch(r"v\d+\.\d+\.\d+", tag), "Invalid archive tag")
     require(re.fullmatch(r"[a-f0-9]{40}", commit), "Invalid archive source")
-    prefix = f"NetAudit-{tag[1:]}-windows-x64-{commit[:12]}"
+    stem = release_identity(tag[1:])[1]
+    prefix = f"{stem}-{tag[1:]}-windows-x64-{commit[:12]}"
     return sorted(prefix + suffix for suffix in ("-portable.zip", "-onefile.zip", "-onefile.exe"))
 
 
@@ -48,18 +56,19 @@ def make_record(repository, tag, files, manifest, artifact):
     commit = manifest["source"]["commit"]
     require(tag == "v" + manifest["application_version"], "Archive version mismatch")
     names = identity(tag, commit)
-    source_name = f"NetAudit-{tag[1:]}-source-{commit[:12]}.zip"
+    stem = release_identity(tag[1:])[1]
+    source_name = f"{stem}-{tag[1:]}-source-{commit[:12]}.zip"
     require(set(files) == set(names) | set(TEXT_NAMES) | {source_name},
             "Archive must describe exactly nine original files")
     require(re.fullmatch(r"[\w.-]+/[\w.-]+", repository), "Invalid archive repository")
     require(isinstance(artifact["id"], int) and artifact["id"] > 0
-            and artifact["name"] == "NetAudit-windows-x64-" + commit
+            and artifact["name"] == artifact_name(tag[1:], commit)
             and re.fullmatch(r"sha256:[a-f0-9]{64}", artifact["digest"]),
             "Invalid archived build artifact identity")
     locations = [{"archive": next(n for n in names if n.endswith(suffix)),
                   "member": root + source_name}
-                 for suffix, root in (("-portable.zip", "NetAudit/"),
-                                      ("-onefile.zip", "NetAudit-onefile/"))]
+                 for suffix, root in (("-portable.zip", stem + "/"),
+                                      ("-onefile.zip", stem + "-onefile/"))]
     for item in locations:
         require(source_bytes(files[item["archive"]], item["member"], len(files[source_name]))
                 == files[source_name], "Runtime ZIP does not preserve the original source")
@@ -191,13 +200,14 @@ def recover_files(api, tag, reference, release):
         require(len(raw) == expected["size_bytes"] and digest(raw) == expected["sha256"],
                 "Runnable asset bytes changed: " + name)
         files[name] = raw
-    source_name = f"NetAudit-{tag[1:]}-source-{record['source_commit'][:12]}.zip"
+    stem = release_identity(tag[1:])[1]
+    source_name = f"{stem}-{tag[1:]}-source-{record['source_commit'][:12]}.zip"
     require(record["source_name"] == source_name, "Archived source filename mismatch")
     expected = record["files"][source_name]
     locations = [{"archive": next(n for n in names if n.endswith(suffix)),
                   "member": root + source_name}
-                 for suffix, root in (("-portable.zip", "NetAudit/"),
-                                      ("-onefile.zip", "NetAudit-onefile/"))]
+                 for suffix, root in (("-portable.zip", stem + "/"),
+                                      ("-onefile.zip", stem + "-onefile/"))]
     require(record["source_locations"] == locations, "Archived source location mismatch")
     for item in locations:
         raw = source_bytes(files[item["archive"]], item["member"], expected["size_bytes"])

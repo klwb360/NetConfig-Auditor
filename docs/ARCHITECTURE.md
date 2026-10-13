@@ -1,6 +1,6 @@
-# 架构与扩展
+# NetConfig Auditor 架构与扩展
 
-NetAudit v1.0.0 先提供离线配置练习，再由用户选择是否审计。CLI、网页和便携 EXE 共用模拟器与中文目标模块；它们只修改配置副本，不连接设备、不执行操作系统命令。原审计流程继续按配置解析、六域架构检查、安全规则、CVE / KEV、可选本机 AI 和报告输出组织。各版本实际构建和验收以 [交付记录](../DELIVERY.md) 为准。
+NetConfig Auditor（原 NetAudit）自 v1.0.0 起先提供离线配置练习，再由用户选择是否审计。CLI、网页和便携 EXE 共用模拟器与中文目标模块；它们只修改配置副本，不连接设备、不执行操作系统命令。原审计流程继续按配置解析、六域架构检查、安全规则、CVE / KEV、可选本机 AI 和报告输出组织。各版本实际构建和验收以 [交付记录](../DELIVERY.md) 为准。
 
 ```mermaid
 flowchart TD
@@ -39,6 +39,8 @@ flowchart TD
 
 模拟器与中文草案不会调用审计、情报或 AI；用户明确审计时才进入后半段。架构检查产生的发现与原有配置规则合并、统一排序，情报与 AI 使用独立字段，不覆盖配置证据或规则严重度。默认情报来自随包离线快照，AI 默认关闭。
 
+v1.1.1 将用户可见名称统一为 NetConfig Auditor，Windows EXE 为 `NetConfig-Auditor.exe`，主启动器为 `Start-NetConfig-Auditor.bat`，旧 `Start-NetAudit.bat` 保留为兼容入口。Python 模块和命令仍为 `netaudit`；`NetAuditBridge`、会话令牌头、主题存储键及原情报缓存路径维持兼容，避免名称修改导致已有调用或设置失效。历史发行记录和文件名保持原样。
+
 ## 目录与职责
 
 下列路径均位于 [`network-config-auditor/`](../network-config-auditor/)：
@@ -61,7 +63,7 @@ flowchart TD
 | [`netaudit/web/`](../network-config-auditor/netaudit/web/) | `app.js` 保留导入、主题与审计；`simulator.js` 管理页面内的原始备份、已应用副本、待确认预览、撤销和练习交互；无外部 CDN |
 | [`tests/`](../network-config-auditor/tests/) | 解析、规则、情报、AI、统一流程、报告、入口与便携行为验证 |
 | [`tools/build_windows.py`](../network-config-auditor/tools/build_windows.py)、[`tools/smoke_portable.py`](../network-config-auditor/tools/smoke_portable.py) | 隔离构建、资源收集、源码/EXE 进程验收、来源/许可证与校验和 |
-| [`Start-NetAudit.bat`](../network-config-auditor/Start-NetAudit.bat)、[`tools/windows_entry.py`](../network-config-auditor/tools/windows_entry.py) | Windows 目录/Python/EXE 选择、冻结入口、输出编码和退出码 |
+| [`Start-NetConfig-Auditor.bat`](../network-config-auditor/Start-NetConfig-Auditor.bat)、[`tools/windows_entry.py`](../network-config-auditor/tools/windows_entry.py) | Windows 目录/Python/EXE 选择、冻结入口、输出编码和退出码 |
 
 ## 数据流与边界
 

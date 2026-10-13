@@ -10,6 +10,7 @@ import threading
 import webbrowser
 
 from .parser import MAX_BYTES, MAX_LINES, detect_vendor
+from .branding import APPLICATION_NAME, FILE_STEM
 from .reports import render
 from .pipeline import audit_configuration
 from .simulator import simulate_configuration
@@ -55,7 +56,7 @@ class LocalServer(ThreadingHTTPServer):
 
 def make_handler(token: str):
     class Handler(BaseHTTPRequestHandler):
-        server_version = "NetAudit"
+        server_version = FILE_STEM
         sys_version = ""
 
         def log_message(self, *_):
@@ -183,7 +184,7 @@ def serve(port: int = 8765, *, open_browser: bool = True):
             if port and server.server_port != port:
                 print(f"端口 {port} 已被占用或不可用，已自动选择空闲端口。", flush=True)
             url = f"http://127.0.0.1:{server.server_port}"
-            print(f"网络配置审计工具已启动：{url}", flush=True)
+            print(f"{APPLICATION_NAME} 已启动：{url}", flush=True)
             print("关闭程序：在此窗口按 Ctrl+C，或关闭此窗口。仅关闭网页不会停止服务。", flush=True)
             if open_browser:
                 try:

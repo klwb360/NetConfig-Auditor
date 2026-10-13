@@ -1,14 +1,16 @@
-# NetAudit Windows 使用说明
+# NetConfig Auditor Windows 使用说明
 
-**本页对应 v1.0.1 源码的使用说明**。在 [最新 Release](https://github.com/klwb360/NetConfig-Auditor/releases/latest) 的 **Assets** 选择 `*-onefile.exe`，下载后双击，无需解压或安装 Python；模拟功能需要 **1.0.0 或更新**，厂商底色高亮需要 **1.0.1 或更新**。实际发布状态、文件名和校验值以在线 [交付记录](https://github.com/klwb360/NetConfig-Auditor/blob/main/DELIVERY.md) 为准。需要 BAT、说明和示例时使用便携 ZIP：
+**本页对应 v1.1.1 源码的使用说明**。在 [最新 Release](https://github.com/klwb360/NetConfig-Auditor/releases/latest) 的 **Assets** 选择 `*-onefile.exe`，下载后双击，无需解压或安装 Python；模拟功能需要 **1.0.0 或更新**，厂商底色高亮需要 **1.0.1 或更新**。v1.1.1 起使用新程序名，历史发行文件名保持原样。实际发布状态、文件名和校验值以在线 [交付记录](https://github.com/klwb360/NetConfig-Auditor/blob/main/DELIVERY.md) 为准。需要 BAT、说明和示例时使用便携 ZIP：
 
-1. **下载**：登录有权访问私人仓库的 GitHub 账号，打开 [最新 Release](https://github.com/klwb360/NetConfig-Auditor/releases/latest)，在 **Assets** 下载名称含 `windows-x64` 和 `portable` 的 ZIP。各个正式版本的构建与验收记录保留在发布页，旧版本也保留下载。
-2. **解压**：从 Release 下载的便携 ZIP **解压一次**，找到 `Start-NetAudit.bat` 与 `NetAudit.exe`。建议选择自己的桌面或文档文件夹；中文和带空格的路径均支持。不要在 ZIP 预览窗口内直接运行。
-3. **双击**：打开解压后的文件夹，双击 `Start-NetAudit.bat` 或 `NetAudit.exe`。程序自动打开默认浏览器。若没有自动打开，复制启动窗口显示的 `http://127.0.0.1:端口` 地址到浏览器。
+1. **下载**：打开公开仓库的 [最新 Release](https://github.com/klwb360/NetConfig-Auditor/releases/latest)，在 **Assets** 下载名称含 `windows-x64` 和 `portable` 的 ZIP，无需 GitHub 登录或仓库访问授权。各个正式版本的构建与验收记录保留在发布页，旧版本也保留下载。
+2. **解压**：从 Release 下载的便携 ZIP **解压一次**，找到 `Start-NetConfig-Auditor.bat` 与 `NetConfig-Auditor.exe`。建议选择自己的桌面或文档文件夹；中文和带空格的路径均支持。不要在 ZIP 预览窗口内直接运行。
+3. **双击**：打开解压后的文件夹，双击 `Start-NetConfig-Auditor.bat` 或 `NetConfig-Auditor.exe`。程序自动打开默认浏览器。若没有自动打开，复制启动窗口显示的 `http://127.0.0.1:端口` 地址到浏览器。
 4. **拖入配置**：将一份 UTF-8 配置拖入左侧配置文本区域，或点击“导入配置文件”。程序按内容识别 Cisco、华为、H3C 或锐捷 RGOS；无法可靠识别时手动选择。支持中文、空格与无扩展名文件，最大 2 MiB / 30000 行，一次只导入一个文件。也可粘贴配置，或先使用“载入示例”。
 5. **载入与练习**：点击“载入模拟”，输入 `创建 VLAN 20` 等单一目标，点击“生成命令草案”，阅读每步理由后“将草案放入命令区”。也可直接逐条或批量输入设备命令，每行一条。
 6. **确认与保存**：点击“预览运行”，查看每条命令能否运行、理由和配置差异。确认后“应用本次预览”；原始备份保留，仅副本改变。可撤销、重置或“导出模拟配置 .cfg”。
 7. **按需审查**：点击“审查当前模拟配置”，查看发现、原始行号与建议，使用严重度筛选；点击 JSON、Markdown 或 HTML 下载完整报告。若只想检查备份，未载入模拟时直接点击“开始审计”。
+
+主启动器为 `Start-NetConfig-Auditor.bat`，旧 `Start-NetAudit.bat` 仍作为兼容入口。
 
 ## 新版网页工作区
 
@@ -32,6 +34,8 @@
 
 ## 主题与重复风险
 
+暗黑主题以 `#111111` 深黑背景和中性黑灰面板为主，保留风险等级及厂商语法提示色。
+
 以下操作继续保留：
 
 - **切换主题**：在网页顶部选择“明亮风格”“暗黑风格”或“跟随系统”。首次打开默认跟随系统；浏览器会记住主题偏好，配置内容不会持久保存。清除浏览器网站数据后，主题回到默认设置。
@@ -43,7 +47,7 @@ v0.2.2 Windows 包已包含以下修复：可选择“锐捷 RGOS”，识别已
 
 新版支持将单个配置文件拖入左侧配置文本区域，自动读取并按内容识别厂商；也可点击原来的导入按钮。中文、空格及无扩展名的文件名均可使用。若提示无法可靠识别，请手动选择厂商；识别不代替审计，仍需点击“开始审计”。不支持拖入文件夹或多台设备的多个文件。
 
-每项发现按需提供“只读核查命令”“候选整改命令”“需填参数的命令模板”和前提说明。先核对设备型号、版本及业务，再人工执行；模板中的 `<参数名>` 必须替换。对“未见 VLAN 定义”，先在设备核查 `show vlan` / `display vlan` 并取得完整配置，再判断是否需要创建。NetAudit 不执行命令或自动保存设备配置。
+每项发现按需提供“只读核查命令”“候选整改命令”“需填参数的命令模板”和前提说明。先核对设备型号、版本及业务，再人工执行；模板中的 `<参数名>` 必须替换。对“未见 VLAN 定义”，先在设备核查 `show vlan` / `display vlan` 并取得完整配置，再判断是否需要创建。NetConfig Auditor 不执行命令或自动保存设备配置。
 
 ## 本地运行与便携使用
 
@@ -51,9 +55,9 @@ v0.2.2 Windows 包已包含以下修复：可选择“锐捷 RGOS”，识别已
 
 **关闭**：回到启动的命令行窗口按 Ctrl+C（或关闭该窗口）。关闭浏览器标签页不会停止程序。配置处理全部在本机完成，普通使用设计为无需管理员权限；首次访问可能需要几秒，尤其单 EXE 版本。
 
-**迁移**：复制整个便携文件夹到另一台 Windows 电脑，继续双击使用。`_internal` 等运行库目录必须随 `NetAudit.exe` 一起复制；目标电脑不需要安装 Python。默认临时目录使用 Windows 用户临时目录，网页上传的配置不会保存到程序文件夹。导出报告请选择自己有写入权限的目录。
+**迁移**：复制整个便携文件夹到另一台 Windows 电脑，继续双击使用。`_internal` 等运行库目录必须随 `NetConfig-Auditor.exe` 一起复制；目标电脑不需要安装 Python。默认临时目录使用 Windows 用户临时目录，网页上传的配置不会保存到程序文件夹。导出报告请选择自己有写入权限的目录。
 
-**单 EXE**：名称含 `windows-x64` 和 `onefile` 的 ZIP 内提供独立 `NetAudit.exe`，也有 BAT、示例、许可证及对应源码。该 EXE 可以单独运行；再次分发时请同时提供 ZIP 中的许可证、归属说明与对应源码。优先选择便携文件夹版本，启动更快，也便于排查问题。
+**单 EXE**：名称含 `windows-x64` 和 `onefile` 的 ZIP 内提供独立 `NetConfig-Auditor.exe`，也有 BAT、示例、许可证及对应源码。该 EXE 可以单独运行；再次分发时请同时提供 ZIP 中的许可证、归属说明与对应源码。优先选择便携文件夹版本，启动更快，也便于排查问题。
 
 **Actions 备份下载**：[Windows 构建列表](https://github.com/klwb360/NetConfig-Auditor/actions/workflows/netaudit-windows.yml) 仍提供成功构建的产物，有保留期限。Actions 下载包含外层 ZIP，先解压外层，再解压其中 `portable.zip`；Release 直接提供内部 ZIP，只需解压一次。两种入口以对应清单的源码提交和 SHA-256 为准。
 
@@ -64,11 +68,11 @@ v0.2.2 Windows 包已包含以下修复：可选择“锐捷 RGOS”，识别已
 命令行使用示例（在便携文件夹中打开命令提示符）：
 
 ```bat
-Start-NetAudit.bat serve --no-browser
-NetAudit.exe plan "D:\网络配置\设备.cfg" --vendor cisco --goal "创建 VLAN 20"
-NetAudit.exe simulate "D:\网络配置\设备.cfg" --vendor cisco --commands "D:\练习\commands.txt" --out "D:\练习\模拟配置.cfg"
-Start-NetAudit.bat audit "D:\网络配置\设备.cfg" --vendor cisco --format html --out "D:\审计报告\设备.html"
-NetAudit.exe audit "D:\网络配置\设备.cfg" --format json --out "D:\审计报告\设备.json" --fail-on high
+Start-NetConfig-Auditor.bat serve --no-browser
+NetConfig-Auditor.exe plan "D:\网络配置\设备.cfg" --vendor cisco --goal "创建 VLAN 20"
+NetConfig-Auditor.exe simulate "D:\网络配置\设备.cfg" --vendor cisco --commands "D:\练习\commands.txt" --out "D:\练习\模拟配置.cfg"
+Start-NetConfig-Auditor.bat audit "D:\网络配置\设备.cfg" --vendor cisco --format html --out "D:\审计报告\设备.html"
+NetConfig-Auditor.exe audit "D:\网络配置\设备.cfg" --format json --out "D:\审计报告\设备.json" --fail-on high
 ```
 
 `plan` / `simulate` 需 v1.0.0 或更新，标准输出为 JSON；模拟响应的 `config` 含完整原文和凭据，请勿记入公开日志。命令批次失败全部回滚，不写 `--out`，原始备份不会覆盖。`--context context.json` 可载入上次结果中的视图对象；继续练习需要同时使用上次接受的配置。

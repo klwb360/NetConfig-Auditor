@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Exercise actual source/BAT/frozen processes without installing NetAudit.
+"""Exercise actual source/BAT/frozen processes without installing NetConfig Auditor.
 
 Examples::
 
     python tools/smoke_portable.py --source . --report build/source-smoke.json
-    python tools/smoke_portable.py --onedir dist/onedir/NetAudit/NetAudit.exe --report build/onedir-smoke.json
-    python tools/smoke_portable.py --onefile dist/onefile/NetAudit.exe --report build/onefile-smoke.json
+    python tools/smoke_portable.py --onedir dist/onedir/NetConfig-Auditor/NetConfig-Auditor.exe --report build/onedir-smoke.json
+    python tools/smoke_portable.py --onefile dist/onefile/NetConfig-Auditor.exe --report build/onefile-smoke.json
 
 Frozen checks require Windows. All copies, configurations, reports, logs and
 extraction files live in a disposable Unicode/space-containing temporary tree.
@@ -34,6 +34,10 @@ import tempfile
 import threading
 import time
 from typing import Callable
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from netaudit import __version__
+from netaudit.branding import APPLICATION_NAME, FILE_STEM
 
 
 WINDOWS = os.name == "nt"
@@ -738,6 +742,18 @@ class Harness:
         output_dir = self.results / target.name
         output_dir.mkdir()
         runs = []
+        version = run_command(target, ["--version"], self.cwd)
+        require(version.returncode == 0 and version.stdout.decode("utf-8").strip() == APPLICATION_NAME + " " + __version__,
+                "CLI version does not match the new application identity")
+        compatibility = None
+        if target.bat:
+            legacy = Target(target.name + "-legacy-entry", bat_command(self.install / "Start-NetAudit.bat"), target.env, True)
+            legacy_version = run_command(legacy, ["--version"], self.cwd)
+            require(legacy_version.returncode == 0 and legacy_version.stdout == version.stdout,
+                    "Compatibility BAT changed the application identity or version exit code")
+            rejected = run_command(legacy, ["audit", "nonexistent-compatibility-config.cfg"], self.cwd)
+            require(rejected.returncode == 2, "Compatibility BAT lost the nonzero CLI exit code")
+            compatibility = {"version_matches": True, "failure_exit_code": 2}
         for vendor in ("cisco", "huawei", "h3c", "ruijie"):
             cfg = output_dir / f"设备 配置 {vendor}.cfg"
             shutil.copyfile(self.install / "examples" / f"{vendor}.cfg", cfg)
@@ -756,6 +772,8 @@ class Harness:
             require(result.returncode == expected, f"CLI exit-code check expected {expected}, got {result.returncode}")
             runs.append({"arguments": extra, "exit_code": result.returncode})
         return {"runs": runs, "simulator_cli": self.simulator_cli(target, output_dir),
+                "application_version": version.stdout.decode("utf-8").strip(),
+                "compatibility_launcher": compatibility,
                 "stdin": "DEVNULL", "timeout_seconds": COMMAND_TIMEOUT,
                 "external_cwd": True, "unicode_and_spaces_in_paths": True}
 
@@ -979,7 +997,7 @@ class Harness:
                 "download_guidance": "verified"}
 
     def run(self) -> None:
-        bat = self.install / "Start-NetAudit.bat"
+        bat = self.install / ("Start-" + FILE_STEM + ".bat")
         if self.mode == "source":
             direct_env = dict(self.env, PYTHONPATH=str(self.install))
             targets = [Target("source-python", [sys.executable, "-m", "netaudit"], direct_env)]
@@ -994,7 +1012,7 @@ class Harness:
             env = no_python_environment(self.env)
             require(shutil.which("python", path=env["PATH"]) is None and shutil.which("py", path=env["PATH"]) is None,
                     "Frozen no-Python PATH still resolves an interpreter")
-            targets = [Target(f"{self.mode}-EXE-no-Python", [str(self.install / "NetAudit.exe")], env),
+            targets = [Target(f"{self.mode}-EXE-no-Python", [str(self.install / (FILE_STEM + ".exe"))], env),
                        Target(f"{self.mode}-BAT-no-Python", bat_command(bat), env, True)]
             self.report["python_independence"] = "EXE/BAT child PATH excludes Python, py and Python-related environment variables; host still has build Python installed"
         for target in targets:
@@ -1024,8 +1042,8 @@ def parse_args(argv: list[str] | None = None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--source", type=Path, help="source project directory")
-    mode.add_argument("--onedir", type=Path, help="onedir NetAudit.exe path (Windows only)")
-    mode.add_argument("--onefile", type=Path, help="onefile NetAudit.exe path (Windows only)")
+    mode.add_argument("--onedir", type=Path, help="onedir NetConfig-Auditor.exe path (Windows only)")
+    mode.add_argument("--onefile", type=Path, help="onefile NetConfig-Auditor.exe path (Windows only)")
     parser.add_argument("--report", type=Path, required=True, help="machine-readable acceptance report")
     return parser.parse_args(argv)
 
@@ -1058,7 +1076,7 @@ def main(argv: list[str] | None = None) -> int:
                 require(bool(kernel.AllocConsole()), f"Cannot allocate console for CTRL_BREAK_EVENT: {ctypes.get_last_error()}")
                 console_allocated = True
             report["console_allocated_for_process_group_signals"] = console_allocated
-        with tempfile.TemporaryDirectory(prefix="NetAudit-便携 验收-") as directory:
+        with tempfile.TemporaryDirectory(prefix="NetConfig-Auditor-便携 验收-") as directory:
             root = Path(directory)
             install = root / "迁移后 中文 程序目录"
             if mode == "source":
@@ -1066,11 +1084,12 @@ def main(argv: list[str] | None = None) -> int:
                 install.mkdir()
                 for name in ("netaudit", "examples"):
                     shutil.copytree(project / name, install / name, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
-                if (project / "Start-NetAudit.bat").exists():
-                    shutil.copyfile(project / "Start-NetAudit.bat", install / "Start-NetAudit.bat")
+                for launcher in ("Start-" + FILE_STEM + ".bat", "Start-NetAudit.bat"):
+                    if (project / launcher).exists():
+                        shutil.copyfile(project / launcher, install / launcher)
             else:
                 executable = (args.onedir or args.onefile).resolve()
-                require(executable.name == "NetAudit.exe", "Expected executable named NetAudit.exe")
+                require(executable.name == FILE_STEM + ".exe", "Expected executable named " + FILE_STEM + ".exe")
                 require(executable.is_file(), f"Executable does not exist: {executable}")
                 report["executable_sha256"] = hashlib.sha256(executable.read_bytes()).hexdigest()
                 # base_library.zip is a required PyInstaller runtime file;
@@ -1089,7 +1108,8 @@ def main(argv: list[str] | None = None) -> int:
                                 f"Migrated runtime file differs from the original: {relative}")
                         migrated_libraries[str(relative)] = digest
                     report["migration_base_libraries_sha256"] = migrated_libraries
-                require((install / "Start-NetAudit.bat").is_file(), "BAT must be next to packaged EXE before acceptance")
+                require((install / ("Start-" + FILE_STEM + ".bat")).is_file(), "Canonical BAT must be next to packaged EXE before acceptance")
+                require((install / "Start-NetAudit.bat").is_file(), "Compatibility BAT must remain available")
             Harness(report, root, install, reference, mode).run()
     except Exception as exc:
         report["fatal_error"] = f"{type(exc).__name__}: {exc}"

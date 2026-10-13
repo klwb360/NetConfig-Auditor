@@ -2,7 +2,7 @@
 
 ``commands`` contains complete scripts whose required values are known. Changes
 that need a business decision, a new secret, or version-specific syntax belong
-to ``command_templates``. Neither collection is executed by NetAudit. Source
+to ``command_templates``. Neither collection is executed by NetConfig Auditor. Source
 scopes are validated before interpolation; source commands are never replayed.
 """
 from __future__ import annotations
@@ -10,13 +10,14 @@ from __future__ import annotations
 import re
 
 from .model import Config, Finding
+from .branding import APPLICATION_NAME
 
 
 SUPPORTED = {"cisco", "ruijie", "huawei", "h3c"}
 IOS_STYLE = {"cisco", "ruijie"}
 BASE_NOTE = (
     "先在特权/用户视图执行只读核查，核对设备型号和软件版本。整改脚本需由管理员确认后执行；"
-    "先备份配置并保留 Console/带外或备用管理会话，验证业务后再自行保存。NetAudit 不连接设备、"
+    f"先备份配置并保留 Console/带外或备用管理会话，验证业务后再自行保存。{APPLICATION_NAME} 不连接设备、"
     "不执行命令，也不自动保存配置。模板中的 <参数名> 必须替换，不能原样粘贴执行。"
 )
 

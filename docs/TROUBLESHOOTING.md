@@ -1,10 +1,10 @@
-# 故障排查
+# NetConfig Auditor 故障排查
 
-先确认从 [最新 Release](https://github.com/klwb360/NetConfig-Auditor/releases/latest) 的 **Assets** 下载了 `*-portable.zip`，并完整解压一次。若使用开发或备份用的 Actions 产物，需要先解压外层 ZIP，再解压内部便携 ZIP。完整下载步骤见 [常见问题](FAQ.md)，实际校验与验收范围见 [交付记录](../DELIVERY.md)。
+本文对应 v1.1.1 源码。先确认从 [最新 Release](https://github.com/klwb360/NetConfig-Auditor/releases/latest) 的 **Assets** 下载了 `*-portable.zip`，并完整解压一次。若使用开发或备份用的 Actions 产物，需要先解压外层 ZIP，再解压内部便携 ZIP。完整下载步骤见 [常见问题](FAQ.md)，实际校验与验收范围见 [交付记录](../DELIVERY.md)。
 
 ## 无法下载或解压后没有程序
 
-私人仓库需要登录有访问权限的 GitHub 账号。优先在 [v0.1.0 发布页](https://github.com/klwb360/NetConfig-Auditor/releases/tag/v0.1.0) 的 **Assets** 下载便携 ZIP；访问受限时检查当前账号权限，不能通过公开访问获取私人资产。GitHub 自动生成的 “Source code” 只包含源码，不包含 Windows EXE。
+当前仓库公开，无需 GitHub 登录即可下载。优先在 [最新 Release](https://github.com/klwb360/NetConfig-Auditor/releases/latest) 的 **Assets** 下载便携 ZIP；下载失败时检查网络及发布页中的具体附件。GitHub 自动生成的 “Source code” 只包含源码，不包含 Windows EXE。
 
 ## 双击后没有正常启动
 
@@ -13,13 +13,13 @@
 | 提示需要 Python 3.10 或更新版本 | 当前运行的是源码版，或 EXE 没有与 BAT 放在同一目录。普通用户下载便携 EXE 包并完整解压；无需安装 Python、pip 或 PyInstaller。 |
 | 提示找不到 EXE 或完整源码 | 确认已经完整解压 Release 的便携 ZIP，且运行的是其中的 BAT；使用 Actions 包时还需解压内部 `portable.zip`。不要只下载单个 BAT。 |
 | EXE 提示缺少运行库、`base_library.zip` 或模块 | 重新完整解压便携 ZIP，保留 `_internal`。可用产物内的 SHA-256 清单检查文件；不要混用不同构建的 EXE 和运行库。 |
-| 启动窗口一闪而过 | 在解压文件夹中打开命令提示符，运行 `Start-NetAudit.bat`，保留窗口中的错误信息。BAT 仅在识别到无参数 Explorer 双击且启动错误时暂停，不能依赖所有启动方式都会停住。 |
+| 启动窗口一闪而过 | 在解压文件夹中打开命令提示符，运行 `Start-NetConfig-Auditor.bat`，保留窗口中的错误信息。BAT 仅在识别到无参数 Explorer 双击且启动错误时暂停，不能依赖所有启动方式都会停住。 |
 | 单 EXE 等待较久或解压失败 | 等待几秒；确认用户临时目录有可写空间。优先使用便携文件夹版；只读程序目录不要求可写，但临时目录仍需可写。 |
 
 中文和带空格的路径已在 Windows runner 验收。命令行中的配置、报告或程序路径含空格时，请使用双引号：
 
 ```bat
-"D:\网络工具\NetAudit 便携版\NetAudit.exe" audit "D:\设备配置\核心交换机.cfg" --vendor cisco --format md --out "D:\审计报告\核心交换机.md"
+"D:\网络工具\NetConfig Auditor 便携版\NetConfig-Auditor.exe" audit "D:\设备配置\核心交换机.cfg" --vendor cisco --format md --out "D:\审计报告\核心交换机.md"
 ```
 
 ## 浏览器没有打开，或网页不能访问
@@ -29,8 +29,8 @@
 需要手动管理浏览器或指定端口时，在便携文件夹中运行：
 
 ```bat
-Start-NetAudit.bat serve --no-browser
-Start-NetAudit.bat serve --port 9000 --no-browser
+Start-NetConfig-Auditor.bat serve --no-browser
+Start-NetConfig-Auditor.bat serve --port 9000 --no-browser
 ```
 
 若网页显示连接失败，检查启动窗口是否仍在运行。若页面提示会话或来源错误，重新打开当前启动窗口中的完整地址并刷新页面；服务仅供本机浏览器访问，不应通过远程 IP 或其他站点嵌入。网页样式或脚本缺失时，重新完整解压匹配版本的便携包。
@@ -61,6 +61,6 @@ Start-NetAudit.bat serve --port 9000 --no-browser
 
 ## 仍无法解决时如何反馈
 
-在有访问权限的 [仓库 Issues](https://github.com/klwb360/NetConfig-Auditor/issues) 提供 Windows 版本、使用的文件名或源码提交、启动方式、实际提示与复现步骤。可附 SHA-256 校验结果及脱敏的最小配置样例；不要提交真实凭据、完整内部配置或未经检查的报告。
+在公开 [仓库 Issues](https://github.com/klwb360/NetConfig-Auditor/issues) 提供 Windows 版本、使用的文件名或源码提交、启动方式、实际提示与复现步骤。可附 SHA-256 校验结果及脱敏的最小配置样例；不要提交真实凭据、完整内部配置或未经检查的报告。
 
 目前真实验收环境为 Windows Server 2022 x64。Windows 10/11、普通非管理员账户、物理无 Python 电脑、真实 Explorer 双击与可视浏览器交互尚未实测，不能把当前记录视为这些环境的验收结论。详细边界见 [交付记录](../DELIVERY.md)。

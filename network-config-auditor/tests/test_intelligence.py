@@ -240,6 +240,7 @@ class IntelligenceTests(unittest.TestCase):
             self.assertEqual(document.metadata["origin"], "official-download")
             self.assertEqual(request.call_count, 1)
             self.assertEqual(request.call_args.args[0].full_url, KEV_URL)
+            self.assertEqual(request.call_args.args[0].get_header("User-agent"), "NetConfig Auditor intelligence updater")
 
 
 if __name__ == "__main__":

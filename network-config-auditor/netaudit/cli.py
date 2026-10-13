@@ -9,6 +9,7 @@ import sys
 import tempfile
 
 from . import __version__
+from .branding import APPLICATION_NAME
 from .parser import MAX_BYTES, VENDORS
 from .reports import render
 from .rules import SEVERITIES
@@ -51,11 +52,11 @@ def _write_private(path: Path, text: str):
 def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
     # A double-click has no arguments. Also allow the convenient
-    # `NetAudit.exe --no-browser` form without changing audit arguments.
+    # `NetConfig-Auditor.exe --no-browser` form without changing audit arguments.
     if not argv or argv[0] in ("--no-browser", "--port") or argv[0].startswith("--port="):
         argv.insert(0, "serve")
     p = argparse.ArgumentParser(description="华为/Cisco/H3C/锐捷 RGOS 离线配置练习与审计；无参数时打开本地网页")
-    p.add_argument("--version", action="version", version=f"NetAudit {__version__}")
+    p.add_argument("--version", action="version", version=f"{APPLICATION_NAME} {__version__}")
     sub = p.add_subparsers(dest="command", required=True)
     a = sub.add_parser("audit", help="审计配置文件或标准输入")
     a.add_argument("input", help="配置文件；- 表示标准输入")
@@ -107,6 +108,7 @@ def main(argv=None):
             return 0
         if args.command == "intel-update":
             from .intelligence import fetch_official_kev
+            # Keep the existing cache directory so prior downloads remain usable.
             output = args.out or Path(os.environ.get("LOCALAPPDATA") or tempfile.gettempdir()) / "NetAudit" / "kev.json"
             fetch_official_kev(destination=output)
             print(f"KEV 已更新：{output}；审计时使用 --kev-file 指定该文件。")

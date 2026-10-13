@@ -14,6 +14,8 @@ import urllib.request
 from datetime import date, datetime, timezone
 from pathlib import Path
 
+from .branding import APPLICATION_NAME
+
 MAX_INTELLIGENCE_BYTES = 16 * 1024 * 1024
 MAX_RECORDS = 50000
 KEV_URL = "https://raw.githubusercontent.com/cisagov/kev-data/develop/known_exploited_vulnerabilities.json"
@@ -186,7 +188,7 @@ def load_default_kev() -> dict:
 
 def fetch_official_kev(destination: str | Path | None = None) -> dict:
     """Explicit official-data download; never called by analysis or startup."""
-    request = urllib.request.Request(KEV_URL, headers={"User-Agent": "NetAudit intelligence updater", "Accept": "application/json"})
+    request = urllib.request.Request(KEV_URL, headers={"User-Agent": f"{APPLICATION_NAME} intelligence updater", "Accept": "application/json"})
     try:
         with urllib.request.urlopen(request, timeout=30) as response:
             if response.geturl() != KEV_URL:

@@ -13,6 +13,7 @@ import json
 import re
 
 from .model import Evidence
+from .branding import APPLICATION_NAME
 from .parser import (IOS_VENDORS, MAX_BYTES, MAX_LINES, VENDORS, _acl_rule,
                      parse_config, vlan_ids)
 from .privacy import redact
@@ -240,8 +241,8 @@ def _prompt(context: dict, vendor: str) -> str:
     if vendor in IOS_VENDORS:
         suffix = {"exec": "#", "config": "(config)#", "interface": "(config-if)#",
                   "vlan": "(config-vlan)#", "vty": "(config-line)#", "acl": "(config-acl)#"}[mode]
-        return "NetAudit" + suffix
-    return "<NetAudit>" if mode == "exec" else "[NetAudit" + ("-" + target if target else "") + "]"
+        return APPLICATION_NAME + suffix
+    return "<" + APPLICATION_NAME + ">" if mode == "exec" else "[" + APPLICATION_NAME + ("-" + target if target else "") + "]"
 
 
 def _capabilities(vendor: str, context: dict) -> list[dict]:

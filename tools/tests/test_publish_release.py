@@ -16,12 +16,14 @@ RECORDS_COMMIT = "a" * 40
 
 
 def bundle(change=None, version="0.1.0", counts=None):
-    prefix = "NetAudit-" + version + "-windows-x64-" + COMMIT[:12]
+    branded = tuple(map(int, version.split("."))) >= (1, 1, 1)
+    stem = "NetConfig-Auditor" if branded else "NetAudit"
+    prefix = stem + "-" + version + "-windows-x64-" + COMMIT[:12]
     packages = {prefix + "-portable.zip": b"portable", prefix + "-onefile.zip": b"onefile",
-                prefix + "-onefile.exe": b"exe", "NetAudit-" + version + "-source-" + COMMIT[:12] + ".zip": b"source"}
+                prefix + "-onefile.exe": b"exe", stem + "-" + version + "-source-" + COMMIT[:12] + ".zip": b"source"}
     reports = {mode: {"mode": mode, "passed": True, "checks": [{"status": "passed"} for _ in range(count)]}
                for mode, count in (counts or (("source", 9), ("onedir", 8), ("onefile", 8)))}
-    manifest = {"application": "NetAudit", "application_version": version,
+    manifest = {"application": "NetConfig Auditor" if branded else "NetAudit", "application_version": version,
                 "source": {"commit": COMMIT, "dirty": False},
                 "environment": {"github_run_id": "123", "github_run_attempt": "1",
                                 "architecture": "AMD64", "runner_os": "Windows"},
